@@ -1,62 +1,44 @@
+// ReSharper disable CommentTypo
+
 namespace PerpetualAmericanOptions
 {
     internal class ThomasAlgorithmCalculator
     {
-        private readonly int n_1;
-        private readonly double h_sq;
-        private readonly double tau;
-        private readonly double sigma;
+        private readonly int n;
 
-        internal ThomasAlgorithmCalculator(int n_1, double h_sq, double tau, double sigma)
+        /// <summary>
+        /// </summary>
+        /// <param name="n">Pass n + 1</param>
+        internal ThomasAlgorithmCalculator(int n)
         {
-            this.n_1 = n_1;
-            this.h_sq = h_sq;
-            this.tau = tau;
-            this.sigma = sigma;
+            this.n = n;
         }
+        
+        internal double[] Calculate(double[] b, double[] c, double[] d, double[] r) {
+            double[] delta = new double[n];
+            double[] beta = new double[n];
+            double[] lambda = new double[n];
 
-        /**
-	 * n - число уравнений (строк матрицы)
-	 * b - диагональ, лежащая под главной (нумеруется: [1;n-1])
-	 * c - главная диагональ матрицы A (нумеруется: [0;n-1])
-	 * d - диагональ, лежащая над главной (нумеруется: [0;n-2])
-	 * f - правая часть (столбец)
-	 * x - решение, массив x будет содержать ответ
-	 */
-        internal double[] GetB()
-        {
-            var b = new double[n_1];
-            b[0] = b[1] = b[n_1 - 1] = 0.0;
-            for (var i = 2; i < n_1 - 1; ++i)
-            {
-                b[i] = 1.0 / (8.0 * tau) - sigma / h_sq;
+            delta[1] = c[1];
+            beta[1] = -d[1] / delta[1];
+            lambda[1] = r[1] / delta[1];
+
+            for (int i = 2; i < n - 1; ++i) {
+                delta[i] = c[i] + b[i] * beta[i - 1];
+                beta[i] = -d[i] / delta[i];
+                lambda[i] = (r[i] - b[i] * lambda[i - 1]) / delta[i];
             }
 
-            return b;
-        }
+            var x = new double[n];
 
-        internal double[] GetC()
-        {
-            var c = new double[n_1];
-            c[0] = c[n_1 - 1] = 0.0;
-            for (var i = 1; i < n_1 - 1; ++i)
+            x[n - 2] = lambda[n - 2];
+
+            for (int i = n - 3; i >= 1; i--)
             {
-                c[i] = 3.0 / (4.0 * tau) + 2.0 * sigma / h_sq;
+                x[i] = beta[i] * x[i + 1] + lambda[i];
             }
 
-            return c;
-        }
-
-        internal double[] GetD()
-        {
-            var d = new double[n_1];
-            d[0] = d[n_1 - 2] = d[n_1 - 1] = 0.0;
-            for (var i = 1; i < n_1 - 2; ++i)
-            {
-                d[i] = 1.0 / (8.0 * tau) - sigma / h_sq;
-            }
-
-            return d;
+            return x;
         }
     }
 }

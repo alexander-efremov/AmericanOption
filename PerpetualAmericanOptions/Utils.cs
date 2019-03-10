@@ -11,6 +11,8 @@ namespace PerpetualAmericanOptions
             {
                 Console.Write(arr[i] + " ");
             }
+
+            Console.WriteLine();
         }
 
         internal static void print_result_arrays1(int exp_cnt, double[] l1_10, double[] l1_40, double[] l1_160,
@@ -56,8 +58,6 @@ namespace PerpetualAmericanOptions
             return err;
         }
 
-        
-
         internal static double GetL1(double h, int n, double[] data)
         {
             var r = 0.0;
@@ -68,10 +68,15 @@ namespace PerpetualAmericanOptions
             return r * h;
         }
 
-        internal static void FillArrayDiff(double[] err, double[] arr1, double[] arr2, int n)
+        internal static double[] FillArrayDiff(double[] arr1, double[] arr2)
         {
-            for (var i = 0; i < n; ++i)
+            double[] err = new double[arr1.Length];
+            for (var i = 0; i < err.Length; ++i)
+            {
                 err[i] = arr1[i] - arr2[i];
+            }
+
+            return err;
         }
 
         internal static void
