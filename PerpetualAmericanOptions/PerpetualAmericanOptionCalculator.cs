@@ -17,7 +17,6 @@ namespace PerpetualAmericanOptions
         private readonly double tau;
         private readonly double r;
         private readonly double h;
-        private readonly double h_2;
         private readonly double h_sq;
         private readonly double K;
         
@@ -66,11 +65,6 @@ namespace PerpetualAmericanOptions
             return h;
         }
         
-        public double GetHalfH()
-        {
-            return h_2;
-        }
-        
         public double GetSquaredH()
         {
             return h_sq;
@@ -94,7 +88,6 @@ namespace PerpetualAmericanOptions
             K = parameters.K;
 
             h = (b - a) / n;
-            h_2 = h * 0.5d;
             h_sq = h * h;
 
             CheckParameters();
@@ -112,13 +105,13 @@ namespace PerpetualAmericanOptions
             var thomasArrayPrinter = new ThomasArrayPrinter();
             double[] calculatedV = new double[n_1];
             // TODO:TEMPORARILY!
-            double S0 = GetExactS0();
+            double S0 = h;
             var prevV = GetExactSolution();
             //while (Math.Abs(GetExactS0() - S0) > 10e-5)
             {
-                var b_t = GetB(n_1, S0, h, h_sq, sigma_sq, tau, r);
-                var c_t = GetC(n_1, S0, h, h_sq, sigma_sq, tau, r);
-                var d_t = GetD(n_1, S0, h, h_sq, sigma_sq, tau, r);
+                var b_t = GetB(n_1, S0, h, sigma_sq, tau, r);
+                var c_t = GetC(n_1, S0, h, sigma_sq, tau, r);
+                var d_t = GetD(n_1, S0, h, sigma_sq, tau, r);
                 thomasArrayPrinter.PrintThomasArrays(b_t, c_t, d_t);
                 
                 var rp = CalculateRightPart(prevV, S0);
@@ -127,7 +120,9 @@ namespace PerpetualAmericanOptions
                 calculatedV = _thomasAlgorithmCalculator.Calculate(b_t, c_t, d_t, rp);
 
                 tecplotPrinter.PrintXY(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\" + "rp", 0d, rp);
-                tecplotPrinter.PrintXY(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\" + "v", 0d, calculatedV);
+                var vs0 = GetVKS();
+                tecplotPrinter.PrintXY(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\" + "v", 0d,  calculatedV);
+//                tecplotPrinter.PrintXY(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\" + "v", 0d, vs0, calculatedV);
 
                 var err = Utils.FillArrayDiff(GetExactSolution(), rp);
                 tecplotPrinter.PrintXY("ex_minus_rp", 0d, err);
@@ -203,38 +198,40 @@ namespace PerpetualAmericanOptions
         private double CalculateBetas(int i, double[] v, double S0)
         {
             var Si = S0 + i * h;
-            var s_m_h = Si - h_2;
-            var s_p_h = Si + h_2;
+            var s_m_h = Si - h/2d;
+            var s_p_h = Si + h/2d;
             
-            var leftArg = tau / h;
-            var rightArg = (s_p_h / (2d * r));
-            Assert.LessOrEqual(leftArg, rightArg);
+//            var leftArg = tau / h;
+//            var rightArg = (s_p_h / (2d * r));
+//            Assert.LessOrEqual(leftArg, rightArg);
 
-            double beta1 = 1d / (8d * tau) * (1d + (2d * tau * r) / (h * s_m_h)) *
-                        (1d + (2d * tau * r) / h * s_m_h);
+            double beta1 = (1d / (8d * tau)) * (1d + (2d * tau * r) / (h * s_m_h)) *
+                        (1d + (2d * tau * r) / (h * s_m_h));
 
-            double beta2 = 1d / (8d * tau) * (3d + (2d * tau * r) / (h * s_m_h)) *
+            // from presentation by VV
+            double beta2 = (1d / (8d * tau)) * (3d + (2d * tau * r) / (h * s_m_h)) *
                         (1d - (2d * tau * r) / (h * s_m_h))
-                        + 1d / (8d * tau) * (3d - (2d * tau * r) / (h * s_p_h)) *
+                        + (1d / (8d * tau)) * (3d - (2d * tau * r) / (h * s_p_h)) *
                         (1d + (2d * tau * r) / (h * s_p_h));
 
-            double beta3 = 1d / (8d * tau) * (1d - (2d * tau * r) / (h * s_p_h)) *
+            double beta3 = (1d / (8d * tau)) * (1d - (2d * tau * r) / (h * s_p_h)) *
                         (1d - (2d * tau * r) / (h * s_p_h));
-            
-            double val = beta1 * v[i - 1] + beta2 * v[i] + beta3 * v[i + 1];
-            return val;
+
+            var betas = beta1 * v[i - 1] + beta2 * v[i] + beta3 * v[i + 1];
+            betas = betas / tau;
+            return betas;
         }
 
         private double[] CalculateRightPart(double[] v, double S0)
         {
             var rp = new double[n_1];
-            for (var i = 1; i < n_1 - 1; ++i)
+            int start_i = (int) (S0 / h);
+            for (var i = start_i; i < n_1 - 1; ++i)
             {
                 rp[i] = CalculateBetas(i, v, S0);
             }
-            // todo: take attention! boundary conditions
-            rp[0] = rp[1];
-            rp[n_1 - 1] = rp[n_1 - 2];
+
+            rp[n_1 - 1] = 0;
             return rp;
         }
         
@@ -246,58 +243,94 @@ namespace PerpetualAmericanOptions
          * f - правая часть (столбец)
          * x - решение, массив x будет содержать ответ
          */
-        private static double[] GetB(int n_1, double S0, double h, double h_sq, double sigma_sq, double tau, double r)
+        // pass n = n + 1!
+        private static double[] GetB(int n, double S0, double h, double sigma_sq, double tau, double r)
         {
-            var b = new double[n_1];
-            b[0] = b[1] = b[n_1 - 1] = 0d;
-            for (var i = 2; i < n_1 - 1; ++i)
+            var b = new double[n];
+            
+            // enumeration restrictions
+            b[0] = 0d;
+            
+            for (var i = 1; i <= n - 1; ++i)
             {
-                double si = S0 + i * h;
-                double si_p_h = si + 0.5 * h;
-                var leftArg = tau / h;
-                var rightArg = (r * h) / (4d * sigma_sq * si);
-                Assert.GreaterOrEqual(leftArg, rightArg, "leftArg >= rightArg GetB");
-                Assert.LessOrEqual(h, (2d * si * si_p_h * sigma_sq) / (r * r));
-                b[i] = ( ((-sigma_sq) / (2d * h_sq)) + (r / (8d * tau * si)) );
+//                double si = S0 + i * h;
+//                double si_p_h = si + 0.5 * h;
+//                var leftArg = tau / h;
+//                var rightArg = (r * h) / (4d * sigma_sq * si);
+//                Assert.GreaterOrEqual(leftArg, rightArg, "leftArg >= rightArg GetB");
+//                Assert.LessOrEqual(h, (2d * si * si_p_h * sigma_sq) / (r * r));
+
+                var si = S0 + i * h;
+                var hmh = si - (S0 + (i - 1) * h); // h_{i-1/2}
+                if (hmh * hmh > 4d * tau * sigma_sq * si)
+                {
+                    throw new ArgumentException("hmh is invalid");
+                }
+                b[i] = (hmh / (4d * tau)) - (sigma_sq * si * si) / (2d * hmh);
             }
+            
+            // right boundary cond
+            b[n - 1] = 0d;
 
             return b;
         }
 
-        private static double[] GetC(int n_1, double S0, double h, double h_sq, double sigma_sq, double tau, double r)
+        // главная диагональ матрицы A (нумеруется: [0;n-1])
+        // pass n = n + 1!
+        private static double[] GetC(int n, double S0, double h, double sigma_sq, double tau, double r)
         {
-            var c = new double[n_1];
-            c[0] = c[n_1 - 1] = 0d;
-            for (var i = 1; i < n_1 - 1; ++i)
+            var c = new double[n];
+            for (var i = 0; i <= n - 1; ++i)
             {
-                double si = S0 + i * h;
-                double si_p_h = si + 0.5 * h;
-                double si_sq = si * si;
-                var leftArg = tau / h;
-                var rightArg = (r * h) / (4d * sigma_sq * si);
-                Assert.GreaterOrEqual(leftArg, rightArg, "leftArg >= rightArg GetC");
-                Assert.LessOrEqual(h, (2d * si * si_p_h * sigma_sq) / (r * r));
-                c[i] = ((3d * r) / (4d * tau * si)) + (r / si_sq) + sigma_sq / h_sq;
+//                double si = S0 + i * h;
+//                double si_p_h = si + 0.5 * h;
+//                double si_sq = si * si;
+//                var leftArg = tau / h;
+//                var rightArg = (r * h) / (4d * sigma_sq * si);
+//                Assert.GreaterOrEqual(leftArg, rightArg, "leftArg >= rightArg GetC");
+//                Assert.LessOrEqual(h, (2d * si * si_p_h * sigma_sq) / (r * r));
+                
+                var si = S0 + i * h;
+                var hmh = si - (S0 + (i - 1) * h); // h_{i-1/2}
+                if (hmh * hmh > 4d * tau * sigma_sq * si)
+                {
+                    throw new ArgumentException("hmh is invalid");
+                }
+                
+                var hph = (S0 + (i + 1) * h) - (S0 + i * h); // h_{i+1/2}
+                c[i] = ((sigma_sq * si * si) / (2d * hmh)) + ((sigma_sq * si * si) / (2d * hph)) +
+                       (hmh + hph) * ( (1d / (4d * tau)) + r / 2d);
             }
+
+            // right boundary condition
+            c[n - 1] = 0d;
 
             return c;
         }
 
-        private static double[] GetD(int n_1, double S0, double h, double h_sq, double sigma_sq, double tau, double r)
+        // диагональ, лежащая над главной (нумеруется: [0;n-2])
+        // pass n = n + 1!
+        private static double[] GetD(int n, double S0, double h, double sigma_sq, double tau, double r)
         {
-            var d = new double[n_1];
-            d[0] = d[n_1 - 2] = d[n_1 - 1] = 0d;
-            for (var i = 1; i < n_1 - 2; ++i)
+            var d = new double[n];
+            // numeration restrictions
+            d[n - 1] = 0d;
+            for (var i = 0; i <= n - 2; ++i)
             {
-                double si = S0 + i * h;
-                double si_p_h = si + 0.5 * h;
-                var leftArg = tau / h;
-                var rightArg = (r * h) / (4d * sigma_sq * si);
-                Assert.GreaterOrEqual(leftArg, rightArg, "leftArg >= rightArg GetC");
-                Assert.LessOrEqual(h, (2d * si * si_p_h * sigma_sq) / (r * r));
-                d[i] = ( ((-sigma_sq) / (2d * h_sq)) + (r / (8d * tau * si)) );
+//                double si = S0 + i * h;
+//                double si_p_h = si + 0.5 * h;
+//                var leftArg = tau / h;
+//                var rightArg = (r * h) / (4d * sigma_sq * si);
+//                Assert.GreaterOrEqual(leftArg, rightArg, "leftArg >= rightArg GetC");
+//                Assert.LessOrEqual(h, (2d * si * si_p_h * sigma_sq) / (r * r));
+
+                var hph = (S0 + (i + 1) * h) - (S0 + i * h); // h_{i+1/2}
+                var si = S0 + i * h;
+                d[i] = (hph / (4d * tau)) - (sigma_sq * si * si) / (2d * hph);
             }
 
+            // right boundary condition
+            d[n - 2] = 0d;
             return d;
         }
 
@@ -305,7 +338,6 @@ namespace PerpetualAmericanOptions
         {
             Assert.True(h > 0.0);
             Assert.AreEqual(h * h, h_sq);
-            Assert.AreEqual(h * 0.5, h_2);
             Assert.True(n > 1);
             Assert.AreEqual(n + 1, n_1);
             Assert.AreEqual(0, a);
@@ -323,9 +355,9 @@ namespace PerpetualAmericanOptions
             // (r * h) / (4*sigmaSq*h) <= tau/h <= 0.5h / (2 * r)
             // 0.25r / sigmaSq <= tau/h <= 0.25h / r
 
-            Assert.GreaterOrEqual(tau / h, (0.25d * r) / sigma_sq);
-            
-            Assert.GreaterOrEqual((0.25d * h) / r, tau / h);
+//            Assert.GreaterOrEqual(tau / h, (0.25d * r) / sigma_sq);
+//            
+//            Assert.GreaterOrEqual((0.25d * h) / r, tau / h);
         }
     }
 
@@ -403,8 +435,8 @@ namespace PerpetualAmericanOptions
             double a = 0d;
             double b = 1d;
             double sigma = 1d;
-            double tau = 2e-4;
-            int n = 100;
+            double tau = 1e-3;
+            int n = 400;
             double r = 0.08d;
             double K = 0.5d;
             return new Parameters(a, b, n, r, tau , sigma, K);
@@ -415,7 +447,6 @@ namespace PerpetualAmericanOptions
             Console.WriteLine("a = " + calculator.GetLeftBoundary());
             Console.WriteLine("b = " + calculator.GetRightBoundary());
             Console.WriteLine("h = " + calculator.GetH());
-            Console.WriteLine("h_2 = " + calculator.GetHalfH());
             Console.WriteLine("h_sq = " + calculator.GetSquaredH());
             Console.WriteLine("r = " + calculator.GetR());
             Console.WriteLine("N = " + calculator.GetN());
