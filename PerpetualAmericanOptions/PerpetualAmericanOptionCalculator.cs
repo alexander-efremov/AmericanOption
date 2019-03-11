@@ -253,13 +253,6 @@ namespace PerpetualAmericanOptions
             
             for (var i = 1; i <= n - 1; ++i)
             {
-//                double si = S0 + i * h;
-//                double si_p_h = si + 0.5 * h;
-//                var leftArg = tau / h;
-//                var rightArg = (r * h) / (4d * sigma_sq * si);
-//                Assert.GreaterOrEqual(leftArg, rightArg, "leftArg >= rightArg GetB");
-//                Assert.LessOrEqual(h, (2d * si * si_p_h * sigma_sq) / (r * r));
-
                 var si = S0 + i * h;
                 var hmh = si - (S0 + (i - 1) * h); // h_{i-1/2}
                 if (hmh * hmh > 4d * tau * sigma_sq * si)
@@ -282,14 +275,6 @@ namespace PerpetualAmericanOptions
             var c = new double[n];
             for (var i = 0; i <= n - 1; ++i)
             {
-//                double si = S0 + i * h;
-//                double si_p_h = si + 0.5 * h;
-//                double si_sq = si * si;
-//                var leftArg = tau / h;
-//                var rightArg = (r * h) / (4d * sigma_sq * si);
-//                Assert.GreaterOrEqual(leftArg, rightArg, "leftArg >= rightArg GetC");
-//                Assert.LessOrEqual(h, (2d * si * si_p_h * sigma_sq) / (r * r));
-                
                 var si = S0 + i * h;
                 var hmh = si - (S0 + (i - 1) * h); // h_{i-1/2}
                 if (hmh * hmh > 4d * tau * sigma_sq * si)
@@ -317,13 +302,6 @@ namespace PerpetualAmericanOptions
             d[n - 1] = 0d;
             for (var i = 0; i <= n - 2; ++i)
             {
-//                double si = S0 + i * h;
-//                double si_p_h = si + 0.5 * h;
-//                var leftArg = tau / h;
-//                var rightArg = (r * h) / (4d * sigma_sq * si);
-//                Assert.GreaterOrEqual(leftArg, rightArg, "leftArg >= rightArg GetC");
-//                Assert.LessOrEqual(h, (2d * si * si_p_h * sigma_sq) / (r * r));
-
                 var hph = (S0 + (i + 1) * h) - (S0 + i * h); // h_{i+1/2}
                 var si = S0 + i * h;
                 d[i] = (hph / (4d * tau)) - (sigma_sq * si * si) / (2d * hph);
@@ -343,21 +321,6 @@ namespace PerpetualAmericanOptions
             Assert.AreEqual(0, a);
             Assert.True(tau > 0d);
             Assert.True(K > 0d);
-            
-            // let's check scheme t/h restrictions
-            // left for Thomas algo, right for postiive defined M matrix
-            // (r * h) / (4*sigmaSq*Si) <= tau/h <= S_i+1/2 / (2 * r)
-            // Si = a + i*h S_i+1/2 = a + i*h + h/2
-            // then 
-            // (r * h) / (4*sigmaSq*(a+i*h)) <= tau/h <= (a+i*h + 0.5h) / (2 * r)
-            // min(Si) = h (except i = 0) and min(Si+1/2) = 0.5h
-            // then
-            // (r * h) / (4*sigmaSq*h) <= tau/h <= 0.5h / (2 * r)
-            // 0.25r / sigmaSq <= tau/h <= 0.25h / r
-
-//            Assert.GreaterOrEqual(tau / h, (0.25d * r) / sigma_sq);
-//            
-//            Assert.GreaterOrEqual((0.25d * h) / r, tau / h);
         }
     }
 
