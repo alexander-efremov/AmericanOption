@@ -120,8 +120,8 @@ namespace PerpetualAmericanOptions
                 calculatedV = _thomasAlgorithmCalculator.Calculate(b_t, c_t, d_t, rp);
 
                 tecplotPrinter.PrintXY(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\" + "rp", 0d, rp);
-                var vs0 = GetVKS();
                 tecplotPrinter.PrintXY(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\" + "v", 0d,  calculatedV);
+//                var vs0 = GetVKS();
 //                tecplotPrinter.PrintXY(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\" + "v", 0d, vs0, calculatedV);
 
                 var err = Utils.FillArrayDiff(GetExactSolution(), rp);
@@ -195,42 +195,76 @@ namespace PerpetualAmericanOptions
             return v;
         }
 
-        private double CalculateBetas(int i, double[] v, double S0)
+//        private double CalculateBetas(int i, double[] v, double S0)
+//        {
+//            var Si = S0 + i * h;
+//            var s_m_h = Si - h/2d;
+//            var s_p_h = Si + h/2d;
+//
+//            double beta1 = (1d / (8d * tau)) * (1d + (2d * tau * r) / (h * s_m_h)) *
+//                        (1d + (2d * tau * r) / (h * s_m_h));
+//
+//            // from presentation by VV
+//            double beta2 = (1d / (8d * tau)) * (3d + (2d * tau * r) / (h * s_m_h)) *
+//                        (1d - (2d * tau * r) / (h * s_m_h))
+//                        + (1d / (8d * tau)) * (3d - (2d * tau * r) / (h * s_p_h)) *
+//                        (1d + (2d * tau * r) / (h * s_p_h));
+//
+//            double beta3 = (1d / (8d * tau)) * (1d - (2d * tau * r) / (h * s_p_h)) *
+//                        (1d - (2d * tau * r) / (h * s_p_h));
+//
+//            var betas = beta1 * v[i - 1] + beta2 * v[i] + beta3 * v[i + 1];
+//            betas = betas / tau;
+//            return betas;
+//        }
+//
+        private double CalculateBetas(int i, double[] w, double S0)
         {
-            var Si = S0 + i * h;
-            var s_m_h = Si - h/2d;
-            var s_p_h = Si + h/2d;
-            
-//            var leftArg = tau / h;
-//            var rightArg = (s_p_h / (2d * r));
-//            Assert.LessOrEqual(leftArg, rightArg);
-
-            double beta1 = (1d / (8d * tau)) * (1d + (2d * tau * r) / (h * s_m_h)) *
-                        (1d + (2d * tau * r) / (h * s_m_h));
-
-            // from presentation by VV
-            double beta2 = (1d / (8d * tau)) * (3d + (2d * tau * r) / (h * s_m_h)) *
-                        (1d - (2d * tau * r) / (h * s_m_h))
-                        + (1d / (8d * tau)) * (3d - (2d * tau * r) / (h * s_p_h)) *
-                        (1d + (2d * tau * r) / (h * s_p_h));
-
-            double beta3 = (1d / (8d * tau)) * (1d - (2d * tau * r) / (h * s_p_h)) *
-                        (1d - (2d * tau * r) / (h * s_p_h));
-
-            var betas = beta1 * v[i - 1] + beta2 * v[i] + beta3 * v[i + 1];
-            betas = betas / tau;
-            return betas;
-        }
-
-        private double[] CalculateRightPart(double[] v, double S0)
-        {
-            var rp = new double[n_1];
-            int start_i = (int) (S0 / h);
-            for (var i = start_i; i < n_1 - 1; ++i)
+            double sum = 0d;
+            for (int j = 0; j < w.Length - 1; j++)
             {
-                rp[i] = CalculateBetas(i, v, S0);
+                var Si = S0 + i * h;
+                var s_m_h = Si - h / 2d;
+                var s_p_h = Si + h / 2d;
+
+                double beta_ij = (1d / (8d * tau)) * (3d + (2d * tau * r) / (h * s_m_h)) *
+                               (1d - (2d * tau * r) / (h * s_m_h))
+                               + (1d / (8d * tau)) * (3d - (2d * tau * r) / (h * s_p_h)) *
+                               (1d + (2d * tau * r) / (h * s_p_h));
+                sum += beta_ij * w[j];
             }
 
+            sum /= tau;
+            return sum;
+        }
+
+        private double[] CalculateRightPart(double[] w, double S0)
+        {
+            var rp = new double[n_1];
+            for (var i = 1; i < n_1 - 1; ++i)
+            {
+                rp[i] = CalculateBetas(i, w, S0);
+            }
+            double sum = 0d;
+            for (int j = 0; j < w.Length - 1; j++)
+            {
+                var Si = S0 + 0 * h;
+                var s_m_h = Si - h / 2d;
+                var s_p_h = Si + h / 2d;
+
+                double beta_ij = (1d / (8d * tau)) * (3d + (2d * tau * r) / (h * s_m_h)) *
+                                 (1d - (2d * tau * r) / (h * s_m_h))
+                                 + (1d / (8d * tau)) * (3d - (2d * tau * r) / (h * s_p_h)) *
+                                 (1d + (2d * tau * r) / (h * s_p_h));
+                sum += beta_ij * w[j];
+            }
+
+            var hph0 = (S0 + (0 + 1) * h) - (S0 + 0 * h); // h_{i+1/2}
+            sum = sum - (hph0 / 4d) * w[0] - (hph0 / 4d) * w[1];
+            sum = sum / tau;
+            rp[0] = sum;
+            rp[0] = rp[0] + sigma_sq / 2d;
+            
             rp[n_1 - 1] = 0;
             return rp;
         }
@@ -247,10 +281,6 @@ namespace PerpetualAmericanOptions
         private static double[] GetB(int n, double S0, double h, double sigma_sq, double tau, double r)
         {
             var b = new double[n];
-            
-            // enumeration restrictions
-            b[0] = 0d;
-            
             for (var i = 1; i <= n - 1; ++i)
             {
                 var si = S0 + i * h;
@@ -273,7 +303,7 @@ namespace PerpetualAmericanOptions
         private static double[] GetC(int n, double S0, double h, double sigma_sq, double tau, double r)
         {
             var c = new double[n];
-            for (var i = 0; i <= n - 1; ++i)
+            for (var i = 1; i <= n - 1; ++i)
             {
                 var si = S0 + i * h;
                 var hmh = si - (S0 + (i - 1) * h); // h_{i-1/2}
@@ -286,6 +316,11 @@ namespace PerpetualAmericanOptions
                 c[i] = ((sigma_sq * si * si) / (2d * hmh)) + ((sigma_sq * si * si) / (2d * hph)) +
                        (hmh + hph) * ( (1d / (4d * tau)) + r / 2d);
             }
+            
+            // left boundary condition
+            var hph0 = (S0 + (0 + 1) * h) - (S0 + 0 * h); // h_{i+1/2}
+            var si0 = S0 + 0 * h;
+            c[0] = sigma_sq / (2d * hph0) + (hph0 / (2d * si0 * si0)) * r;
 
             // right boundary condition
             c[n - 1] = 0d;
@@ -298,8 +333,6 @@ namespace PerpetualAmericanOptions
         private static double[] GetD(int n, double S0, double h, double sigma_sq, double tau, double r)
         {
             var d = new double[n];
-            // numeration restrictions
-            d[n - 1] = 0d;
             for (var i = 0; i <= n - 2; ++i)
             {
                 var hph = (S0 + (i + 1) * h) - (S0 + i * h); // h_{i+1/2}
@@ -307,6 +340,10 @@ namespace PerpetualAmericanOptions
                 d[i] = (hph / (4d * tau)) - (sigma_sq * si * si) / (2d * hph);
             }
 
+            // left boundary condition
+            var hph0 = (S0 + (0 + 1) * h) - (S0 + 0 * h); // h_{i+1/2}
+            d[0] = -sigma_sq / (2d * hph0);
+            
             // right boundary condition
             d[n - 2] = 0d;
             return d;
