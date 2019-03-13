@@ -46,6 +46,7 @@
     <Compile Include="JacobiCalculator.cs" />
     <Compile Include="Parameters.cs" />
     <Compile Include="PerpetualAmericanOptionCalculator.cs" />
+    <Compile Include="PerpetualAmericanOptionTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TecplotPrinter.cs" />
     <Compile Include="ThomasAlgorithmCalculator.cs" />

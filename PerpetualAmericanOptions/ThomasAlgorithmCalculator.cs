@@ -46,14 +46,7 @@ namespace PerpetualAmericanOptions
             return x;
         }
         
-        /// <summary>
-        /// thomas_algo_verzh_modified
-        /// </summary>
-        /// <param name="b"></param>
-        /// <param name="c"></param>
-        /// <param name="d"></param>
-        /// <param name="r"></param>
-        /// <returns></returns>
+        //thomas_algo_verzh_modified
         internal double[] CalculateModified(double[] b, double[] c, double[] d, double[] r) {
             double[] delta = new double[n];
             double[] beta = new double[n];

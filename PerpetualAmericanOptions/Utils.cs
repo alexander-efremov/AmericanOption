@@ -58,10 +58,10 @@ namespace PerpetualAmericanOptions
             return err;
         }
 
-        internal static double GetL1(double h, int n, double[] data)
+        internal static double GetL1(double h, double[] data)
         {
             var r = 0.0;
-            for (var i = 0; i < n; ++i)
+            for (var i = 0; i < data.Length; ++i)
             {
                 r += Math.Abs(data[i]);
             }
