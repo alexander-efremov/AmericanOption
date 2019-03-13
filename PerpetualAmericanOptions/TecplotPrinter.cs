@@ -19,7 +19,7 @@ namespace PerpetualAmericanOptions
             this.tau = tau;
         }
 
-        internal void PrintXY(string filename, double t, double[] data)
+        internal void PrintXY(string filename, double t, double[] data, double start = 0d)
         {
             var name = string.Format("{0}_nx={1}_hx={2}_t={3}_tau={4}_a={5}_c={6}.dat", filename, n_1, h, t, tau, a, b);
             using (var writer = new StreamWriter(name, false))
@@ -31,7 +31,7 @@ namespace PerpetualAmericanOptions
                 writer.WriteLine("DATAPACKING=POINT\nDT=(DOUBLE DOUBLE)");
                 for (var i = 0; i < n_1; i++)
                 {
-                    writer.WriteLine("{0:e8} {1:e8}", i * h, data[i]);
+                    writer.WriteLine("{0:e8} {1:e8}", start + i * h, data[i]);
                 }
             }
         }

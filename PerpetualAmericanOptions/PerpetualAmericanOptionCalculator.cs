@@ -92,8 +92,7 @@ namespace PerpetualAmericanOptions
         private double[] GetRp(double S0)
         {
             double[] rp = new double[n_1];
-            rp[0] = (sigma_sq * S0 * S0) / 2d;
-            for (int i = 1; i <= n_1 - 1; i++)
+            for (int i = 0; i <= n_1 - 1; i++)
             {
                 var si = S0 + i * h;
                 rp[i] = GetV(sigma_sq, r, K, si);
@@ -101,7 +100,6 @@ namespace PerpetualAmericanOptions
             
             return rp;
         }
- 
 
         public Tuple<double[], double> Solve()
         {
@@ -123,12 +121,12 @@ namespace PerpetualAmericanOptions
                 var d_t = GetD(n_1, S0, h, sigma_sq, tau, r, h_2);
                 printer.PrintThomasArrays(b_t, c_t, d_t);
                 var rp = GetRp(S0);
-                tecplotPrinter.PrintXY(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\" + "rp", 0d, rp);
+                tecplotPrinter.PrintXY(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\" + "rp", 0d, rp, S0);
                 calculatedV = _thomasAlgorithmCalculator.Calculate(b_t, c_t, d_t, rp);
 
                 // for better vis
                 calculatedV[calculatedV.Length - 1] = calculatedV[calculatedV.Length - 2]; 
-                tecplotPrinter.PrintXY(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\" + "v", 0d,  calculatedV);
+                tecplotPrinter.PrintXY(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\" + "v", 0d,  calculatedV, S0);
 ////                var vs0 = GetVKS();
 ////                tecplotPrinter.PrintXY(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\" + "v", 0d, vs0, calculatedV);
 //
@@ -246,7 +244,7 @@ namespace PerpetualAmericanOptions
 //                var beta = (1d / (8d * tau)) * 
 //                           (1d + (2d * tau * r * smh) / h) *
 //                           (1d + (2d * tau * r * smh) / h);
-                b[i] = (hmh / (4d * tau)) - (sigma_sq * si * si) / (2d * hmh); //- (1d / tau) * beta;
+                b[i] = /*(hmh / (4d * tau))*/ -(sigma_sq * si * si) / (2d * hmh); //- (1d / tau) * beta;
             }
             
             // right boundary cond
@@ -283,7 +281,7 @@ namespace PerpetualAmericanOptions
                 c[i] = ((sigma_sq * si * si) / (2d * hmh)) +
                        ((sigma_sq * si * si) / (2d * hph)) +
                        (hmh + hph) *
-                       ((1d / (4d * tau)) + r / 2d); 
+                       (/*(1d / (4d * tau)) +*/ r / 2d); 
                        //- (1d / tau) * beta;
             }
             
@@ -300,7 +298,7 @@ namespace PerpetualAmericanOptions
 //                           (1d / (8d * tau)) * 
 //                           (3d - (2d * tau * r * sph0) / h) *
 //                           (1d + (2d * tau * r * sph0) / h);
-            c[0] = (sigma_sq * si0 * si0) / (2d * hph0) + (hph0 / 2d) * r /*+ (1d / tau) * beta0*/ - (hph0 / (4d * tau));
+            c[0] = (sigma_sq * si0 * si0) / (2d * hph0) + (hph0 / 2d) * r /*+ (1d / tau) * beta0*/ /*- (hph0 / (4d * tau))*/;
 
             // right boundary condition
             c[n - 1] = 0d;
@@ -322,7 +320,7 @@ namespace PerpetualAmericanOptions
 //                              (1d - (2d * tau * r * sph) / h) *
 //                              (1d - (2d * tau * r * sph) / h);
 
-                d[i] = (hph / (4d * tau)) - (sigma_sq * si * si) / (2d * hph);
+                d[i] = /*(hph / (4d * tau))*/ - (sigma_sq * si * si) / (2d * hph);
                 //- (1d / tau) * beta;
             }
 
@@ -334,7 +332,7 @@ namespace PerpetualAmericanOptions
 //                           (1d - (2d * tau * r * sph0) / h) *
 //                           (1d - (2d * tau * r * sph0) / h);
 
-            d[0] = -(sigma_sq * si0 * si0) / (2d * hph0) /*+ (1d / tau) * beta0*/ - (hph0 / (4d * tau));
+            d[0] = -(sigma_sq * si0 * si0) / (2d * hph0) /*+ (1d / tau) * beta0*//* - (hph0 / (4d * tau))*/;
             
             // right boundary condition
             d[n - 2] = 0d;
