@@ -15,7 +15,7 @@ namespace PerpetualAmericanOptions
         public void PerpetualAmericanOption()
         {
             var parameters = GetParameters();
-            var calculator = new PerpetualAmericanOptionCalculator(parameters);
+            var calculator = new PerpetualAmericanOptionCalculator1(parameters);
             var exactS0 = calculator.GetExactS0();
             Console.WriteLine("Exact S0 = " + exactS0);
             Console.WriteLine();
@@ -47,7 +47,7 @@ namespace PerpetualAmericanOptions
         public void PerpetualAmericanOptionDrawVS0()
         {
             var parameters = GetParameters();
-            var calculator = new PerpetualAmericanOptionCalculator(parameters);
+            var calculator = new PerpetualAmericanOptionCalculator1(parameters);
             var exactS0 = calculator.GetVKS();
             var printer = new TecplotPrinter(calculator.GetN1(),
                 calculator.GetH(), 
@@ -61,7 +61,7 @@ namespace PerpetualAmericanOptions
         public void PerpetualAmericanOptionDrawExactSolution()
         {
             var parameters = GetParameters();
-            var calculator = new PerpetualAmericanOptionCalculator(parameters);
+            var calculator = new PerpetualAmericanOptionCalculator1(parameters);
             var V = calculator.GetExactSolution();
             var VS0 = calculator.GetVKS();
             var printer = new TecplotPrinter(calculator.GetN1(),
@@ -84,19 +84,19 @@ namespace PerpetualAmericanOptions
             return new Parameters(a, b, n, r, tau , sigma, K);
         }
         
-        internal double GetL1Error(PerpetualAmericanOptionCalculator cal, double[] calculated)
+        internal double GetL1Error(PerpetualAmericanOptionCalculator1 cal, double[] calculated)
         {
             var exact = cal.GetExactSolution();
             var err = Utils.GetError(exact, calculated, exact.Length);
             return Utils.GetL1(cal.GetH(), err);
         }
         
-        internal double GetL1Solution(PerpetualAmericanOptionCalculator cal, double[] calculatedV)
+        internal double GetL1Solution(PerpetualAmericanOptionCalculator1 cal, double[] calculatedV)
         {
             return Utils.GetL1(cal.GetH(), calculatedV);
         }
 
-        private static void PrintParameters(PerpetualAmericanOptionCalculator calculator)
+        private static void PrintParameters(PerpetualAmericanOptionCalculator1 calculator)
         {
             //Console.WriteLine("a = " + calculator.GetLeftBoundary());
             Console.WriteLine("b = " + calculator.GetRightBoundary());
