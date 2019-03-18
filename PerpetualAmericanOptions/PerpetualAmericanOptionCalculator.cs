@@ -7,7 +7,7 @@ using NUnit.Framework;
 namespace PerpetualAmericanOptions
 {
     // from new presentation with FEM
-    internal class PerpetualAmericanOptionCalculator1
+    internal class PerpetualAmericanOptionCalculator
     {
         private readonly ThomasAlgorithmCalculator _thomasAlgorithmCalculator;
         private readonly int n;
@@ -17,9 +17,9 @@ namespace PerpetualAmericanOptions
         private readonly double sigma_sq;
         private readonly double tau;
         private readonly double r;
+        private readonly double K;
         private double h;
         private double h_sq;
-        private readonly double K;
         
         public int GetN()
         {
@@ -71,7 +71,7 @@ namespace PerpetualAmericanOptions
             return K;
         }
 
-        public PerpetualAmericanOptionCalculator1(Parameters parameters)
+        public PerpetualAmericanOptionCalculator(Parameters parameters)
         {
             b = parameters.B;
             sigma = parameters.Sigma;
@@ -98,21 +98,24 @@ namespace PerpetualAmericanOptions
                 V[i] = GetV(sigma_sq, r, K, si);
             }
 
-//            return V;
             var rp = new double[n_1];
             var si0 = S0 + 0 * h;
-            var hph0 = (S0 + (0 + 1) * h) - si0; // h_{i+1/2}
+            var hph0 = (S0 + (0d + 1d) * h) - si0; // h_{i+1/2}
+            var hmh0 = si0 - (S0 + (0d - 1d) * h); // h_{i-1/2}
             var sph0 = si0 + 0.5d * hph0; // s_{i+1/2}
-            check_h(hph0, tau, sph0, r);
-            var beta20 = (1d / (8d * tau)) * 
-                        (3d - (2d * tau * r * sph0) / h) *
-                        (1d + (2d * tau * r * sph0) / h);
+            var smh0 = si0 - 0.5d * hmh0; // s_{i-1/2}
+            CheckHCorrectness(hph0, tau, sph0, r);
+            CheckHCorrectness(hmh0, tau, smh0, r);
+            var beta20 = (1d / (8d * tau)) *
+                         (3d - (2d * tau * r * sph0) / hph0) *
+                         (1d + (2d * tau * r * sph0) / hph0);
             var beta30 = (1d / (8d * tau)) * 
-                        (1d - (2d * tau * r * sph0) / h) *
-                        (1d - (2d * tau * r * sph0) / h);
-            var val0 = beta20 * V[0] + beta30 * V[1];
-            val0 = val0 * (1d / tau);
-            rp[0] = val0 + (sigma_sq*si0*si0)/2d;
+                        (1d - (2d * tau * r * sph0) / hph0) *
+                        (1d - (2d * tau * r * sph0) / hph0);
+            var c0 = hph0;
+            var val0 = c0 * beta20 * V[0] + c0 * beta30 * V[1];
+            rp[0] = val0 + (sigma_sq * si0 * si0) / 2d;
+            
             for (int i = 1; i <= n_1 - 1; i++)
             {
                 var si = S0 + i * h;
@@ -120,8 +123,8 @@ namespace PerpetualAmericanOptions
                 var hph = (S0 + (i + 1) * h) - si; // h_{i+1/2}
                 var smh = si - 0.5d * hmh; // s_{i-1/2}
                 var sph = si + 0.5d * hph; // s_{i+1/2}
-                check_h(hph, tau, sph, r);
-                check_h(hmh, tau, sph, r);
+                CheckHCorrectness(hph, tau, sph, r);
+                CheckHCorrectness(hmh, tau, sph, r);
                 var beta1 = (1d / (8d * tau)) * 
                             (1d + (2d * tau * r * smh) / h) * 
                             (1d + (2d * tau * r * smh) / h);
@@ -135,8 +138,8 @@ namespace PerpetualAmericanOptions
                 var beta3 = (1d / (8d * tau)) * 
                                (1d - (2d * tau * r * sph) / h) *
                                (1d - (2d * tau * r * sph) / h);
-                var val = beta1 * V[i - 1] + beta2 * V[i] + beta3 * V[i + 1];
-                val = val * (1d / tau);
+                var c = ((hph + hmh) / 2d);
+                var val = c * beta1 * V[i - 1] + c * beta2 * V[i] + c * beta3 * V[i + 1];
 
                 rp[i] = GetF(i) + val;
             }
@@ -144,49 +147,45 @@ namespace PerpetualAmericanOptions
             return rp;
         }
 
+        // it is zero for our case
         private double GetF(int i)
         {
             return 0;
         }
 
-        private static void check_h(double h, double tau, double sph, double r)
+        private static void CheckHCorrectness(double h, double tau, double sph, double r)
         {
-            Assert.LessOrEqual(tau/h, 1d/(2d*r*sph));
+            Assert.LessOrEqual(tau / h, 1d / (2d * r * sph));
         }
 
         public Tuple<double[], double> Solve()
         {
             var tecplotPrinter = new TecplotPrinter(GetN1(),
-                GetH(), 
                 0d,
                 GetRightBoundary(),
                 GetTau());
             var printer = new ThomasArrayPrinter();
-            double[] calculatedV = new double[n_1];
+            double[] calculatedV;
             
-//            double S0 = 0.5d * ((b - 0d) / n);
+            // take exact S0 for debugging
             var S0 = GetExactS0();
             //while (Math.Abs(GetExactS0() - S0) > 10e-5)
             {
                 CalculateH(S0);
                 CheckParameters2();
+                Console.WriteLine("h = " + GetH());
                 var b_t = GetB(n_1, S0, h, sigma_sq, tau);
                 var c_t = GetC(n_1, S0, h, sigma_sq, tau, r);
                 var d_t = GetD(n_1, S0, h, sigma_sq, tau);
                 printer.PrintThomasArrays(b_t, c_t, d_t);
                 var rp = CalculateRightPart(S0);
-                tecplotPrinter.PrintXY(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\" + "rp", 0d, rp, S0);
+                
                 calculatedV = _thomasAlgorithmCalculator.Calculate(b_t, c_t, d_t, rp);
 
-                // for better vis
-                calculatedV[calculatedV.Length - 1] = calculatedV[calculatedV.Length - 2]; 
-                tecplotPrinter.PrintXY(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\" + "v", 0d,  calculatedV, S0);
-                tecplotPrinter.PrintXY(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\" + "rp_v", 0d, rp, calculatedV, S0);
-//                var vs0 = GetVKS();
-//                tecplotPrinter.PrintXY(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\" + "v", 0d, vs0, calculatedV);
-//
-//                var err = Utils.FillArrayDiff(GetExactSolution(GetExactS0()), rp);
-//                tecplotPrinter.PrintXY("ex_minus_rp", 0d, err);
+                // print results to visualize it in Tecplot
+                tecplotPrinter.PrintXY(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\" + "rp", 0d,  GetH(), rp, S0);
+                tecplotPrinter.PrintXY(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\" + "v", 0d,  GetH(),  calculatedV, S0);
+                tecplotPrinter.PrintXY(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\" + "rp_v", 0d, GetH(), rp, calculatedV, S0);
             }
 
             return Tuple.Create(calculatedV, S0);
@@ -203,6 +202,17 @@ namespace PerpetualAmericanOptions
             // V(S) does not touch 0
             // adjust value for better visualization
             arr[0] = arr[1];
+            return arr;
+        }
+        
+        public double[] GetExactSolution(double S0)
+        {
+            var arr = new double[n_1];
+            for (var i = 0; i < arr.Length; ++i)
+            {
+                double si = S0 + i * h;
+                arr[i] = GetV(sigma_sq, r, K, si);
+            }
             return arr;
         }
         
@@ -273,7 +283,7 @@ namespace PerpetualAmericanOptions
             }
             
             // right boundary cond
-            //b[n - 1] = 0d;
+            b[n - 1] = 0d;
 
             return b;
         }
@@ -305,7 +315,7 @@ namespace PerpetualAmericanOptions
             c[0] = (sigma_sq * si0 * si0) / (2d * hph0) + (hph0 / 2d) * r + hph0/(4d*tau);
 
             // right boundary condition
-            // c[n - 1] = 0d;
+            c[n - 1] = 0d;
 
             return c;
         }
@@ -346,20 +356,6 @@ namespace PerpetualAmericanOptions
         {
             Assert.True(h > 0.0);
             Assert.AreEqual(h * h, h_sq);
-            
-//            // let's check scheme t/h restrictions
-//            // left for Thomas algo, right for postiive defined M matrix
-//            // (r * h) / (4*sigmaSq*Si) <= tau/h <= S_i+1/2 / (2 * r)
-//            // Si = a + i*h S_i+1/2 = a + i*h + h/2
-//            // then 
-//            // (r * h) / (4*sigmaSq*(a+i*h)) <= tau/h <= (a+i*h + 0.5h) / (2 * r)
-//            // min(Si) = h (except i = 0) and min(Si+1/2) = 0.5h
-//            // then
-//            // (r * h) / (4*sigmaSq*h) <= tau/h <= 0.5h / (2 * r)
-//            // 0.25r / sigmaSq <= tau/h <= 0.25h / r
-//
-//            Assert.GreaterOrEqual(tau / h, (0.25d * r) / sigma_sq);
-//            Assert.GreaterOrEqual((0.25d * h) / r, tau / h);
         }
     } 
 }

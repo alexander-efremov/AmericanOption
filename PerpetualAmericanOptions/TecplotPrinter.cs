@@ -5,21 +5,19 @@ namespace PerpetualAmericanOptions
     internal class TecplotPrinter
     {
         private readonly int n_1;
-        private readonly double h;
         private readonly double a;
         private readonly double b;
         private readonly double tau;
 
-        internal TecplotPrinter(int n_1, double h, double a, double b, double tau)
+        internal TecplotPrinter(int n_1,  double a, double b, double tau)
         {
             this.n_1 = n_1;
-            this.h = h;
             this.a = a;
             this.b = b;
             this.tau = tau;
         }
 
-        internal void PrintXY(string filename, double t, double[] data, double start = 0d)
+        internal void PrintXY(string filename, double t, double h,  double[] data, double start = 0d)
         {
             var name = string.Format("{0}_nx={1}_hx={2}_t={3}_tau={4}_a={5}_c={6}.dat", filename, n_1, h, t, tau, a, b);
             using (var writer = new StreamWriter(name, false))
@@ -36,7 +34,7 @@ namespace PerpetualAmericanOptions
             }
         }
 
-        internal void PrintXY(string filename, double t, double[] exact, double[] numerical, double S0 = 0)
+        internal void PrintXY(string filename, double t, double h, double[] exact, double[] numerical, double S0 = 0)
         {
             var name = string.Format("{0}_nx={1}_hx={2}_t={3}_tau={4}_a={5}_c={6}.dat", filename, n_1, h, t, tau, a, b);
             using (var writer = new StreamWriter(name, false))
