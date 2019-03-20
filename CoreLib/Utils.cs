@@ -2,9 +2,9 @@ using System;
 
 namespace PerpetualAmericanOptions
 {
-    internal static class Utils
+    public static class Utils
     {
-        internal static void Print(double[] arr, string header)
+        public static void Print(double[] arr, string header)
         {
             Console.WriteLine(header);
             for (int i = 0; i < arr.Length; i++)
@@ -15,7 +15,7 @@ namespace PerpetualAmericanOptions
             Console.WriteLine();
         }
 
-        internal static void print_result_arrays1(int exp_cnt, double[] l1_10, double[] l1_40, double[] l1_160,
+        public static void print_result_arrays1(int exp_cnt, double[] l1_10, double[] l1_40, double[] l1_160,
             double[] l1_640, double[] l1_2560)
         {
             if (l1_10 != null)
@@ -49,7 +49,7 @@ namespace PerpetualAmericanOptions
             }
         }
 
-        internal static double[] GetError(double[] arr1, double[] arr2, int n)
+        public static double[] GetError(double[] arr1, double[] arr2, int n)
         {
             var err = new double[n];
 
@@ -58,7 +58,7 @@ namespace PerpetualAmericanOptions
             return err;
         }
 
-        internal static double GetL1(double h, double[] data)
+        public static double GetL1(double h, double[] data)
         {
             var r = 0.0;
             for (var i = 0; i < data.Length; ++i)
@@ -68,7 +68,7 @@ namespace PerpetualAmericanOptions
             return r * h;
         }
 
-        internal static double[] FillArrayDiff(double[] arr1, double[] arr2)
+        public static double[] FillArrayDiff(double[] arr1, double[] arr2)
         {
             double[] err = new double[arr1.Length];
             for (var i = 0; i < err.Length; ++i)
@@ -79,7 +79,7 @@ namespace PerpetualAmericanOptions
             return err;
         }
 
-        internal static void
+        public static void
             print_header(int norm_type, bool check_solution, bool use_betas)
         {
             if (check_solution)
@@ -108,7 +108,7 @@ namespace PerpetualAmericanOptions
             }
         }
 
-        internal static void
+        public static void
             print_result_arrays(int exp_cnt, double[] l1_10, double[] l1_40, double[] l1_160, double[] l1_640,
                 double[] l1_2560)
         {

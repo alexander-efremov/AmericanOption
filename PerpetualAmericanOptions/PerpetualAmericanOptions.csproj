@@ -46,16 +46,17 @@
     <Compile Include="JacobiCalculator.cs" />
     <Compile Include="Parameters.cs" />
     <Compile Include="PerpetualAmericanOptionCalculator.cs" />
-    <Compile Include="PerpetualAmericanOptionTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TecplotPrinter.cs" />
-    <Compile Include="ThomasAlgorithmCalculator.cs" />
-    <Compile Include="ThomasArrayPrinter.cs" />
-    <Compile Include="UnitTestBase.cs" />
-    <Compile Include="Utils.cs" />
+    <Compile Include="TecplotPrinterSpecial.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CoreLib\CoreLib.csproj">
+      <Project>{f848cf90-a3e1-4b27-b584-44bc48354586}</Project>
+      <Name>CoreLib</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

@@ -1,5 +1,3 @@
-using System;
-
 namespace PerpetualAmericanOptions
 {
 //    internal class JacobiCalculator
