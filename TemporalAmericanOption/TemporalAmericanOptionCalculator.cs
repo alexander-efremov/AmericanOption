@@ -21,8 +21,9 @@ namespace PerpetualAmericanOptions
             return M;
         }
         
-        private double[] GetVT()
+        private double[] GetVST()
         {
+            UpdateH(GetK());
             var arr = new double[GetN1()];
             for (var i = 0; i < arr.Length; ++i)
             {
@@ -48,7 +49,7 @@ namespace PerpetualAmericanOptions
                 GetTau());
             var printer = new ThomasArrayPrinter();
             
-            var VK1 = GetVT();
+            var Vk1 = GetVST(); // V(S, T) = (K - S)+
             var St = new double[GetM()];
             St[St.Length - 1] = GetK();
 
@@ -59,7 +60,8 @@ namespace PerpetualAmericanOptions
             for (int k = GetM() - 1; k >= 1; --k)
             {
                 Console.WriteLine("Time step = " + k);
-                
+
+                double[] Vk;
                 int iter = 0;
                 double S0Old;
                 double S0New = St[k];
@@ -69,19 +71,14 @@ namespace PerpetualAmericanOptions
                     
                     S0Old = S0New;
                     UpdateH(S0Old);
-                    var rp = CalculateRightPart(S0Old, VK1, GetH(), GetTau());
+                    var rp = CalculateRightPart(S0Old, Vk1, GetH(), GetTau());
                     var b_t = GetB(GetN1(), S0Old, GetH(), GetSquaredSigma(), GetTau());
                     var c_t = GetC(GetN1(), S0Old, GetH(), GetSquaredSigma(), GetTau(), GetR());
                     var d_t = GetD(GetN1(), S0Old, GetH(), GetSquaredSigma(), GetTau());
-                    var VK = ThomasAlgorithmCalculator.Calculate(b_t, c_t, d_t, rp);
-                   
-                    if (GetK() - VK[0] <= 0d) throw new Exception("GetK() - VK[0] <= 0d");
+                    Vk = ThomasAlgorithmCalculator.Calculate(b_t, c_t, d_t, rp);
+
+                    S0New = GetK() - Vk[0];
                     
-                    S0New = GetK() - VK[0];
-                    for (int i = 0; i < VK.Length; i++)
-                    {
-                        VK1[i] = VK[i];
-                    }
 
                     using (var streamWriter =
                         File.AppendText(
@@ -89,14 +86,21 @@ namespace PerpetualAmericanOptions
                     {
                         streamWriter.WriteLine(
                             new string(' ', 2) + " Time step = {0} Iteration = " + iter +
-                            " h = {1} S0 = {2} Abs(S0New-S0Old)={3} S0Eps={4} Cnd={5}", GetH(), S0Old,
-                            Math.Abs(S0New - S0Old), GetS0Eps(), Math.Abs(S0New - S0Old) > GetS0Eps(), k);
+                            " h = {1} S0 = {2} Abs(S0New-S0Old)={3} S0Eps={4} Cnd={5}", k, GetH(), S0Old,
+                            Math.Abs(S0New - S0Old), GetS0Eps(), Math.Abs(S0New - S0Old) > GetS0Eps());
                     }
-                    Console.WriteLine(new string(' ', 2) + "Iteration = " + iter + " h = {0} S0_old = {1} S0_new = {2}", GetH(), S0Old, S0New);
+                    Console.WriteLine(new string(' ', 2) + "Iteration = " + iter + " h = {0} S0_old = {1} Vk[0] = {2} S0_new = {3}", GetH(), S0Old, Vk[0], S0New);
+                    
+                    if (S0New <= 0d) throw new Exception("S0New <= 0d");
+                    if (S0New >= GetK()) throw new Exception("S0New >= GetK()");
                     
                 } while (Math.Abs(S0New - S0Old) > GetS0Eps());
 
                 St[k - 1] = S0New;
+                for (int i = 0; i < Vk.Length; i++)
+                {
+                    Vk1[i] = Vk[i];
+                }
                 Console.WriteLine("--------------------------------------------------");
             }
 
@@ -157,20 +161,20 @@ namespace PerpetualAmericanOptions
 
         private double GetF(double sigma_sq, double r, double K, int i, double S0)
         {
-            return 0;
-//            var si = S0 + i * GetH();
-//            var p1 = sigma_sq / (2d * r);
-//
-//            var arg = K / (1 + sigma_sq / (2d * r));
-//            var pow = (2d * r + sigma_sq) / sigma_sq;
-//            var p2 = Math.Pow(arg, pow);
-//
-//            var arg2 = si;
-//            var pow2 = -2d * r / sigma_sq;
-//            var p3 = Math.Pow(arg2, pow2);
-//
-//            var v = p1 * p2 * p3;
-//            return v;
+//            return 0;
+            var si = S0 + i * GetH();
+            var p1 = sigma_sq / (2d * r);
+
+            var arg = K / (1 + sigma_sq / (2d * r));
+            var pow = (2d * r + sigma_sq) / sigma_sq;
+            var p2 = Math.Pow(arg, pow);
+
+            var arg2 = si;
+            var pow2 = -2d * r / sigma_sq;
+            var p3 = Math.Pow(arg2, pow2);
+
+            var v = p1 * p2 * p3;
+            return v;
         }
 
         /**
