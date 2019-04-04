@@ -21,30 +21,8 @@ namespace PerpetualAmericanOptions
             var n = 400;
             var r = 0.08d;
             var K = 0.5d;
-            return new PerpetualParameters(a, b, n, r, tau, sigma, K);
-        }
-
-        internal double GetL1Error(PerpetualAmericanOptionCalculator cal, double[] exact, double[] calculated)
-        {
-            double[] err = Utils.GetError(exact, calculated, exact.Length);
-            return Utils.GetL1(cal.GetH(), err);
-        }
-
-        internal double GetL1Solution(PerpetualAmericanOptionCalculator cal, double[] calculatedV)
-        {
-            return Utils.GetL1(cal.GetH(), calculatedV);
-        }
-
-        private static void PrintParameters(PerpetualAmericanOptionCalculator calculator)
-        {
-            Console.WriteLine("b = " + calculator.GetRightBoundary());
-            Console.WriteLine("r = " + calculator.GetR());
-            Console.WriteLine("N = " + calculator.GetN());
-            Console.WriteLine("N_1 = " + calculator.GetN1());
-            Console.WriteLine("tau = " + calculator.GetTau());
-            Console.WriteLine("sigma = " + calculator.GetSigma());
-            Console.WriteLine("sigma_sq = " + calculator.GetSquaredSigma());
-            Console.WriteLine("K = " + calculator.GetK());
+            var S0Eps = 10e-4;
+            return new PerpetualParameters(a, b, n, r, tau, sigma, K, S0Eps);
         }
 
         [Test]
@@ -67,6 +45,7 @@ namespace PerpetualAmericanOptions
             Utils.Print(exactV, "V_exact");
             Utils.Print(answer.Item1, "V_num");
             Console.WriteLine("S0 = {0}", answer.Item2);
+            Console.WriteLine("S0 - exactS0 = {0}", Math.Abs(answer.Item2 - calculator.GetExactS0()));
             Console.WriteLine("L1 of error = " + l1Error);
             Console.WriteLine("L1 of solution = " + l1Solution);
         }

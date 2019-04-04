@@ -5,6 +5,7 @@ namespace CoreLib
     public abstract class AmericanOptionCalculator
     {
         private readonly ThomasAlgorithmCalculator _thomasAlgorithmCalculator;
+        private readonly double a;
         private readonly double b;
         private readonly double K;
         private readonly int n;
@@ -13,7 +14,13 @@ namespace CoreLib
         private readonly double sigma;
         private readonly double sigma_sq;
         private readonly double tau;
+        private readonly double S0Eps;
         private double h;
+        
+        public double GetS0Eps()
+        {
+            return S0Eps;
+        }
 
         public int GetN()
         {
@@ -28,6 +35,11 @@ namespace CoreLib
         public double GetRightBoundary()
         {
             return b;
+        }
+        
+        public double GetLeftBoundary()
+        {
+            return a;
         }
 
         public double GetSigma()
@@ -67,6 +79,7 @@ namespace CoreLib
         
         public AmericanOptionCalculator(Parameters parameters)
         {
+            a = parameters.A;
             b = parameters.B;
             sigma = parameters.Sigma;
             sigma_sq = sigma * sigma;
@@ -76,6 +89,7 @@ namespace CoreLib
             r = parameters.R;
             K = parameters.K;
             h = b / n;
+            S0Eps = parameters.S0Eps;
 
             CheckParameters();
 
@@ -84,7 +98,17 @@ namespace CoreLib
         
         protected void UpdateH(double S0)
         {
+            if (S0 < 0d)
+            {
+                throw new ArgumentException("S0");
+            }
+            
             h = (b - S0) / n;
+            
+            if (h <= 0d)
+            {
+                throw new ArgumentException("h");
+            }
         }
 
         private void CheckParameters()

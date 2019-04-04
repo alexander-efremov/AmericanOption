@@ -1,6 +1,5 @@
 ﻿using System;
 using CoreLib;
-using NUnit.Framework;
 
 // ReSharper disable CommentTypo
 
@@ -9,7 +8,7 @@ namespace PerpetualAmericanOptions
     // from new presentation with FEM
     public class PerpetualAmericanOptionCalculator : AmericanOptionCalculator
     {
-        public PerpetualAmericanOptionCalculator(Parameters parameters) : base(parameters)
+        public PerpetualAmericanOptionCalculator(PerpetualParameters parameters) : base(parameters)
         {
         }
         
@@ -38,7 +37,7 @@ namespace PerpetualAmericanOptions
                          (1d - 2d * GetTau() * GetR() * sph0 / hph0);
             var c0 = hph0;
             var val0 = c0 * beta20 * V[0] + c0 * beta30 * V[1];
-            rp[0] = val0 + GetSquaredSigma() * si0 * si0 / 2d;
+            rp[0] = val0 + (GetSquaredSigma() * si0 * si0) / 2d;
 
             for (var i = 1; i <= GetN1() - 1; i++)
             {
@@ -74,12 +73,15 @@ namespace PerpetualAmericanOptions
         // it is zero for our case
         private double GetF(int i)
         {
-            return 0;
+            return 0d;
         }
 
         private static void CheckHCorrectness(double h, double tau, double sph, double r)
         {
-            Assert.LessOrEqual(tau / h, 1d / (2d * r * sph));
+            if (tau / h > 1d / (2d * r * sph))
+            {
+                throw new ArgumentOutOfRangeException("tau/h");
+            }
         }
 
         public Tuple<double[], double> Solve()
@@ -87,29 +89,31 @@ namespace PerpetualAmericanOptions
             var tecplotPrinter = new TecplotPrinterSpecial(GetN1(),
                 0d,
                 GetRightBoundary(),
-                GetTau());
+                GetTau()); 
+            var printer = new ThomasArrayPrinter();
 
             double[] V = null;
             var S0 = GetK();
-            while (Math.Abs(GetExactS0() - S0) > 10e-3)
+            var iter = 0;
+            while (Math.Abs(GetExactS0() - S0) > GetS0Eps())
             {
-                Console.WriteLine("S0 = " + S0);
+                iter++;
                 UpdateH(S0);
-                CheckParameters2();
+                Console.WriteLine("S0 = " + S0);
                 Console.WriteLine("h = " + GetH());
                 double[] b_t = GetB(GetN1(), S0, GetH(), GetSquaredSigma(), GetTau());
                 double[] c_t = GetC(GetN1(), S0, GetH(), GetSquaredSigma(), GetTau(), GetR());
                 double[] d_t = GetD(GetN1(), S0, GetH(), GetSquaredSigma(), GetTau());
-                //var printer = new ThomasArrayPrinter();
-                //printer.PrintThomasArrays(b_t, c_t, d_t);
                 double[] rp = CalculateRightPart(S0);
-                //tecplotPrinter.PrintXY(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\" + "rp", 0d, GetH(), rp, S0);
-
                 V = ThomasAlgorithmCalculator.Calculate(b_t, c_t, d_t, rp);
+                
+                //printer.PrintThomasArrays(b_t, c_t, d_t);
+                tecplotPrinter.PrintXY(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\" + "perpetual-rp", 0d, GetH(), rp, S0);
 
                 S0 = GetK() - V[0];
             }
 
+            Console.WriteLine("Iteration count = " + iter);
             tecplotPrinter.PrintXY(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\" + "v", 0d,
                 GetH(), V, S0);
             double[] KS = GetVKS();
@@ -163,8 +167,6 @@ namespace PerpetualAmericanOptions
 
             return res;
         }
-
-        
 
         private static double GetV(double sigma_sq, double r, double K, double si)
         {
@@ -258,11 +260,6 @@ namespace PerpetualAmericanOptions
             // right boundary condition
             d[n - 2] = 0d;
             return d;
-        }
-
-        private void CheckParameters2()
-        {
-            Assert.True(GetH() > 0.0);
         }
     }
 }

@@ -1,7 +1,7 @@
 using System.IO;
 using CoreLib;
 
-namespace PerpetualAmericanOptions
+namespace CoreLib
 {
     public class TecplotPrinterSpecial : TecplotPrinter
     {

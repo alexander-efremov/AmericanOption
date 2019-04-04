@@ -18,6 +18,7 @@ namespace CoreLib
 
         public double[] Calculate(double[] b, double[] c, double[] d, double[] r)
         {
+            CheckDiagonalDominance(b, c, d);
             var delta = new double[n];
             var beta = new double[n];
             var lambda = new double[n];
@@ -40,6 +41,17 @@ namespace CoreLib
             for (var i = n - 2; i >= 0; i--) x[i] = beta[i] * x[i + 1] + lambda[i];
 
             return x;
+        }
+        
+        private void CheckDiagonalDominance(double[] lower, double[] central, double[] upper)
+        {
+            for (int i = 0; i < central.Length; i++)
+            {
+                if (Math.Abs(central[i]) < Math.Abs(lower[i]) + Math.Abs(upper[i]))
+                {
+                    throw new Exception(string.Format("There is no diagonal dominance! i={0} {1} {2} {3} sum={4} ", i,  Math.Abs(lower[i]), Math.Abs(central[i]), Math.Abs(upper[i]), Math.Abs(lower[i] + upper[i]) ));
+                }
+            }
         }
     }
 }

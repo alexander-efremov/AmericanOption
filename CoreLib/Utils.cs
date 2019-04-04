@@ -79,8 +79,7 @@ namespace PerpetualAmericanOptions
             return err;
         }
 
-        public static void
-            print_header(int norm_type, bool check_solution, bool use_betas)
+        public static void print_header(int norm_type, bool check_solution, bool use_betas)
         {
             if (check_solution)
             {
