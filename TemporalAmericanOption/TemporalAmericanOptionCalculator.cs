@@ -23,14 +23,15 @@ namespace PerpetualAmericanOptions
         
         private double[] GetVST()
         {
-            UpdateH(GetK());
+            var s0 = GetK();
+            UpdateH(s0);
             var arr = new double[GetN1()];
             for (var i = 0; i < arr.Length; ++i)
             {
-                var S = GetLeftBoundary() + i * GetH();
-                if (S < GetK())
+                var S = s0 + i * GetH();
+                if (S <= s0)
                 {
-                    arr[i] = GetK() - S;
+                    arr[i] = s0 - S;
                 }
                 else
                 {
@@ -48,7 +49,7 @@ namespace PerpetualAmericanOptions
                 GetRightBoundary(),
                 GetTau());
             var printer = new ThomasArrayPrinter();
-            
+            var tau1 = GetTau();
             var Vk1 = GetVST(); // V(S, T) = (K - S)+
             var St = new double[GetM()];
             St[St.Length - 1] = GetK();
@@ -71,25 +72,26 @@ namespace PerpetualAmericanOptions
                     
                     S0Old = S0New;
                     UpdateH(S0Old);
-                    var rp = CalculateRightPart(S0Old, Vk1, GetH(), GetTau());
-                    var b_t = GetB(GetN1(), S0Old, GetH(), GetSquaredSigma(), GetTau());
-                    var c_t = GetC(GetN1(), S0Old, GetH(), GetSquaredSigma(), GetTau(), GetR());
-                    var d_t = GetD(GetN1(), S0Old, GetH(), GetSquaredSigma(), GetTau());
+                    var h_old = GetH();
+                    var rp = CalculateRightPart(S0Old, Vk1, h_old, tau1);
+                    var b_t = GetB(GetN1(), S0Old, h_old, GetSquaredSigma(), tau1);
+                    var c_t = GetC(GetN1(), S0Old, h_old, GetSquaredSigma(), tau1, GetR());
+                    var d_t = GetD(GetN1(), S0Old, h_old, GetSquaredSigma(), tau1);
                     Vk = ThomasAlgorithmCalculator.Calculate(b_t, c_t, d_t, rp);
-
+                    //tecplotPrinter.PrintXY(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\AO\\" + "V" + iter, 0d, h_old, Vk, S0Old);
                     S0New = GetK() - Vk[0];
-                    
-
+//                    tecplotPrinter.PrintXY(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\" + "temporal-rp", 0d, GetH(), rp, S0);
+//                    printer.PrintThomasArrays(b_t, c_t, d_t);
                     using (var streamWriter =
                         File.AppendText(
                             Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\" + "stat.txt"))
                     {
                         streamWriter.WriteLine(
                             new string(' ', 2) + " Time step = {0} Iteration = " + iter +
-                            " h = {1} S0 = {2} Abs(S0New-S0Old)={3} S0Eps={4} Cnd={5}", k, GetH(), S0Old,
+                            " h = {1} S0 = {2} Abs(S0New-S0Old)={3} S0Eps={4} Cnd={5}", k, h_old, S0Old,
                             Math.Abs(S0New - S0Old), GetS0Eps(), Math.Abs(S0New - S0Old) > GetS0Eps());
                     }
-                    Console.WriteLine(new string(' ', 2) + "Iteration = " + iter + " h = {0} S0_old = {1} Vk[0] = {2} S0_new = {3}", GetH(), S0Old, Vk[0], S0New);
+                    Console.WriteLine(new string(' ', 2) + "Iteration = " + iter + " h = {0} S0_old = {1} Vk[0] = {2} S0_new = {3}", h_old, S0Old, Vk[0], S0New);
                     
                     if (S0New <= 0d) throw new Exception("S0New <= 0d");
                     if (S0New >= GetK()) throw new Exception("S0New >= GetK()");
@@ -136,7 +138,7 @@ namespace PerpetualAmericanOptions
                             (1d - 2d * tau * GetR() * sph / hph) *
                             (1d - 2d * tau * GetR() * sph / hph);
                 
-                var f = GetF(GetSquaredSigma(), GetR(), GetK(), i, S0);
+                var f = GetF(GetSquaredSigma(), GetR(), GetK(), i, S0, h);
                 rp[i] = ((hmh + hph) / 2d) * f + ((hph + hmh) / 2d)*(beta1 * VK1[i - 1] + beta2 * VK1[i] + beta3 * VK1[i + 1]);
             }
             
@@ -150,19 +152,19 @@ namespace PerpetualAmericanOptions
             var beta30 = 1d / (8d * tau) *
                          (1d - (2d * tau * GetR() * sph0) / hph0) *
                          (1d - (2d * tau * GetR() * sph0) / hph0);
-            var f0 = GetF(GetSquaredSigma(), GetR(), GetK(), 0, S0);
+            var f0 = GetF(GetSquaredSigma(), GetR(), GetK(), 0, S0, h);
             
-            rp[0] = hph0 * f0 + ((GetSquaredSigma() * si0 * si0) / 2d) + (hph0) * (beta20 * VK1[0] + beta30 * VK1[1]);
+            rp[0] = hph0 * f0 + ((GetSquaredSigma() * si0 * si0) / 2d) + hph0 * (beta20 * VK1[0] + beta30 * VK1[1]);
             
             rp[rp.Length - 1] = 0d;
             
             return rp;
         }
 
-        private double GetF(double sigma_sq, double r, double K, int i, double S0)
+        private double GetF(double sigma_sq, double r, double K, int i, double S0, double h)
         {
 //            return 0;
-            var si = S0 + i * GetH();
+            var si = S0 + i * h;
             var p1 = sigma_sq / (2d * r);
 
             var arg = K / (1 + sigma_sq / (2d * r));

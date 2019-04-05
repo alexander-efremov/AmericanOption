@@ -1,4 +1,6 @@
 using System;
+using System.IO;
+using CoreLib;
 using NUnit.Framework;
 using TemporalAmericanOption;
 
@@ -23,7 +25,26 @@ namespace PerpetualAmericanOptions
                 Console.WriteLine("k = " + (i + 1) + " -> " + S0Arr[i]);
             }
 
+            Print(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\AO\\" + "s0", S0Arr, calculator.GetTau(), 0);
+
             Console.WriteLine();
+        }
+
+        private void Print(string filename, double[] St, double tau, double start)
+        {
+            var name = string.Format("{0}_nx={1}_tau={2}.dat", filename, St.Length, tau);
+            using (var writer = new StreamWriter(name, false))
+            {
+                writer.WriteLine(
+                    "TITLE = 'DEM DATA | DEM DATA | DEM DATA | DEM DATA'\nVARIABLES = S {0}\nZONE T='{1}'", "t",
+                    "SubZone");
+                writer.WriteLine("I={0} K={1} ZONETYPE=Ordered", St.Length, 1);
+                writer.WriteLine("DATAPACKING=POINT\nDT=(DOUBLE DOUBLE)");
+                for (var i = 0; i < St.Length; i++)
+                {
+                    writer.WriteLine("{0:e8} {1:e8}", St[i], start + i * tau);
+                }
+            }
         }
         
         private TemporalParameters GetParameters()
