@@ -15,7 +15,7 @@ namespace PerpetualAmericanOptions
         {
             WorkingDirPath = SetWorkingDir();
         }
-        
+
         internal double GetL1Error(AmericanOptionCalculator cal, double[] exact, double[] calculated)
         {
             double[] err = Utils.GetError(exact, calculated, exact.Length);
@@ -26,7 +26,7 @@ namespace PerpetualAmericanOptions
         {
             return Utils.GetL1(cal.GetH(), calculatedV);
         }
-        
+
         protected virtual void PrintParameters(AmericanOptionCalculator calculator)
         {
             Console.WriteLine("b = " + calculator.GetRightBoundary());
@@ -34,7 +34,6 @@ namespace PerpetualAmericanOptions
             Console.WriteLine("N = " + calculator.GetN());
             Console.WriteLine("N_1 = " + calculator.GetN1());
             Console.WriteLine("tau = " + calculator.GetTau());
-            Console.WriteLine("sigma = " + calculator.GetSigma());
             Console.WriteLine("sigma_sq = " + calculator.GetSquaredSigma());
             Console.WriteLine("K = " + calculator.GetK());
         }

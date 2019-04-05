@@ -15,14 +15,14 @@ namespace PerpetualAmericanOptions
         private PerpetualParameters GetParameters()
         {
             var a = 0d;
-            var b = 1d;
-            var sigma = 1d;
+            var b = 2d;
+            var sigmaSq = 0.1d;
             var tau = 1e-3;
             var n = 400;
             var r = 0.08d;
             var K = 0.5d;
             var S0Eps = 10e-4;
-            return new PerpetualParameters(a, b, n, r, tau, sigma, K, S0Eps);
+            return new PerpetualParameters(a, b, n, r, tau, sigmaSq, K, S0Eps);
         }
 
         [Test]

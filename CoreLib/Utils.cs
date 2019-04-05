@@ -67,13 +67,31 @@ namespace PerpetualAmericanOptions
             }
             return r * h;
         }
+        
+        public static double GetLInf(double[] data)
+        {
+            var mx = 0.0;
+            for (var i = 0; i < data.Length; ++i)
+            {
+                mx = Math.Max(data[i], mx);
+            }
+            return mx;
+        }
 
         public static double[] FillArrayDiff(double[] arr1, double[] arr2)
         {
             double[] err = new double[arr1.Length];
             for (var i = 0; i < err.Length; ++i)
             {
-                err[i] = arr1[i] - arr2[i];
+                try
+                {
+err[i] = arr1[i] - arr2[i];
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    throw;
+                }
             }
 
             return err;
@@ -107,8 +125,7 @@ namespace PerpetualAmericanOptions
             }
         }
 
-        public static void
-            print_result_arrays(int exp_cnt, double[] l1_10, double[] l1_40, double[] l1_160, double[] l1_640,
+        public static void print_result_arrays(int exp_cnt, double[] l1_10, double[] l1_40, double[] l1_160, double[] l1_640,
                 double[] l1_2560)
         {
             if (l1_10 != null)

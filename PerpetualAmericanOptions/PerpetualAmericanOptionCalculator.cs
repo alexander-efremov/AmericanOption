@@ -35,9 +35,7 @@ namespace PerpetualAmericanOptions
             var beta30 = 1d / (8d * GetTau()) *
                          (1d - 2d * GetTau() * GetR() * sph0 / hph0) *
                          (1d - 2d * GetTau() * GetR() * sph0 / hph0);
-            var c0 = hph0;
-            var val0 = c0 * beta20 * V[0] + c0 * beta30 * V[1];
-            rp[0] = val0 + (GetSquaredSigma() * si0 * si0) / 2d;
+            rp[0] = hph0 * (beta20 * V[0] + beta30 * V[1]) + (GetSquaredSigma() * si0 * si0) / 2d;
 
             for (var i = 1; i <= GetN1() - 1; i++)
             {
@@ -61,8 +59,7 @@ namespace PerpetualAmericanOptions
                 var beta3 = 1d / (8d * GetTau()) *
                             (1d - 2d * GetTau() * GetR() * sph / GetH()) *
                             (1d - 2d * GetTau() * GetR() * sph / GetH());
-                var c = (hph + hmh) / 2d;
-                var val = c * beta1 * V[i - 1] + c * beta2 * V[i] + c * beta3 * V[i + 1];
+                var val = ((hph + hmh) / 2d) * (beta1 * V[i - 1] + beta2 * V[i] + beta3 * V[i + 1]);
 
                 rp[i] = GetF(i) + val;
             }

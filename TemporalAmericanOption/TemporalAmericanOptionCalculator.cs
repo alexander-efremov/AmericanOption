@@ -10,10 +10,33 @@ namespace PerpetualAmericanOptions
     // from new presentation with FEM
     public class TemporalAmericanOptionCalculator : AmericanOptionCalculator
     {
+        private readonly bool _allowOutputFile;
+        private readonly bool _allowOutputConsole;
+        private readonly string _outpath;
+        private readonly string _outpathStat;
+        private readonly string _outpathRp;
         private readonly int M;
-        public TemporalAmericanOptionCalculator(TemporalParameters parameters) : base(parameters)
+        public TemporalAmericanOptionCalculator(TemporalParameters parameters, bool allowOutputFile, bool allowOutputConsole, string outpath = null) : base(parameters)
         {
+            _allowOutputFile = allowOutputFile;
+            _allowOutputConsole = allowOutputConsole;
+            _outpath = outpath;
             M = parameters.M;
+            if (string.IsNullOrEmpty(outpath))
+            {
+                outpath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\AO\\";
+            }
+
+            _outpathStat = Path.Combine(outpath, "stat");
+            if (!Directory.Exists(_outpathStat))
+            {
+                Directory.CreateDirectory(_outpathStat);
+            }
+            _outpathRp = Path.Combine(outpath, "rp");
+            if (!Directory.Exists(_outpathRp))
+            {
+                Directory.CreateDirectory(_outpathRp);
+            }
         }
 
         public int GetM()
@@ -54,18 +77,33 @@ namespace PerpetualAmericanOptions
             var St = new double[GetM()];
             St[St.Length - 1] = GetK();
 
-            Console.WriteLine("Time step = " + GetM() + string.Format(" h = {0} S(T) = {1}", GetH(), St[St.Length - 1]));
-            Console.WriteLine("--------------------------------------------------");
-            File.Delete(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\" + "stat.txt");
-            
-            for (int k = GetM() - 1; k >= 1; --k)
+            if (_allowOutputConsole)
             {
-                Console.WriteLine("Time step = " + k);
+                Console.WriteLine("Time step = " + GetM() + string.Format(" h = {0} S(T) = {1}", GetH(), St[St.Length - 1]));
+                Console.WriteLine("--------------------------------------------------");
+            }
+
+            if (_allowOutputFile)
+            {
+                if (File.Exists(Path.Combine(_outpathStat, "stat.txt")))
+                {
+                    File.Delete(Path.Combine(_outpathStat, "stat.txt"));
+                }
+                tecplotPrinter.PrintXY(_outpath + "V" + GetM(), GetTau()*GetM(), GetH(), Vk1,   St[St.Length - 1]);
+            }
+            
+            for (int k = GetM() - 2; k >= 0; --k)
+            {
+                var ts = k + 1;
+                if (_allowOutputConsole)
+                {
+                    Console.WriteLine("Time step = " + ts);
+                }
 
                 double[] Vk;
                 int iter = 0;
                 double S0Old;
-                double S0New = St[k];
+                double S0New = St[St.Length - (GetM() - ts)];
                 do
                 {
                     iter++;
@@ -78,35 +116,81 @@ namespace PerpetualAmericanOptions
                     var c_t = GetC(GetN1(), S0Old, h_old, GetSquaredSigma(), tau1, GetR());
                     var d_t = GetD(GetN1(), S0Old, h_old, GetSquaredSigma(), tau1);
                     Vk = ThomasAlgorithmCalculator.Calculate(b_t, c_t, d_t, rp);
-                    //tecplotPrinter.PrintXY(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\AO\\" + "V" + iter, 0d, h_old, Vk, S0Old);
+                    
                     S0New = GetK() - Vk[0];
-//                    tecplotPrinter.PrintXY(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\" + "temporal-rp", 0d, GetH(), rp, S0);
-//                    printer.PrintThomasArrays(b_t, c_t, d_t);
-                    using (var streamWriter =
-                        File.AppendText(
-                            Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\" + "stat.txt"))
+                    if (_allowOutputFile)
                     {
-                        streamWriter.WriteLine(
-                            new string(' ', 2) + " Time step = {0} Iteration = " + iter +
-                            " h = {1} S0 = {2} Abs(S0New-S0Old)={3} S0Eps={4} Cnd={5}", k, h_old, S0Old,
-                            Math.Abs(S0New - S0Old), GetS0Eps(), Math.Abs(S0New - S0Old) > GetS0Eps());
+                        tecplotPrinter.PrintXY(Path.Combine(_outpathRp , "temporal-rp"), 0d, GetH(), rp, S0New);
                     }
-                    Console.WriteLine(new string(' ', 2) + "Iteration = " + iter + " h = {0} S0_old = {1} Vk[0] = {2} S0_new = {3}", h_old, S0Old, Vk[0], S0New);
+//                    printer.PrintThomasArrays(b_t, c_t, d_t);
+                    if (_allowOutputFile)
+                    {
+                        using (var streamWriter =
+                            File.AppendText(Path.Combine(_outpathStat, "stat.txt")))
+                        {
+                            streamWriter.WriteLine(
+                                new string(' ', 2) + " Time step = {0} Iteration = " + iter +
+                                " h = {1} S0 = {2} Abs(S0New-S0Old)={3} S0Eps={4} Cnd={5}", k, h_old, S0Old,
+                                Math.Abs(S0New - S0Old), GetS0Eps(), Math.Abs(S0New - S0Old) > GetS0Eps());
+                        }
+                    }
+
+                    if (_allowOutputConsole)
+                    {
+                        Console.WriteLine(new string(' ', 2) + "Iteration = " + iter + " h = {0} S0_old = {1} Vk[0] = {2} S0_new = {3}", h_old, S0Old, Vk[0], S0New);
+                    }
                     
                     if (S0New <= 0d) throw new Exception("S0New <= 0d");
                     if (S0New >= GetK()) throw new Exception("S0New >= GetK()");
                     
                 } while (Math.Abs(S0New - S0Old) > GetS0Eps());
 
-                St[k - 1] = S0New;
+                St[St.Length - (GetM() - ts) - 1] = S0New;
                 for (int i = 0; i < Vk.Length; i++)
                 {
                     Vk1[i] = Vk[i];
                 }
-                Console.WriteLine("--------------------------------------------------");
+
+                if (_allowOutputFile)
+                {
+                    tecplotPrinter.PrintXY(Path.Combine(_outpath, "V" + ts), GetTau()*ts, GetH(), Vk, S0New);
+                }
+
+                if (_allowOutputConsole)
+                {
+                    Console.WriteLine("--------------------------------------------------");
+                }
             }
 
             return St;
+        }
+
+        private void PrintXY(string filename, double h, double[] data, double start, int tl)
+        {
+            var name = string.Format("{0}_t={1}.dat", filename, tl);
+            using (var writer = new StreamWriter(name, false))
+            {
+                writer.WriteLine("TITLE = \"V(S): from M to 1\"");
+               
+                writer.WriteLine("VARIABLES = S V");
+                writer.WriteLine("DATASETAUXDATA N=\"{0}\"", GetN());
+                writer.WriteLine("DATASETAUXDATA M=\"{0}\"", GetM());
+                writer.WriteLine("DATASETAUXDATA tau=\"{0}\"", GetTau());
+                writer.WriteLine("DATASETAUXDATA K=\"{0}\"", GetK());
+                writer.WriteLine("DATASETAUXDATA r=\"{0}\"", GetR());
+                writer.WriteLine("DATASETAUXDATA sigma_sq=\"{0}\"", GetSquaredSigma());
+                writer.WriteLine("DATASETAUXDATA s0_eps=\"{0}\"", GetS0Eps());
+                writer.WriteLine("DATASETAUXDATA tl=\"{0}\"", tl);
+                writer.WriteLine("ZONE T='SubZone'");
+                writer.WriteLine("I={0} K={1} ZONETYPE=Ordered", data.Length, 1);
+                writer.WriteLine("DATAPACKING=POINT");
+                writer.WriteLine("DT=(DOUBLE DOUBLE)");
+                
+                for (var i = 0; i < data.Length; i++)
+                {
+                    writer.WriteLine("{0:e8} {1:e8}", start + i * h, data[i]);
+                }
+            }
         }
 
         private double[] CalculateRightPart(double S0, double[] VK1, double h, double tau)
@@ -139,7 +223,8 @@ namespace PerpetualAmericanOptions
                             (1d - 2d * tau * GetR() * sph / hph);
                 
                 var f = GetF(GetSquaredSigma(), GetR(), GetK(), i, S0, h);
-                rp[i] = ((hmh + hph) / 2d) * f + ((hph + hmh) / 2d)*(beta1 * VK1[i - 1] + beta2 * VK1[i] + beta3 * VK1[i + 1]);
+                rp[i] = ((hmh + hph) / 2d) * f +
+                        ((hmh + hph) / 2d) * (beta1 * VK1[i - 1] + beta2 * VK1[i] + beta3 * VK1[i + 1]);
             }
             
             var si0 = S0 + 0 * h;
@@ -154,7 +239,7 @@ namespace PerpetualAmericanOptions
                          (1d - (2d * tau * GetR() * sph0) / hph0);
             var f0 = GetF(GetSquaredSigma(), GetR(), GetK(), 0, S0, h);
             
-            rp[0] = hph0 * f0 + ((GetSquaredSigma() * si0 * si0) / 2d) + hph0 * (beta20 * VK1[0] + beta30 * VK1[1]);
+            rp[0] = ((-hph0/2d) * f0) + ((GetSquaredSigma() * si0 * si0) / 2d) +  hph0 * (beta20 * VK1[0] + beta30 * VK1[1]);
             
             rp[rp.Length - 1] = 0d;
             
@@ -163,20 +248,20 @@ namespace PerpetualAmericanOptions
 
         private double GetF(double sigma_sq, double r, double K, int i, double S0, double h)
         {
-//            return 0;
-            var si = S0 + i * h;
-            var p1 = sigma_sq / (2d * r);
-
-            var arg = K / (1 + sigma_sq / (2d * r));
-            var pow = (2d * r + sigma_sq) / sigma_sq;
-            var p2 = Math.Pow(arg, pow);
-
-            var arg2 = si;
-            var pow2 = -2d * r / sigma_sq;
-            var p3 = Math.Pow(arg2, pow2);
-
-            var v = p1 * p2 * p3;
-            return v;
+            return 0;
+//            var si = S0 + i * h;
+//            var p1 = sigma_sq / (2d * r);
+//
+//            var arg = K / (1 + sigma_sq / (2d * r));
+//            var pow = (2d * r + sigma_sq) / sigma_sq;
+//            var p2 = Math.Pow(arg, pow);
+//
+//            var arg2 = si;
+//            var pow2 = -2d * r / sigma_sq;
+//            var p3 = Math.Pow(arg2, pow2);
+//
+//            var v = p1 * p2 * p3;
+//            return v;
         }
 
         /**
@@ -188,16 +273,19 @@ namespace PerpetualAmericanOptions
          * x - решение, массив x будет содержать ответ
          */
         // pass n = n + 1!
-        private double[] GetB(int n, double S0, double h, double sigma_sq, double tau)
+        private double[] GetB(int n, double S0, double h, double sigmaSq, double tau)
         {
             var b = new double[n];
             for (var i = 1; i <= n - 1; ++i)
             {
                 var si = S0 + i * h;
                 var hmh = (S0 + i * h) - (S0 + (i - 1) * h); // h_{i - 1/2}
-                if (hmh * hmh > 4d * tau * sigma_sq * si) throw new ArgumentException("hmh is invalid");
+                if (hmh * hmh > 4d * tau * sigmaSq * si)
+                {
+                    throw new ArgumentException("hmh is invalid");
+                }
 
-                b[i] = (hmh / (4d * tau)) - (sigma_sq * si * si) / (2d * hmh);
+                b[i] = (hmh / (4d * tau)) - (sigmaSq * si * si) / (2d * hmh);
             }
 
             // right boundary cond
@@ -271,8 +359,31 @@ namespace PerpetualAmericanOptions
         {
             if (tau / h > 1d / (2d * r * sph))
             {
-                throw new ArgumentOutOfRangeException("tau/h");
+               // throw new ArgumentOutOfRangeException("tau/h");
             }
+        }
+
+        public double[] GetExactSolution(double t)
+        {
+            var r = new double[GetN1()];
+            for (int i = 0; i < r.Length; i++)
+            {
+                var si = GetLeftBoundary() + i * GetH();
+                var p1 = GetSquaredSigma() / (2d * GetR());
+
+                var arg = GetK() / (1 + GetSquaredSigma() / (2d * GetR()));
+                var pow = (2d * GetR() + GetSquaredSigma()) / GetSquaredSigma();
+                var p2 = Math.Pow(arg, pow);
+
+                var arg2 = si;
+                var pow2 = -2d * GetR() / GetSquaredSigma();
+                var p3 = Math.Pow(arg2, pow2);
+
+                var v = p1 * p2 * p3;
+                r[i] = t*v;
+            }
+
+            return r;
         }
     }
 }

@@ -11,8 +11,7 @@ namespace CoreLib
         private readonly int n;
         private readonly int n_1;
         private readonly double r;
-        private readonly double sigma;
-        private readonly double sigma_sq;
+        private readonly double sigmaSq;
         private readonly double tau;
         private readonly double S0Eps;
         private double h;
@@ -42,14 +41,9 @@ namespace CoreLib
             return a;
         }
 
-        public double GetSigma()
-        {
-            return sigma;
-        }
-
         public double GetSquaredSigma()
         {
-            return sigma_sq;
+            return sigmaSq;
         }
 
         public double GetTau()
@@ -81,8 +75,7 @@ namespace CoreLib
         {
             a = parameters.A;
             b = parameters.B;
-            sigma = parameters.Sigma;
-            sigma_sq = sigma * sigma;
+            sigmaSq = parameters.SigmaSq;
             tau = parameters.Tau;
             n = parameters.N;
             n_1 = n + 1;
