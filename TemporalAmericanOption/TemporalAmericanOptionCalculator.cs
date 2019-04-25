@@ -280,7 +280,7 @@ namespace PerpetualAmericanOptions
             {
                 var si = S0 + i * h;
                 var hmh = (S0 + i * h) - (S0 + (i - 1) * h); // h_{i - 1/2}
-                if (hmh * hmh > 4d * tau * sigmaSq * si)
+                if (hmh * hmh > 2d * tau * sigmaSq * si * si)
                 {
                     throw new ArgumentException("hmh is invalid");
                 }
@@ -304,7 +304,7 @@ namespace PerpetualAmericanOptions
                 var si = S0 + i * h;
                 var hmh = si - (S0 + (i - 1) * h); // h_{i-1/2}
                 var hph = (S0 + (i + 1) * h) - si; // h_{i+1/2}
-                if (hmh * hmh > 4d * tau * sigma_sq * si)
+                if (hmh * hmh > 2d * tau * sigma_sq * si * si)
                 {
                     throw new ArgumentException("hmh is invalid");
                 }
@@ -363,27 +363,27 @@ namespace PerpetualAmericanOptions
             }
         }
 
-        public double[] GetExactSolution(double t)
-        {
-            var r = new double[GetN1()];
-            for (int i = 0; i < r.Length; i++)
-            {
-                var si = GetLeftBoundary() + i * GetH();
-                var p1 = GetSquaredSigma() / (2d * GetR());
-
-                var arg = GetK() / (1 + GetSquaredSigma() / (2d * GetR()));
-                var pow = (2d * GetR() + GetSquaredSigma()) / GetSquaredSigma();
-                var p2 = Math.Pow(arg, pow);
-
-                var arg2 = si;
-                var pow2 = -2d * GetR() / GetSquaredSigma();
-                var p3 = Math.Pow(arg2, pow2);
-
-                var v = p1 * p2 * p3;
-                r[i] = t*v;
-            }
-
-            return r;
-        }
+//        public double[] GetExactSolution(double t)
+//        {
+//            var r = new double[GetN1()];
+//            for (int i = 0; i < r.Length; i++)
+//            {
+//                var si = GetLeftBoundary() + i * GetH();
+//                var p1 = GetSquaredSigma() / (2d * GetR());
+//
+//                var arg = GetK() / (1 + GetSquaredSigma() / (2d * GetR()));
+//                var pow = (2d * GetR() + GetSquaredSigma()) / GetSquaredSigma();
+//                var p2 = Math.Pow(arg, pow);
+//
+//                var arg2 = si;
+//                var pow2 = -2d * GetR() / GetSquaredSigma();
+//                var p3 = Math.Pow(arg2, pow2);
+//
+//                var v = p1 * p2 * p3;
+//                r[i] = t*v;
+//            }
+//
+//            return r;
+//        }
     }
 }

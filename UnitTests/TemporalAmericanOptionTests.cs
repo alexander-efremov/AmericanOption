@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using NUnit.Framework;
 using TemporalAmericanOption;
@@ -52,14 +53,13 @@ namespace PerpetualAmericanOptions
 
             var table = new Dictionary<string, List<double>>();
             
-           
             for (double ki = 1; ki <= Ksteps; ki++)
             {
                 var Ki = K * ki;
                 for (var i = 0; i < Nsteps; i++)
                 {
                     var n = (int) Math.Pow(2, i) * startN;
-                    var folderPath = CreateOutputFolder(Ki, n);
+                    var folderPath = CreateOutputFolder(Ki, n, string.Empty);
                     var parameters = GetSeriesParameters(n, T, Ki, M, tau, a, b, r, sigmaSq, S0eps);
                     var calculator = new TemporalAmericanOptionCalculator(parameters, allowOutputFile, allowOutputConsole, folderPath);
                     double[] S0Arr = calculator.Solve();
@@ -85,6 +85,141 @@ namespace PerpetualAmericanOptions
             }
              
             PrintTable(table);
+            Console.WriteLine();
+            PrintCsv(table);
+        }
+        
+        [Test]
+        public void TestSeriesConvergence()
+        {
+            var allowOutputFile = false;
+            var allowOutputConsole = false;
+            var startN = 150;
+//            int Ksteps = 3;
+            int Nsteps = 7;
+//            int tls = 3;
+            double startK = 5d;
+            var a = 0d;
+            var b = 50d;
+            var r = 0.1d;
+            var sigmaSq = 0.2d;
+            var K = startK;
+            var S0eps = 1e-5;
+            double T = 1d;
+            PrintParamsForSeries2(r, sigmaSq, K);
+            PrintTableHeader(Nsteps, startN);
+
+            var w = new Stopwatch();
+            w.Reset();
+            int M;
+            double tau;
+            double[] S0ArrGold;
+            Console.WriteLine("Started Nsteps - 1");
+            w.Reset();
+            w.Start();
+            {
+                M = (int) (10 * Math.Pow(4, (Nsteps-1)));
+                tau = (T - 0d) / M;
+                var n = (int) Math.Pow(2, Nsteps - 1) * startN;
+                string folderPath = GetTrashFolder();
+                if (allowOutputFile)
+                {
+                    folderPath = CreateOutputFolder(K, n, "convergence");
+                }
+
+                var parameters = GetSeriesParameters(n, T, K, M, tau, a, b, r, sigmaSq, S0eps);
+                var calculator =
+                    new TemporalAmericanOptionCalculator(parameters, allowOutputFile, allowOutputConsole, folderPath);
+                S0ArrGold = calculator.Solve();
+            }
+            Console.WriteLine("Finished Nsteps - 1");
+            var dic = new Dictionary<int, double>();
+            Console.WriteLine("Started from 0 to Nsteps - 1");
+            for (var i = 0; i < Nsteps - 1; i++)
+            {
+                Console.WriteLine("Started step " + i);
+                M = (int) (10 * Math.Pow(4, i));
+                tau = (T - 0d) / M;
+                var n = (int) Math.Pow(2, i) * startN;
+                string folderPath = GetTrashFolder();
+                if (allowOutputFile)
+                {
+                    folderPath = CreateOutputFolder(K, n, "convergence");
+                }
+                var parameters = GetSeriesParameters(n, T, K, M, tau, a, b, r, sigmaSq, S0eps);
+                var calculator =
+                    new TemporalAmericanOptionCalculator(parameters, allowOutputFile, allowOutputConsole, folderPath);
+                double[] S0Arr = calculator.Solve();
+                double lInf = GetErrorLInf(S0ArrGold, S0Arr);
+                dic[n] = lInf;
+                Console.WriteLine("Finished step = "  + i);
+            }
+            w.Stop();
+            Console.WriteLine("Elapsed = " + w.Elapsed.TotalSeconds + " s.");
+            var l = new List<double>();
+            foreach (KeyValuePair<int,double> pair in dic)
+            {
+                l.Add(pair.Value);
+                Console.WriteLine(pair.Key + " " + pair.Value);
+            }
+
+            Console.WriteLine();
+            Console.WriteLine("Log2");
+            for (int i = 1; i < l.Count; i++)
+            {
+                var value = l[i-1]/l[i];
+                Console.WriteLine(value + " " + Math.Log(value, 2));
+            }
+
+//            PrintTable(table);
+//            Console.WriteLine();
+//            PrintCsv(table);
+        }
+
+        public void QuantLib()
+        {
+            
+        }
+
+        private double GetErrorLInf(double[] gold, double[] sol)
+        {
+            var stride = (int)((double)gold.Length / sol.Length);
+            var nSol = new double[gold.Length];
+            var error = new double[gold.Length];
+            for (int i = 0, k = 0; i < gold.Length; i+=stride, k++)
+            {
+                nSol[i] = sol[k];
+                error[i] = Math.Abs(gold[i] - nSol[i]);
+            }
+
+//            double[] error = Utils.GetAbsError(gold, nSol);
+            return Utils.GetLInf(error);
+        }
+
+        private string GetTrashFolder()
+        {
+            return Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\" + "AO/trash";
+        }
+
+        private void PrintCsv(Dictionary<string, List<double>> table)
+        {
+            var dictionary = new Dictionary<string, string>();
+            foreach (KeyValuePair<string,List<double>> pair in table)
+            {
+                string[] strings = pair.Key.Split(new []{' '},StringSplitOptions.RemoveEmptyEntries);
+                Tuple<string, string> tuple = Tuple.Create(strings[0], strings[1]);
+                var tupleItem1 = tuple.Item1+";"+tuple.Item2;
+                foreach (var tt1 in pair.Value)
+                {
+                    tupleItem1 +=";" + tt1.ToString("0.0000000");
+                }
+                dictionary[pair.Key] = tupleItem1;
+            }
+
+            foreach (KeyValuePair<string,string> pair in dictionary)
+            {
+                Console.WriteLine(pair.Value);
+            }
         }
 
         private void PrintParamsForSeries(double r, double sigmaSq, double K, int M, double tau)
@@ -95,10 +230,16 @@ namespace PerpetualAmericanOptions
             Console.Write(" sigma_sq = " + sigmaSq);
             Console.WriteLine(" K = " + K);
         }
-
-        private static string CreateOutputFolder(double Ki, int n)
+private void PrintParamsForSeries2(double r, double sigmaSq, double K )
         {
-            var folderPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "/AO/" + Ki + "_" + "_" + n + "/";
+            Console.Write("r = " + r); 
+            Console.Write(" sigma_sq = " + sigmaSq);
+            Console.WriteLine(" K = " + K);
+        }
+
+        private static string CreateOutputFolder(double Ki, int n, string subfolder)
+        {
+            var folderPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "/AO/" + subfolder + "/" + Ki + "_" + "_" + n + "/";
             if (!Directory.Exists(folderPath))
             {
                 Directory.CreateDirectory(folderPath);

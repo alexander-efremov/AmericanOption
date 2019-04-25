@@ -18,7 +18,7 @@ namespace PerpetualAmericanOptions
 
         internal double GetL1Error(AmericanOptionCalculator cal, double[] exact, double[] calculated)
         {
-            double[] err = Utils.GetError(exact, calculated, exact.Length);
+            double[] err = Utils.GetError(exact, calculated);
             return Utils.GetL1(cal.GetH(), err);
         }
 

@@ -49,11 +49,23 @@ namespace PerpetualAmericanOptions
             }
         }
 
-        public static double[] GetError(double[] arr1, double[] arr2, int n)
+        public static double[] GetError(double[] exact, double[] num)
         {
-            var err = new double[n];
+            var err = new double[exact.Length];
 
-            for (var i = 0; i < n; ++i) err[i] = arr1[i] - arr2[i];
+            for (var i = 0; i < exact.Length; ++i) err[i] = exact[i] - num[i];
+
+            return err;
+        }
+        
+        public static double[] GetAbsError(double[] exact, double[] num)
+        {
+            var err = new double[exact.Length];
+
+            for (var i = 0; i < exact.Length; ++i)
+            {
+                err[i] = Math.Abs(exact[i] - num[i]);
+            }
 
             return err;
         }
