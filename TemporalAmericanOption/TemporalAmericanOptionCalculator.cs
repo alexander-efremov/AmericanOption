@@ -179,20 +179,20 @@ namespace PerpetualAmericanOptions
                 CheckHCorrectness(hph, tau, sph, GetR());
                 CheckHCorrectness(hmh, tau, sph, GetR());
                 var beta1 = 1d / (8d * tau) *
-                            (2d + 2d * tau * GetR() * smh / hmh) *
-                            (2d + 2d * tau * GetR() * smh / hmh);
+                            (1d + 2d * tau * GetR() * smh / hmh) *
+                            (1d + 2d * tau * GetR() * smh / hmh);
                 
                 var beta2 = 1d / (8d * tau) *
-                            (2d - 2d * tau * GetR() * smh / hmh) *
-                            (2d + 2d * tau * GetR() * smh / hmh)
+                            (3d - 2d * tau * GetR() * smh / hmh) *
+                            (1d + 2d * tau * GetR() * smh / hmh)
                             +
                             1d / (8d * tau) *
-                            (2d + 2d * tau * GetR() * sph / hph) *
-                            (2d - 2d * tau * GetR() * sph / hph);
+                            (3d + 2d * tau * GetR() * sph / hph) *
+                            (1d - 2d * tau * GetR() * sph / hph);
                 
                 var beta3 = 1d / (8d * tau) *
-                            (2d - 2d * tau * GetR() * sph / hph) *
-                            (2d - 2d * tau * GetR() * sph / hph);
+                            (1d - 2d * tau * GetR() * sph / hph) *
+                            (1d - 2d * tau * GetR() * sph / hph);
                 
                 var f = GetF(GetSquaredSigma(), GetR(), GetK(), i, S0, h);
                 rp[i] = ((hmh + hph) / 2d) * f +
@@ -204,14 +204,14 @@ namespace PerpetualAmericanOptions
             var sph0 = si0 + 0.5d * hph0; // s_{i+1/2}
             CheckHCorrectness(hph0, tau, sph0, GetR());
             var beta20 = 1d / (8d * tau) *
-                         (2d + 2d * tau * GetR() * sph0 / hph0) *
-                         (2d - 2d * tau * GetR() * sph0 / hph0);
+                         (3d + 2d * tau * GetR() * sph0 / hph0) *
+                         (1d - 2d * tau * GetR() * sph0 / hph0);
             var beta30 = 1d / (8d * tau) *
-                         (2d - (2d * tau * GetR() * sph0) / hph0) *
-                         (2d - (2d * tau * GetR() * sph0) / hph0);
+                         (1d - (2d * tau * GetR() * sph0) / hph0) *
+                         (1d - (2d * tau * GetR() * sph0) / hph0);
             var f0 = GetF(GetSquaredSigma(), GetR(), GetK(), 0, S0, h);
             
-            rp[0] = ((-hph0/2d) * f0) + ((GetSquaredSigma() * si0 * si0) / 2d) + hph0 * (beta20 * VK1[0] + beta30 * VK1[1]);
+            rp[0] = ((-hph0/2d) * f0) + ((GetSquaredSigma() * si0 * si0) / 2d) +  hph0 * (beta20 * VK1[0] + beta30 * VK1[1]);
             
             rp[rp.Length - 1] = 0d;
             
