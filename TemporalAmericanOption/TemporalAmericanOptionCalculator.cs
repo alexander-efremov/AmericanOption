@@ -12,30 +12,30 @@ namespace PerpetualAmericanOptions
     {
         private readonly bool _allowOutputFile;
         private readonly bool _allowOutputConsole;
-        private readonly string _outpath;
-        private readonly string _outpathStat;
-        private readonly string _outpathRp;
+        private readonly string _outputPath;
+        private readonly string _outputPathStat;
+        private readonly string _outputPathRp;
         private readonly int M;
-        public TemporalAmericanOptionCalculator(TemporalParameters parameters, bool allowOutputFile, bool allowOutputConsole, string outpath = null) : base(parameters)
+        public TemporalAmericanOptionCalculator(TemporalParameters parameters, bool allowOutputFile, bool allowOutputConsole, string outputPath = null) : base(parameters)
         {
             _allowOutputFile = allowOutputFile;
             _allowOutputConsole = allowOutputConsole;
-            _outpath = outpath;
+            _outputPath = outputPath;
             M = parameters.M;
-            if (string.IsNullOrEmpty(outpath))
+            if (string.IsNullOrEmpty(outputPath))
             {
-                outpath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\AO\\";
+                outputPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\AO\\";
             }
 
-            _outpathStat = Path.Combine(outpath, "stat");
-            if (!Directory.Exists(_outpathStat))
+            _outputPathStat = Path.Combine(outputPath, "stat");
+            if (!Directory.Exists(_outputPathStat))
             {
-                Directory.CreateDirectory(_outpathStat);
+                Directory.CreateDirectory(_outputPathStat);
             }
-            _outpathRp = Path.Combine(outpath, "rp");
-            if (!Directory.Exists(_outpathRp))
+            _outputPathRp = Path.Combine(outputPath, "rp");
+            if (!Directory.Exists(_outputPathRp))
             {
-                Directory.CreateDirectory(_outpathRp);
+                Directory.CreateDirectory(_outputPathRp);
             }
         }
 
@@ -85,11 +85,11 @@ namespace PerpetualAmericanOptions
 
             if (_allowOutputFile)
             {
-                if (File.Exists(Path.Combine(_outpathStat, "stat.txt")))
+                if (File.Exists(Path.Combine(_outputPathStat, "stat.txt")))
                 {
-                    File.Delete(Path.Combine(_outpathStat, "stat.txt"));
+                    File.Delete(Path.Combine(_outputPathStat, "stat.txt"));
                 }
-                tecplotPrinter.PrintXY(_outpath + "V" + GetM(), GetTau()*GetM(), GetH(), Vk1,   St[St.Length - 1]);
+                tecplotPrinter.PrintXY(_outputPath + "V" + GetM(), GetTau()*GetM(), GetH(), Vk1,   St[St.Length - 1]);
             }
             
             for (int k = GetM() - 2; k >= 0; --k)
@@ -120,13 +120,13 @@ namespace PerpetualAmericanOptions
                     S0New = GetK() - Vk[0];
                     if (_allowOutputFile)
                     {
-                        tecplotPrinter.PrintXY(Path.Combine(_outpathRp , "temporal-rp"), 0d, GetH(), rp, S0New);
+                        tecplotPrinter.PrintXY(Path.Combine(_outputPathRp , "temporal-rp"), 0d, GetH(), rp, S0New);
                     }
 //                    printer.PrintThomasArrays(b_t, c_t, d_t);
                     if (_allowOutputFile)
                     {
                         using (var streamWriter =
-                            File.AppendText(Path.Combine(_outpathStat, "stat.txt")))
+                            File.AppendText(Path.Combine(_outputPathStat, "stat.txt")))
                         {
                             streamWriter.WriteLine(
                                 new string(' ', 2) + " Time step = {0} Iteration = " + iter +
@@ -153,7 +153,7 @@ namespace PerpetualAmericanOptions
 
                 if (_allowOutputFile)
                 {
-                    tecplotPrinter.PrintXY(Path.Combine(_outpath, "V" + ts), GetTau()*ts, GetH(), Vk, S0New);
+                    tecplotPrinter.PrintXY(Path.Combine(_outputPath, "V" + ts), GetTau()*ts, GetH(), Vk, S0New);
                 }
 
                 if (_allowOutputConsole)
@@ -163,34 +163,6 @@ namespace PerpetualAmericanOptions
             }
 
             return St;
-        }
-
-        private void PrintXY(string filename, double h, double[] data, double start, int tl)
-        {
-            var name = string.Format("{0}_t={1}.dat", filename, tl);
-            using (var writer = new StreamWriter(name, false))
-            {
-                writer.WriteLine("TITLE = \"V(S): from M to 1\"");
-               
-                writer.WriteLine("VARIABLES = S V");
-                writer.WriteLine("DATASETAUXDATA N=\"{0}\"", GetN());
-                writer.WriteLine("DATASETAUXDATA M=\"{0}\"", GetM());
-                writer.WriteLine("DATASETAUXDATA tau=\"{0}\"", GetTau());
-                writer.WriteLine("DATASETAUXDATA K=\"{0}\"", GetK());
-                writer.WriteLine("DATASETAUXDATA r=\"{0}\"", GetR());
-                writer.WriteLine("DATASETAUXDATA sigma_sq=\"{0}\"", GetSquaredSigma());
-                writer.WriteLine("DATASETAUXDATA s0_eps=\"{0}\"", GetS0Eps());
-                writer.WriteLine("DATASETAUXDATA tl=\"{0}\"", tl);
-                writer.WriteLine("ZONE T='SubZone'");
-                writer.WriteLine("I={0} K={1} ZONETYPE=Ordered", data.Length, 1);
-                writer.WriteLine("DATAPACKING=POINT");
-                writer.WriteLine("DT=(DOUBLE DOUBLE)");
-                
-                for (var i = 0; i < data.Length; i++)
-                {
-                    writer.WriteLine("{0:e8} {1:e8}", start + i * h, data[i]);
-                }
-            }
         }
 
         private double[] CalculateRightPart(double S0, double[] VK1, double h, double tau)
@@ -248,20 +220,20 @@ namespace PerpetualAmericanOptions
 
         private double GetF(double sigma_sq, double r, double K, int i, double S0, double h)
         {
-            return 0;
-//            var si = S0 + i * h;
-//            var p1 = sigma_sq / (2d * r);
-//
-//            var arg = K / (1 + sigma_sq / (2d * r));
-//            var pow = (2d * r + sigma_sq) / sigma_sq;
-//            var p2 = Math.Pow(arg, pow);
-//
-//            var arg2 = si;
-//            var pow2 = -2d * r / sigma_sq;
-//            var p3 = Math.Pow(arg2, pow2);
-//
-//            var v = p1 * p2 * p3;
-//            return v;
+//            return 0;
+            var si = S0 + i * h;
+            var p1 = sigma_sq / (2d * r);
+
+            var arg = K / (1 + sigma_sq / (2d * r));
+            var pow = (2d * r + sigma_sq) / sigma_sq;
+            var p2 = Math.Pow(arg, pow);
+
+            var arg2 = si;
+            var pow2 = -2d * r / sigma_sq;
+            var p3 = Math.Pow(arg2, pow2);
+
+            var v = p1 * p2 * p3;
+            return v;
         }
 
         /**
@@ -272,7 +244,9 @@ namespace PerpetualAmericanOptions
          * f - правая часть (столбец)
          * x - решение, массив x будет содержать ответ
          */
+
         // pass n = n + 1!
+
         private double[] GetB(int n, double S0, double h, double sigmaSq, double tau)
         {
             var b = new double[n];
@@ -293,6 +267,8 @@ namespace PerpetualAmericanOptions
 
             return b;
         }
+
+       
 
         // главная диагональ матрицы A (нумеруется: [0;n-1])
         // pass n = n + 1!
@@ -362,6 +338,34 @@ namespace PerpetualAmericanOptions
                // throw new ArgumentOutOfRangeException("tau/h");
             }
         }
+        
+//        private void PrintXY(string filename, double h, double[] data, double start, int tl)
+//        {
+//            var name = string.Format("{0}_t={1}.dat", filename, tl);
+//            using (var writer = new StreamWriter(name, false))
+//            {
+//                writer.WriteLine("TITLE = \"V(S): from M to 1\"");
+//               
+//                writer.WriteLine("VARIABLES = S V");
+//                writer.WriteLine("DATASETAUXDATA N=\"{0}\"", GetN());
+//                writer.WriteLine("DATASETAUXDATA M=\"{0}\"", GetM());
+//                writer.WriteLine("DATASETAUXDATA tau=\"{0}\"", GetTau());
+//                writer.WriteLine("DATASETAUXDATA K=\"{0}\"", GetK());
+//                writer.WriteLine("DATASETAUXDATA r=\"{0}\"", GetR());
+//                writer.WriteLine("DATASETAUXDATA sigma_sq=\"{0}\"", GetSquaredSigma());
+//                writer.WriteLine("DATASETAUXDATA s0_eps=\"{0}\"", GetS0Eps());
+//                writer.WriteLine("DATASETAUXDATA tl=\"{0}\"", tl);
+//                writer.WriteLine("ZONE T='SubZone'");
+//                writer.WriteLine("I={0} K={1} ZONETYPE=Ordered", data.Length, 1);
+//                writer.WriteLine("DATAPACKING=POINT");
+//                writer.WriteLine("DT=(DOUBLE DOUBLE)");
+//                
+//                for (var i = 0; i < data.Length; i++)
+//                {
+//                    writer.WriteLine("{0:e8} {1:e8}", start + i * h, data[i]);
+//                }
+//            }
+//        }
 
 //        public double[] GetExactSolution(double t)
 //        {

@@ -1,0 +1,373 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AnalysisUIOptions">
+    <option name="SCOPE_TYPE" value="4" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="5abf8b1e-3647-4d65-af1e-be0f487d2e42" name="Default Changelist" comment="added betas as array" />
+    <list id="cc147183-7a86-40ff-b0e2-54239098393f" name="bins" comment="bins" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="my_betas" />
+      </map>
+    </option>
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/PerpetualAmericanOptions/PerpetualParameters.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/CoreLib/TecplotPrinterSpecial.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/UnitTests/UnitTestBase.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/CoreLib/ThomasArrayPrinter.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/TemporalAmericanOption/TemporalAmericanOptionCalculator.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/CoreLib/TecplotPrinter.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/UnitTests/TemporalAmericanOptionTests.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/CoreLib/ThomasAlgorithmCalculator.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/CoreLib/AmericanOptionCalculator.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/CoreLib/Utils.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/CoreLib/Parameters.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/AppData/Local/Symbols/src/nunit/nunit/4530d6dba175fae6ff8f8ade6c07fd05e6c1c7c5/src/NUnitFramework/framework/Internal/Reflect.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/PerpetualAmericanOptions/packages.config" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/PerpetualAmericanOptions/PerpetualAmericanOptionCalculator.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/PerpetualAmericanOptions/Properties/AssemblyInfo.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$USER_HOME$/AppData/Local/Symbols/src/nunit/nunit/4530d6dba175fae6ff8f8ade6c07fd05e6c1c7c5/src/NUnitFramework/framework/Assert.Comparisons.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/TemporalAmericanOption/TemporalParameters.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/PerpetualAmericanOptions/JacobiCalculator.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/UnitTests/PerpetualAmericanOptionTests.cs" root0="FORCE_HIGHLIGHTING" />
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/PerpetualAmericanOptions/Class1.cs" />
+        <option value="$PROJECT_DIR$/PerpetualAmericanOptions/PerpetualAmericanOptions.cs" />
+        <option value="$PROJECT_DIR$/PerpetualAmericanOptions/JacobyCalculator.cs" />
+        <option value="$PROJECT_DIR$/PerpetualAmericanOptions/JakobyCalculator.cs" />
+        <option value="$PROJECT_DIR$/PerpetualAmericanOptions/JacobiCalculator.cs" />
+        <option value="$PROJECT_DIR$/PerpetualAmericanOptions/Paramters.cs" />
+        <option value="$PROJECT_DIR$/PerpetualAmericanOptions/UnitTestBase.cs" />
+        <option value="$PROJECT_DIR$/PerpetualAmericanOptions/Utils.cs" />
+        <option value="$PROJECT_DIR$/PerpetualAmericanOptions/ThomasAlgorithmCalculator.cs" />
+        <option value="$PROJECT_DIR$/Utils/Class1.cs" />
+        <option value="$PROJECT_DIR$/TemporalAmericanOption/Class1.cs" />
+        <option value="$PROJECT_DIR$/Utils/Utils.cs" />
+        <option value="$PROJECT_DIR$/CoreLib/Class1.cs" />
+        <option value="$PROJECT_DIR$/UnitTests/Class1.cs" />
+        <option value="$PROJECT_DIR$/PerpetualAmericanOptions/ThomasArrayPrinter.cs" />
+        <option value="$PROJECT_DIR$/PerpetualAmericanOptions/TecplotPrinter.cs" />
+        <option value="$PROJECT_DIR$/PerpetualAmericanOptions/PerpetualAmericanOptionTests.cs" />
+        <option value="$PROJECT_DIR$/PerpetualAmericanOptions/TecplotPrinterSpecial.cs" />
+        <option value="$PROJECT_DIR$/PerpetualAmericanOptions/Parameters.cs" />
+        <option value="$PROJECT_DIR$/CoreLib/ThomasArrayPrinter.cs" />
+        <option value="$PROJECT_DIR$/CoreLib/ThomasAlgorithmCalculator.cs" />
+        <option value="$PROJECT_DIR$/CoreLib/TecplotPrinter.cs" />
+        <option value="$PROJECT_DIR$/CoreLib/Parameters.cs" />
+        <option value="$PROJECT_DIR$/CoreLib/AmericanOptionCalculator.cs" />
+        <option value="$PROJECT_DIR$/PerpetualAmericanOptions/PerpetualParameters.cs" />
+        <option value="$PROJECT_DIR$/TemporalAmericanOption/TemporalParameters.cs" />
+        <option value="$PROJECT_DIR$/UnitTests/TemporalAmericanOptionTests.cs" />
+        <option value="$PROJECT_DIR$/UnitTests/UnitTestBase.cs" />
+        <option value="$PROJECT_DIR$/UnitTests/PerpetualAmericanOptionTests.cs" />
+        <option value="$PROJECT_DIR$/PerpetualAmericanOptions/PerpetualAmericanOptionCalculator.cs" />
+        <option value="$PROJECT_DIR$/CoreLib/TecplotPrinterSpecial.cs" />
+        <option value="$PROJECT_DIR$/CoreLib/Utils.cs" />
+        <option value="$PROJECT_DIR$/TemporalAmericanOption/TemporalAmericanOptionCalculator.cs" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectId" id="1OHMMWRLBFrJZKjAzfy5vu3lMbf" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="Rider.DefaultBreakpoints.AreToggled" value="true" />
+    <property name="Rider.ProjectViewActivator.IsNotFirstRun" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="TWShift.4" value="true" />
+    <property name="settings.editor.selected.configurable" value="RiderUnitTestingPageId" />
+  </component>
+  <component name="ServiceViewManager">
+    <option name="viewStates">
+      <list>
+        <serviceView>
+          <treeState>
+            <expand />
+            <select />
+          </treeState>
+        </serviceView>
+      </list>
+    </option>
+  </component>
+  <component name="UnitTestsCoverage.Settings">
+    <option name="coveragePercentColumnWidth" value="150" />
+    <option name="sortOrder" value="DESCENDING" />
+    <option name="sortedColumn" value="1" />
+    <option name="symbolColumnWidth" value="311" />
+    <coverage-tree-state>
+      <expand>
+        <path>
+          <item name="rootNode" type="c53c71d1:RiderDotCoverCoverageTreeModel$RootNode" />
+          <item name="1" type="8b8fad3a:RiderDotCoverCoverageTreeNode" />
+        </path>
+      </expand>
+      <select />
+    </coverage-tree-state>
+  </component>
+  <component name="Vcs.Log.History.Properties">
+    <option name="COLUMN_ORDER">
+      <list>
+        <option value="0" />
+        <option value="2" />
+        <option value="3" />
+        <option value="1" />
+      </list>
+    </option>
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="COLUMN_ORDER" />
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="LOCAL_CHANGES_DETAILS_PREVIEW_SHOWN" value="false" />
+    <MESSAGE value="TEMP" />
+    <MESSAGE value="before remove of my assertions" />
+    <MESSAGE value="my assertions removed" />
+    <MESSAGE value="almost done by fem" />
+    <MESSAGE value="before remove tau members" />
+    <MESSAGE value="before remove all comments" />
+    <MESSAGE value="pause 13/03/2019" />
+    <MESSAGE value="pause 14/03/2019" />
+    <MESSAGE value="working AV(K) = BV(K+1)" />
+    <MESSAGE value="Migrated to new project structure.&#10;Added perpetual and temporal calculators." />
+    <MESSAGE value="tmp" />
+    <MESSAGE value="working dynamical" />
+    <MESSAGE value="before beta changes" />
+    <MESSAGE value="after beta changes" />
+    <MESSAGE value="added gitignore" />
+    <MESSAGE value="before beta rewriting from 3 to 4" />
+    <MESSAGE value="wrong betas by me" />
+    <MESSAGE value="reverted betas back" />
+    <MESSAGE value="worked version" />
+    <MESSAGE value="added F and added comparison with exact solution" />
+    <MESSAGE value="added betas as array" />
+    <option name="LAST_COMMIT_MESSAGE" value="added betas as array" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="92" y="92" width="1736" height="856" key="DiffContextDialog" timestamp="1577270371767">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="92" y="92" width="1736" height="856" key="DiffContextDialog/0.0.1920.1040/1920.-1080.3840.2160@0.0.1920.1040" timestamp="1577270371767" />
+    <state x="755" y="231" key="RollbackChangesDialog" timestamp="1577270327817">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="755" y="231" key="RollbackChangesDialog/0.0.1920.1040/1920.-1080.3840.2160@0.0.1920.1040" timestamp="1577270327817" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <breakpoint enabled="true" suspend="NONE" type="DotNet Exception Breakpoints">
+          <properties exception="System.Threading.ThreadAbortException" displayValue="System.Threading.ThreadAbortException" />
+          <option name="timeStamp" value="1" />
+        </breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/CoreLib/Utils.cs</url>
+          <line>123</line>
+          <properties documentPath="$PROJECT_DIR$/CoreLib/Utils.cs" initialLine="91">
+            <startOffsets>
+              <option value="3523" />
+            </startOffsets>
+            <endOffsets>
+              <option value="3544" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="41" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/UnitTests/TemporalAmericanOptionTests.cs</url>
+          <line>215</line>
+          <properties documentPath="$PROJECT_DIR$/UnitTests/TemporalAmericanOptionTests.cs" initialLine="169">
+            <startOffsets>
+              <option value="8403" />
+            </startOffsets>
+            <endOffsets>
+              <option value="8450" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="45" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/UnitTests/TemporalAmericanOptionTests.cs</url>
+          <line>216</line>
+          <properties documentPath="$PROJECT_DIR$/UnitTests/TemporalAmericanOptionTests.cs" initialLine="170">
+            <startOffsets>
+              <option value="8463" />
+            </startOffsets>
+            <endOffsets>
+              <option value="8491" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="47" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/TemporalAmericanOption/TemporalAmericanOptionCalculator.cs</url>
+          <line>458</line>
+          <properties documentPath="$PROJECT_DIR$/TemporalAmericanOption/TemporalAmericanOptionCalculator.cs" initialLine="456">
+            <startOffsets>
+              <option value="16886" />
+            </startOffsets>
+            <endOffsets>
+              <option value="16932" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="75" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+    <watches-manager>
+      <configuration name="RiderUnitTests">
+        <watch expression="GetM() - 1 - tl" />
+        <watch expression="4d * tau * sigmaSq * si * si" />
+        <watch expression="hmh * hmh" />
+      </configuration>
+    </watches-manager>
+  </component>
+  <component name="debuggerHistoryManager">
+    <expressions id="breakpointCondition">
+      <expression>
+        <expression-string>i==1</expression-string>
+        <language-id>C#</language-id>
+        <custom-info>RiderImportsList:</custom-info>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>k == 9 || k == 8</expression-string>
+        <language-id>C#</language-id>
+        <custom-info>RiderImportsList:</custom-info>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>iter == 712</expression-string>
+        <language-id>C#</language-id>
+        <custom-info>RiderImportsList:</custom-info>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>k==8</expression-string>
+        <language-id>C#</language-id>
+        <custom-info>RiderImportsList:</custom-info>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>i==99</expression-string>
+        <language-id>C#</language-id>
+        <custom-info>RiderImportsList:</custom-info>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>i==100</expression-string>
+        <language-id>C#</language-id>
+        <custom-info>RiderImportsList:</custom-info>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>i == 100</expression-string>
+        <language-id>C#</language-id>
+        <custom-info>RiderImportsList:</custom-info>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+    </expressions>
+    <expressions id="watch">
+      <expression>
+        <expression-string>GetT()</expression-string>
+        <language-id>C#</language-id>
+        <custom-info>RiderImportsList:</custom-info>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>h</expression-string>
+        <language-id>C#</language-id>
+        <custom-info>RiderImportsList:</custom-info>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>4d * tau * sigma_sq * si</expression-string>
+        <language-id>C#</language-id>
+        <custom-info>RiderImportsList:</custom-info>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+    </expressions>
+    <expressions id="evaluateExpression">
+      <expression>
+        <expression-string>St.Length - (GetM() - k)</expression-string>
+        <language-id>C#</language-id>
+        <custom-info>RiderImportsList:</custom-info>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>GetH()</expression-string>
+        <language-id>C#</language-id>
+        <custom-info>RiderImportsList:</custom-info>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>GetK()</expression-string>
+        <language-id>C#</language-id>
+        <custom-info>RiderImportsList:</custom-info>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>GetK() -</expression-string>
+        <language-id>C#</language-id>
+        <custom-info>RiderImportsList:</custom-info>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>GetK() - Vk[0]</expression-string>
+        <language-id>C#</language-id>
+        <custom-info>RiderImportsList:</custom-info>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>VK[0]</expression-string>
+        <language-id>C#</language-id>
+        <custom-info>RiderImportsList:</custom-info>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>k</expression-string>
+        <language-id>C#</language-id>
+        <custom-info>RiderImportsList:</custom-info>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>Math.Abs(S0New - S0Old)</expression-string>
+        <language-id>C#</language-id>
+        <custom-info>RiderImportsList:</custom-info>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+      <expression>
+        <expression-string>Math.Abs(GetExactS0() - S0) &gt; GetS0Eps() || iter &lt; 1000</expression-string>
+        <language-id>C#</language-id>
+        <custom-info>RiderImportsList:</custom-info>
+        <evaluation-mode>EXPRESSION</evaluation-mode>
+      </expression>
+    </expressions>
+  </component>
+</project>
