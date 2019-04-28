@@ -4,13 +4,383 @@
     <option name="SCOPE_TYPE" value="4" />
   </component>
   <component name="ChangeListManager">
+<<<<<<< HEAD
     <list default="true" id="5abf8b1e-3647-4d65-af1e-be0f487d2e42" name="Default Changelist" comment="added betas as array" />
     <list id="cc147183-7a86-40ff-b0e2-54239098393f" name="bins" comment="bins" />
+=======
+    <list default="true" id="5abf8b1e-3647-4d65-af1e-be0f487d2e42" name="Default Changelist" comment="before beta rewriting from 3 to 4">
+      <change beforePath="$PROJECT_DIR$/TemporalAmericanOption/TemporalAmericanOptionCalculator.cs" beforeDir="false" afterPath="$PROJECT_DIR$/TemporalAmericanOption/TemporalAmericanOptionCalculator.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UnitTests/TemporalAmericanOptionTests.cs" beforeDir="false" afterPath="$PROJECT_DIR$/UnitTests/TemporalAmericanOptionTests.cs" afterDir="false" />
+    </list>
+    <list id="cc147183-7a86-40ff-b0e2-54239098393f" name="bins" comment="bins">
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.AmericanOption/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.AmericanOption/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CoreLib/bin/Release/CoreLib.dll" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CoreLib/bin/Release/CoreLib.pdb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CoreLib/obj/Release/CoreLib.csproj.CoreCompileInputs.cache" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CoreLib/obj/Release/CoreLib.csproj.FileListAbsolute.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CoreLib/obj/Release/CoreLib.csproj.FileListAbsolute.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CoreLib/obj/Release/CoreLib.csprojAssemblyReference.cache" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CoreLib/obj/Release/CoreLib.dll" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/CoreLib/obj/Release/CoreLib.pdb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/PerpetualAmericanOptions/bin/Release/CoreLib.dll" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/PerpetualAmericanOptions/bin/Release/CoreLib.pdb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/PerpetualAmericanOptions/bin/Release/PerpetualAmericanOptions.dll" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/PerpetualAmericanOptions/bin/Release/PerpetualAmericanOptions.pdb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/PerpetualAmericanOptions/obj/Release/PerpetualAmericanOptions.csproj.CopyComplete" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/PerpetualAmericanOptions/obj/Release/PerpetualAmericanOptions.csproj.CoreCompileInputs.cache" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/PerpetualAmericanOptions/obj/Release/PerpetualAmericanOptions.csproj.FileListAbsolute.txt" beforeDir="false" afterPath="$PROJECT_DIR$/PerpetualAmericanOptions/obj/Release/PerpetualAmericanOptions.csproj.FileListAbsolute.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/PerpetualAmericanOptions/obj/Release/PerpetualAmericanOptions.csprojAssemblyReference.cache" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/PerpetualAmericanOptions/obj/Release/PerpetualAmericanOptions.dll" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/PerpetualAmericanOptions/obj/Release/PerpetualAmericanOptions.pdb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TemporalAmericanOption/bin/Release/CoreLib.dll" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TemporalAmericanOption/bin/Release/CoreLib.pdb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TemporalAmericanOption/bin/Release/TemporalAmericanOption.dll" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TemporalAmericanOption/bin/Release/TemporalAmericanOption.pdb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TemporalAmericanOption/obj/Release/TemporalAmericanOption.csproj.CopyComplete" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TemporalAmericanOption/obj/Release/TemporalAmericanOption.csproj.CoreCompileInputs.cache" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TemporalAmericanOption/obj/Release/TemporalAmericanOption.csproj.FileListAbsolute.txt" beforeDir="false" afterPath="$PROJECT_DIR$/TemporalAmericanOption/obj/Release/TemporalAmericanOption.csproj.FileListAbsolute.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TemporalAmericanOption/obj/Release/TemporalAmericanOption.csprojAssemblyReference.cache" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TemporalAmericanOption/obj/Release/TemporalAmericanOption.dll" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TemporalAmericanOption/obj/Release/TemporalAmericanOption.pdb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/UnitTests/bin/Release/CoreLib.dll" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/UnitTests/bin/Release/CoreLib.pdb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/UnitTests/bin/Release/PerpetualAmericanOptions.dll" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/UnitTests/bin/Release/PerpetualAmericanOptions.pdb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/UnitTests/bin/Release/TemporalAmericanOption.dll" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/UnitTests/bin/Release/TemporalAmericanOption.pdb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/UnitTests/bin/Release/UnitTests.dll" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/UnitTests/bin/Release/UnitTests.pdb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/UnitTests/bin/Release/nunit.framework.dll" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/UnitTests/bin/Release/nunit.framework.pdb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/UnitTests/bin/Release/nunit.framework.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/UnitTests/obj/Release/UnitTests.csproj.CopyComplete" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/UnitTests/obj/Release/UnitTests.csproj.CoreCompileInputs.cache" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/UnitTests/obj/Release/UnitTests.csproj.FileListAbsolute.txt" beforeDir="false" afterPath="$PROJECT_DIR$/UnitTests/obj/Release/UnitTests.csproj.FileListAbsolute.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UnitTests/obj/Release/UnitTests.csprojAssemblyReference.cache" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/UnitTests/obj/Release/UnitTests.dll" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/UnitTests/obj/Release/UnitTests.pdb" beforeDir="false" />
+    </list>
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+>>>>>>> f2b8d56... before beta rewriting from 3 to 4
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+<<<<<<< HEAD
+=======
+  <component name="FileEditorManager">
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/TemporalAmericanOption/TemporalParameters.cs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="195">
+              <caret line="13" column="23" selection-start-line="13" selection-start-column="23" selection-end-line="13" selection-end-column="23" />
+              <folding>
+                <marker date="1555838281610" expanded="true" signature="48:418" ph="{...}" />
+                <marker date="1555838281610" expanded="true" signature="99:416" ph="{...}" />
+                <marker date="1555838281610" expanded="true" signature="302:346" ph="{...}" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/UnitTests/TemporalAmericanOptionTests.cs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="291">
+              <caret line="20" column="43" selection-start-line="20" selection-start-column="43" selection-end-line="20" selection-end-column="43" />
+              <folding>
+                <marker date="1556470367208" expanded="true" signature="6:143" ph="..." />
+                <marker date="1556470367208" expanded="true" signature="179:12457" ph="{...}" />
+                <marker date="1556470367208" expanded="true" signature="241:12455" ph="{...}" />
+                <marker date="1556470367208" expanded="true" signature="307:1002" ph="{...}" />
+                <marker date="1556470367208" expanded="true" signature="1051:3263" ph="{...}" />
+                <marker date="1556470367208" expanded="true" signature="1774:3146" ph="{...}" />
+                <marker date="1556470367208" expanded="true" signature="1870:3132" ph="{...}" />
+                <marker date="1556470367208" expanded="true" signature="2394:3114" ph="{...}" />
+                <marker date="1556470367208" expanded="true" signature="2841:2944" ph="{...}" />
+                <marker date="1556470367208" expanded="true" signature="2973:3092" ph="{...}" />
+                <marker date="1556470367208" expanded="true" signature="3331:6571" ph="{...}" />
+                <marker date="1556470367208" expanded="true" signature="4359:4469" ph="{...}" />
+                <marker date="1556470367208" expanded="true" signature="4999:5878" ph="{...}" />
+                <marker date="1556470367208" expanded="true" signature="5300:5410" ph="{...}" />
+                <marker date="1556470367208" expanded="true" signature="6077:6204" ph="{...}" />
+                <marker date="1556470367208" expanded="true" signature="6323:6461" ph="{...}" />
+                <marker date="1556470367208" expanded="true" signature="6463:6561" ph="/* PrintTable(table); ... */" />
+                <marker date="1556470367208" expanded="true" signature="6603:6636" ph="{...}" />
+                <marker date="1556470367208" expanded="true" signature="6702:7175" ph="{...}" />
+                <marker date="1556470367208" expanded="true" signature="6943:7061" ph="{...}" />
+                <marker date="1556470367208" expanded="true" signature="7216:7337" ph="{...}" />
+                <marker date="1556470367208" expanded="true" signature="7408:8183" ph="{...}" />
+                <marker date="1556470367208" expanded="true" signature="7551:8028" ph="{...}" />
+                <marker date="1556470367208" expanded="true" signature="7861:7963" ph="{...}" />
+                <marker date="1556470367208" expanded="true" signature="8098:8173" ph="{...}" />
+                <marker date="1556470367208" expanded="true" signature="8281:8521" ph="{...}" />
+                <marker date="1556470367208" expanded="true" signature="8610:8767" ph="{...}" />
+                <marker date="1556470367208" expanded="true" signature="8853:9180" ph="{...}" />
+                <marker date="1556470367208" expanded="true" signature="9055:9138" ph="{...}" />
+                <marker date="1556470367208" expanded="true" signature="9250:9789" ph="{...}" />
+                <marker date="1556470367208" expanded="true" signature="9527:9679" ph="{...}" />
+                <marker date="1556470367208" expanded="true" signature="9869:10199" ph="{...}" />
+                <marker date="1556470367208" expanded="true" signature="9919:10189" ph="{...}" />
+                <marker date="1556470367208" expanded="true" signature="10013:10136" ph="{...}" />
+                <marker date="1556470367208" expanded="true" signature="10269:10901" ph="{...}" />
+                <marker date="1556470367208" expanded="true" signature="10445:10891" ph="{...}" />
+                <marker date="1556470367208" expanded="true" signature="10953:11328" ph="{...}" />
+                <marker date="1556470367208" expanded="true" signature="11500:11603" ph="{...}" />
+                <marker date="1556470367208" expanded="true" signature="11693:12290" ph="{...}" />
+                <marker date="1556470367208" expanded="true" signature="12341:12449" ph="{...}" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/CoreLib/Utils.cs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="990">
+              <caret line="66" column="36" selection-start-line="66" selection-start-column="36" selection-end-line="66" selection-end-column="36" />
+              <folding>
+                <marker date="1556024701075" expanded="true" signature="49:5283" ph="{...}" />
+                <marker date="1556024701075" expanded="true" signature="81:5281" ph="{...}" />
+                <marker date="1556024701075" expanded="true" signature="149:364" ph="{...}" />
+                <marker date="1556024701075" expanded="true" signature="247:320" ph="{...}" />
+                <marker date="1556024701075" expanded="true" signature="522:1489" ph="{...}" />
+                <marker date="1556024701075" expanded="true" signature="563:719" ph="{...}" />
+                <marker date="1556024701075" expanded="true" signature="751:907" ph="{...}" />
+                <marker date="1556024701075" expanded="true" signature="940:1097" ph="{...}" />
+                <marker date="1556024701075" expanded="true" signature="1130:1287" ph="{...}" />
+                <marker date="1556024701075" expanded="true" signature="1321:1479" ph="{...}" />
+                <marker date="1556024701075" expanded="true" signature="1560:1733" ph="{...}" />
+                <marker date="1556024701075" expanded="true" signature="1815:2042" ph="{...}" />
+                <marker date="1556024701075" expanded="true" signature="1925:2007" ph="{...}" />
+                <marker date="1556024701075" expanded="true" signature="2103:2292" ph="{...}" />
+                <marker date="1556024701075" expanded="true" signature="2188:2256" ph="{...}" />
+                <marker date="1556024701075" expanded="true" signature="2353:2544" ph="{...}" />
+                <marker date="1556024701075" expanded="true" signature="2439:2511" ph="{...}" />
+                <marker date="1556024701075" expanded="true" signature="2620:3019" ph="{...}" />
+                <marker date="1556024701075" expanded="true" signature="2731:2984" ph="{...}" />
+                <marker date="1556024701075" expanded="true" signature="2765:2829" ph="{...}" />
+                <marker date="1556024701075" expanded="true" signature="2865:2970" ph="{...}" />
+                <marker date="1556024701075" expanded="true" signature="3112:4147" ph="{...}" />
+                <marker date="1556024701075" expanded="true" signature="3154:3631" ph="{...}" />
+                <marker date="1556024701075" expanded="true" signature="3648:4137" ph="{...}" />
+                <marker date="1556024701075" expanded="true" signature="4308:5275" ph="{...}" />
+                <marker date="1556024701075" expanded="true" signature="4349:4505" ph="{...}" />
+                <marker date="1556024701075" expanded="true" signature="4537:4693" ph="{...}" />
+                <marker date="1556024701075" expanded="true" signature="4726:4883" ph="{...}" />
+                <marker date="1556024701075" expanded="true" signature="4916:5073" ph="{...}" />
+                <marker date="1556024701075" expanded="true" signature="5107:5265" ph="{...}" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/UnitTests/UnitTestBase.cs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="270">
+              <caret line="20" column="59" selection-start-line="20" selection-start-column="59" selection-end-line="20" selection-end-column="59" />
+              <folding>
+                <marker date="1556024775161" expanded="false" signature="6:51" ph="..." />
+                <marker date="1556024775161" expanded="true" signature="87:1306" ph="{...}" />
+                <marker date="1556024775161" expanded="true" signature="128:1304" ph="{...}" />
+                <marker date="1556024775161" expanded="true" signature="275:341" ph="{...}" />
+                <marker date="1556024775161" expanded="true" signature="444:575" ph="{...}" />
+                <marker date="1556024775161" expanded="true" signature="666:743" ph="{...}" />
+                <marker date="1556024775161" expanded="true" signature="828:1298" ph="{...}" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/TemporalAmericanOption/TemporalAmericanOptionCalculator.cs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="171">
+              <caret line="73" column="16" selection-start-line="73" selection-start-column="16" selection-end-line="73" selection-end-column="16" />
+              <folding>
+                <marker date="1556470437915" expanded="false" signature="6:75" ph="..." />
+                <marker date="1556470437915" expanded="true" signature="145:14956" ph="{...}" />
+                <marker date="1556470437915" expanded="true" signature="262:14954" ph="{...}" />
+                <marker date="1556470437915" expanded="true" signature="711:1482" ph="{...}" />
+                <marker date="1556470437915" expanded="true" signature="941:1071" ph="{...}" />
+                <marker date="1556470437915" expanded="true" signature="1188:1276" ph="{...}" />
+                <marker date="1556470437915" expanded="true" signature="1386:1472" ph="{...}" />
+                <marker date="1556470437915" expanded="true" signature="1509:1551" ph="{...}" />
+                <marker date="1556470437915" expanded="true" signature="1594:2046" ph="{...}" />
+                <marker date="1556470437915" expanded="true" signature="1750:2011" ph="{...}" />
+                <marker date="1556470437915" expanded="true" signature="1834:1907" ph="{...}" />
+                <marker date="1556470437915" expanded="true" signature="1928:1997" ph="{...}" />
+                <marker date="1556470437915" expanded="true" signature="2079:6198" ph="{...}" />
+                <marker date="1556470437915" expanded="true" signature="2498:2741" ph="{...}" />
+                <marker date="1556470437915" expanded="true" signature="2776:3111" ph="{...}" />
+                <marker date="1556470437915" expanded="true" signature="2866:2978" ph="{...}" />
+                <marker date="1556470437915" expanded="true" signature="3174:6164" ph="{...}" />
+                <marker date="1556470437915" expanded="true" signature="3261:3357" ph="{...}" />
+                <marker date="1556470437915" expanded="true" signature="4228:4388" ph="{...}" />
+                <marker date="1556470437915" expanded="true" signature="4494:5091" ph="{...}" />
+                <marker date="1556470437915" expanded="true" signature="4679:5069" ph="{...}" />
+                <marker date="1556470437915" expanded="true" signature="5137:5347" ph="{...}" />
+                <marker date="1556470437915" expanded="true" signature="5719:5791" ph="{...}" />
+                <marker date="1556470437915" expanded="true" signature="5830:5979" ph="{...}" />
+                <marker date="1556470437915" expanded="true" signature="6021:6150" ph="{...}" />
+                <marker date="1556470437915" expanded="true" signature="6290:8553" ph="{...}" />
+                <marker date="1556470437915" expanded="true" signature="6407:7694" ph="{...}" />
+                <marker date="1556470437915" expanded="true" signature="8647:9086" ph="{...}" />
+                <marker date="1556470437915" expanded="true" signature="9096:9452" ph="/* n - число уравнений (строк матрицы) ... */" />
+                <marker date="1556470437915" expanded="true" signature="9567:10138" ph="{...}" />
+                <marker date="1556470437915" expanded="true" signature="9657:10042" ph="{...}" />
+                <marker date="1556470437915" expanded="true" signature="9846:9949" ph="{...}" />
+                <marker date="1556470437915" expanded="true" signature="10157:10236" ph="/* главная диагональ матрицы A (нумеруется: [0;n-1]) ... */" />
+                <marker date="1556470437915" expanded="true" signature="10333:11601" ph="{...}" />
+                <marker date="1556470437915" expanded="true" signature="10423:10982" ph="{...}" />
+                <marker date="1556470437915" expanded="true" signature="10665:10768" ph="{...}" />
+                <marker date="1556470437915" expanded="true" signature="11611:11693" ph="/* диагональ, лежащая над главной (нумеруется: [0;n-2]) ... */" />
+                <marker date="1556470437915" expanded="true" signature="11780:12413" ph="{...}" />
+                <marker date="1556470437915" expanded="true" signature="11870:12090" ph="{...}" />
+                <marker date="1556470437915" expanded="true" signature="12512:12673" ph="{...}" />
+                <marker date="1556470437915" expanded="true" signature="12569:12663" ph="{...}" />
+                <marker date="1556470437915" expanded="true" signature="12683:14948" ph="/* private void PrintXY(string filename, double h, double[] data, double start, int tl) ... */" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/CoreLib/AmericanOptionCalculator.cs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1365">
+              <caret line="91" column="23" selection-start-line="91" selection-start-column="23" selection-end-line="91" selection-end-column="23" />
+              <folding>
+                <marker date="1555838219253" expanded="true" signature="32:2608" ph="{...}" />
+                <marker date="1555838219253" expanded="true" signature="85:2606" ph="{...}" />
+                <marker date="1555838219253" expanded="true" signature="561:607" ph="{...}" />
+                <marker date="1555838219253" expanded="true" signature="634:676" ph="{...}" />
+                <marker date="1555838219253" expanded="true" signature="704:748" ph="{...}" />
+                <marker date="1555838219253" expanded="true" signature="790:832" ph="{...}" />
+                <marker date="1555838219253" expanded="true" signature="881:923" ph="{...}" />
+                <marker date="1555838219253" expanded="true" signature="964:1012" ph="{...}" />
+                <marker date="1555838219253" expanded="true" signature="1044:1088" ph="{...}" />
+                <marker date="1555838219253" expanded="true" signature="1118:1160" ph="{...}" />
+                <marker date="1555838219253" expanded="true" signature="1190:1232" ph="{...}" />
+                <marker date="1555838219253" expanded="true" signature="1262:1304" ph="{...}" />
+                <marker date="1555838219253" expanded="true" signature="1372:1447" ph="{...}" />
+                <marker date="1555838219253" expanded="true" signature="1519:1961" ph="{...}" />
+                <marker date="1555838219253" expanded="true" signature="2012:2295" ph="{...}" />
+                <marker date="1555838219253" expanded="true" signature="2047:2126" ph="{...}" />
+                <marker date="1555838219253" expanded="true" signature="2207:2285" ph="{...}" />
+                <marker date="1555838219253" expanded="true" signature="2335:2600" ph="{...}" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/UnitTests/PerpetualAmericanOptionTests.cs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="135">
+              <caret line="11" column="87" selection-start-line="11" selection-start-column="87" selection-end-line="11" selection-end-column="87" />
+              <folding>
+                <marker date="1555838281596" expanded="false" signature="6:51" ph="..." />
+                <marker date="1555838281596" expanded="true" signature="87:3863" ph="{...}" />
+                <marker date="1555838281596" expanded="true" signature="168:3861" ph="{...}" />
+                <marker date="1555838281596" expanded="true" signature="224:332" ph="{...}" />
+                <marker date="1555838281596" expanded="true" signature="385:702" ph="{...}" />
+                <marker date="1555838281596" expanded="true" signature="764:1840" ph="{...}" />
+                <marker date="1555838281596" expanded="true" signature="1919:2508" ph="{...}" />
+                <marker date="1555838281596" expanded="true" signature="2593:3250" ph="{...}" />
+                <marker date="1555838281596" expanded="true" signature="3319:3855" ph="{...}" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/PerpetualAmericanOptions/PerpetualAmericanOptionCalculator.cs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1110">
+              <caret line="75" column="28" selection-start-line="75" selection-start-column="28" selection-end-line="75" selection-end-column="28" />
+              <folding>
+                <marker date="1555593925209" expanded="false" signature="6:28" ph="..." />
+                <marker date="1555593925209" expanded="true" signature="98:9782" ph="{...}" />
+                <marker date="1555593925209" expanded="true" signature="216:9780" ph="{...}" />
+                <marker date="1555593925209" expanded="true" signature="322:342" ph="{...}" />
+                <marker date="1555593925209" expanded="true" signature="406:3112" ph="{...}" />
+                <marker date="1555593925209" expanded="true" signature="547:685" ph="{...}" />
+                <marker date="1555593925209" expanded="true" signature="1664:3078" ph="{...}" />
+                <marker date="1555593925209" expanded="true" signature="3183:3226" ph="{...}" />
+                <marker date="1555593925209" expanded="true" signature="3317:3476" ph="{...}" />
+                <marker date="1555593925209" expanded="true" signature="3374:3466" ph="{...}" />
+                <marker date="1555593925209" expanded="true" signature="3524:5239" ph="{...}" />
+                <marker date="1555593925209" expanded="true" signature="3886:4727" ph="{...}" />
+                <marker date="1555593925209" expanded="true" signature="5283:5678" ph="{...}" />
+                <marker date="1555593925209" expanded="true" signature="5385:5524" ph="{...}" />
+                <marker date="1555593925209" expanded="true" signature="5538:5615" ph="/* V(S) does not touch 0 ... */" />
+                <marker date="1555593925209" expanded="true" signature="5731:6008" ph="{...}" />
+                <marker date="1555593925209" expanded="true" signature="5833:5973" ph="{...}" />
+                <marker date="1555593925209" expanded="true" signature="6044:6134" ph="{...}" />
+                <marker date="1555593925209" expanded="true" signature="6168:6425" ph="{...}" />
+                <marker date="1555593925209" expanded="true" signature="6270:6390" ph="{...}" />
+                <marker date="1555593925209" expanded="true" signature="6509:6891" ph="{...}" />
+                <marker date="1555593925209" expanded="true" signature="6901:7257" ph="/* n - число уравнений (строк матрицы) ... */" />
+                <marker date="1555593925209" expanded="true" signature="7378:7876" ph="{...}" />
+                <marker date="1555593925209" expanded="true" signature="7468:7780" ph="{...}" />
+                <marker date="1555593925209" expanded="true" signature="7886:7965" ph="/* главная диагональ матрицы A (нумеруется: [0;n-1]) ... */" />
+                <marker date="1555593925209" expanded="true" signature="8069:8984" ph="{...}" />
+                <marker date="1555593925209" expanded="true" signature="8159:8658" ph="{...}" />
+                <marker date="1555593925209" expanded="true" signature="8994:9076" ph="/* диагональ, лежащая над главной (нумеруется: [0;n-2]) ... */" />
+                <marker date="1555593925209" expanded="true" signature="9170:9774" ph="{...}" />
+                <marker date="1555593925209" expanded="true" signature="9260:9462" ph="{...}" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>sin</find>
+      <find>(double[]) malloc(</find>
+      <find>double *</find>
+      <find>printf</find>
+      <find>fConsole</find>
+      <find>use_betas,</find>
+      <find>print</find>
+      <find>V_PR</find>
+      <find>get</find>
+      <find>a</find>
+      <find>4d</find>
+      <find>tau</find>
+      <find>getext</find>
+      <find>GetTau()</find>
+      <find>geth</find>
+      <find>auto</find>
+      <find>exact</find>
+      <find>des</find>
+      <find>s</find>
+      <find>sta</find>
+      <find>5</find>
+      <find>sigma</find>
+      <find>throw new ArgumentException</find>
+      <find>americanOption</find>
+      <find>&gt; 4d</find>
+      <find>V</find>
+    </findStrings>
+    <replaceStrings>
+      <replace>Math.Sin</replace>
+      <replace>Assert.True</replace>
+      <replace>new double [</replace>
+      <replace>Console.WriteLine</replace>
+      <replace>double[]</replace>
+      <replace>Console.WriteLine(</replace>
+      <replace>writer</replace>
+      <replace>tau</replace>
+      <replace>var</replace>
+    </replaceStrings>
+  </component>
+>>>>>>> f2b8d56... before beta rewriting from 3 to 4
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
     <option name="RECENT_BRANCH_BY_REPOSITORY">
@@ -81,10 +451,24 @@
   </component>
   <component name="ProjectId" id="1OHMMWRLBFrJZKjAzfy5vu3lMbf" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+<<<<<<< HEAD
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showExcludedFiles" value="true" />
     <option name="showLibraryContents" value="true" />
+=======
+  <component name="ProjectView">
+    <navigator currentView="SolutionExplorer" proportions="" version="1">
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="SolutionExplorer">
+        <option name="show-all-files" value="false" />
+      </pane>
+      <pane id="AssemblyExplorer" />
+      <pane id="FileSystemExplorer" />
+    </panes>
+>>>>>>> f2b8d56... before beta rewriting from 3 to 4
   </component>
   <component name="PropertiesComponent">
     <property name="Rider.DefaultBreakpoints.AreToggled" value="true" />
@@ -106,6 +490,51 @@
       </list>
     </option>
   </component>
+<<<<<<< HEAD
+=======
+  <component name="TodoView" selected-index="4">
+    <todo-panel id="selected-file">
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+    <todo-panel id="all">
+      <are-packages-shown value="true" />
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
+    <editor active="true" />
+    <layout>
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.21268657" />
+      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
+      <window_info id="Image Layers" order="2" />
+      <window_info id="Capture Tool" order="3" />
+      <window_info id="Favorites" order="4" side_tool="true" />
+      <window_info anchor="bottom" id="Message" order="0" />
+      <window_info anchor="bottom" id="Find" order="1" weight="0.32799146" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.32936078" />
+      <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.49946696" weight="0.31876332" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="bottom" id="TODO" order="6" weight="0.32936078" />
+      <window_info anchor="bottom" id="NuGet" order="7" sideWeight="0.49946696" weight="0.3283582" />
+      <window_info anchor="bottom" id="Performance Profiler" order="8" weight="0.3283582" />
+      <window_info anchor="bottom" id="Docker" order="9" show_stripe_button="false" />
+      <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.50053304" side_tool="true" visible="true" weight="0.2771855" />
+      <window_info anchor="bottom" id="Change Signature" order="11" side_tool="true" />
+      <window_info anchor="bottom" id="Unit Tests" order="12" sideWeight="0.86993605" weight="0.42217484" />
+      <window_info active="true" anchor="bottom" id="Build" order="13" sideWeight="0.49946696" visible="true" weight="0.2771855" />
+      <window_info anchor="bottom" id="Version Control" order="14" weight="0.3272921" />
+      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
+      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="right" id="Capture Analysis" order="3" />
+      <window_info anchor="right" id="Errors In Solution" order="4" />
+      <window_info anchor="right" id="Tutorials" order="5" />
+      <window_info anchor="right" id="Unit Tests Coverage" order="6" weight="0.32995737" />
+    </layout>
+  </component>
+>>>>>>> f2b8d56... before beta rewriting from 3 to 4
   <component name="UnitTestsCoverage.Settings">
     <option name="coveragePercentColumnWidth" value="150" />
     <option name="sortOrder" value="DESCENDING" />
@@ -160,6 +589,7 @@
     <MESSAGE value="working dynamical" />
     <MESSAGE value="before beta changes" />
     <MESSAGE value="after beta changes" />
+<<<<<<< HEAD
     <MESSAGE value="added gitignore" />
     <MESSAGE value="before beta rewriting from 3 to 4" />
     <MESSAGE value="wrong betas by me" />
@@ -178,6 +608,11 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="755" y="231" key="RollbackChangesDialog/0.0.1920.1040/1920.-1080.3840.2160@0.0.1920.1040" timestamp="1577270327817" />
+=======
+    <MESSAGE value="before beta rewriting from 3 to 4" />
+    <MESSAGE value="added gitignore" />
+    <option name="LAST_COMMIT_MESSAGE" value="added gitignore" />
+>>>>>>> f2b8d56... before beta rewriting from 3 to 4
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -187,6 +622,35 @@
           <option name="timeStamp" value="1" />
         </breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
+<<<<<<< HEAD
+=======
+          <url>file://$PROJECT_DIR$/PerpetualAmericanOptions/PerpetualAmericanOptionCalculator.cs</url>
+          <line>113</line>
+          <properties documentPath="$PROJECT_DIR$/PerpetualAmericanOptions/PerpetualAmericanOptionCalculator.cs" initialLine="114">
+            <startOffsets>
+              <option value="4801" />
+            </startOffsets>
+            <endOffsets>
+              <option value="4934" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="6" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/UnitTests/TemporalAmericanOptionTests.cs</url>
+          <line>25</line>
+          <properties documentPath="$PROJECT_DIR$/UnitTests/TemporalAmericanOptionTests.cs" initialLine="26">
+            <startOffsets>
+              <option value="828" />
+            </startOffsets>
+            <endOffsets>
+              <option value="958" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="36" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+>>>>>>> f2b8d56... before beta rewriting from 3 to 4
           <url>file://$PROJECT_DIR$/CoreLib/Utils.cs</url>
           <line>123</line>
           <properties documentPath="$PROJECT_DIR$/CoreLib/Utils.cs" initialLine="91">
@@ -201,6 +665,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="DotNet Breakpoints">
           <url>file://$PROJECT_DIR$/UnitTests/TemporalAmericanOptionTests.cs</url>
+<<<<<<< HEAD
           <line>215</line>
           <properties documentPath="$PROJECT_DIR$/UnitTests/TemporalAmericanOptionTests.cs" initialLine="169">
             <startOffsets>
@@ -208,6 +673,28 @@
             </startOffsets>
             <endOffsets>
               <option value="8450" />
+=======
+          <line>152</line>
+          <properties documentPath="$PROJECT_DIR$/UnitTests/TemporalAmericanOptionTests.cs" initialLine="150">
+            <startOffsets>
+              <option value="5728" />
+            </startOffsets>
+            <endOffsets>
+              <option value="5773" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="44" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/UnitTests/TemporalAmericanOptionTests.cs</url>
+          <line>194</line>
+          <properties documentPath="$PROJECT_DIR$/UnitTests/TemporalAmericanOptionTests.cs" initialLine="169">
+            <startOffsets>
+              <option value="7077" />
+            </startOffsets>
+            <endOffsets>
+              <option value="7124" />
+>>>>>>> f2b8d56... before beta rewriting from 3 to 4
             </endOffsets>
           </properties>
           <option name="timeStamp" value="45" />
@@ -230,13 +717,46 @@
           <line>458</line>
           <properties documentPath="$PROJECT_DIR$/TemporalAmericanOption/TemporalAmericanOptionCalculator.cs" initialLine="456">
             <startOffsets>
+<<<<<<< HEAD
               <option value="16886" />
             </startOffsets>
             <endOffsets>
               <option value="16932" />
+=======
+              <option value="7137" />
+            </startOffsets>
+            <endOffsets>
+              <option value="7165" />
+>>>>>>> f2b8d56... before beta rewriting from 3 to 4
             </endOffsets>
           </properties>
           <option name="timeStamp" value="75" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/TemporalAmericanOption/TemporalAmericanOptionCalculator.cs</url>
+          <line>169</line>
+          <properties documentPath="$PROJECT_DIR$/TemporalAmericanOption/TemporalAmericanOptionCalculator.cs" initialLine="169">
+            <startOffsets>
+              <option value="6313" />
+            </startOffsets>
+            <endOffsets>
+              <option value="6342" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="48" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="DotNet Breakpoints">
+          <url>file://$PROJECT_DIR$/TemporalAmericanOption/TemporalAmericanOptionCalculator.cs</url>
+          <line>206</line>
+          <properties documentPath="$PROJECT_DIR$/TemporalAmericanOption/TemporalAmericanOptionCalculator.cs" initialLine="206">
+            <startOffsets>
+              <option value="8484" />
+            </startOffsets>
+            <endOffsets>
+              <option value="8507" />
+            </endOffsets>
+          </properties>
+          <option name="timeStamp" value="49" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
@@ -370,4 +890,358 @@
       </expression>
     </expressions>
   </component>
+<<<<<<< HEAD
+=======
+  <component name="editorHistoryManager">
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/Test Output for TemporalAmericanOption.Kubuzug.txt" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/Test Output for TemporalAmericanOption.Raqexin.txt" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/Test Output for TemporalAmericanOption.Peqilal.txt" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/Test Output for TemporalAmericanOption.Riwapan.txt" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/Test Output for TemporalAmericanOption.Qyfukuv.txt" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/Test Output for TemporalAmericanOption.Ledyfak.txt" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/Test Output for TemporalAmericanOption.Tuzobor.txt" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/Test Output for TemporalAmericanOption.Wawukox.txt" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/Test Output for TemporalAmericanOption.Tukuhiq.txt" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/Test Output for TemporalAmericanOption.Wacaxop.txt" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/Test Output for TemporalAmericanOption.Kaqaqib.txt" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/Test Output for TemporalAmericanOption.Kytifap.txt" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/Test Output for TemporalAmericanOption.Gejydih.txt" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/Test Output for TemporalAmericanOption.Huruhok.txt" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/Test Output for TemporalAmericanOption.Garygif.txt" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/Test Output for TemporalAmericanOption.Quhawuq.txt" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/Test Output for TemporalAmericanOption.Qyxuvum.txt" />
+    <entry file="file://$PROJECT_DIR$/CoreLib/ThomasAlgorithmCalculator.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="765">
+          <caret line="51" column="109" selection-start-line="51" selection-start-column="109" selection-end-line="51" selection-end-column="109" />
+          <folding>
+            <marker date="1554121387785" expanded="true" signature="66:1782" ph="{...}" />
+            <marker date="1554121387785" expanded="true" signature="111:1780" ph="{...}" />
+            <marker date="1554121387785" expanded="true" signature="159:242" ph="/// ... " />
+            <marker date="1554121387785" expanded="true" signature="292:336" ph="{...}" />
+            <marker date="1554121387785" expanded="true" signature="419:1234" ph="{...}" />
+            <marker date="1554121387785" expanded="true" signature="847:1043" ph="{...}" />
+            <marker date="1554121387785" expanded="true" signature="1337:1774" ph="{...}" />
+            <marker date="1554121387785" expanded="true" signature="1400:1764" ph="{...}" />
+            <marker date="1554121387785" expanded="true" signature="1498:1750" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/Test Output for TemporalAmericanOption.Midyvir.txt" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/Test Output for TemporalAmericanOption.Qacipop.txt" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/Test Output for TemporalAmericanOption.Panybeq.txt" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/Test Output for TemporalAmericanOption.Symoduk.txt" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/Test Output for TemporalAmericanOption.Riqaxel.txt" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/Test Output for TemporalAmericanOption.Meboror.txt" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/Test Output for TemporalAmericanOption.Qoweqib.txt" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/Test Output for TemporalAmericanOption.Lerykot.txt" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/Test Output for TemporalAmericanOption.Xasibew.txt" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/Test Output for TemporalAmericanOption.Bufirog.txt" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/Test Output for TemporalAmericanOption.Vilowys.txt" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/Test Output for TemporalAmericanOption.Kuxehij.txt" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/Test Output for TemporalAmericanOption.Nemuhet.txt" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/Test Output for TemporalAmericanOption.Xanagew.txt" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/Test Output for TemporalAmericanOption.Rapeleg.txt" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/Test Output for TemporalAmericanOption.Fimudyj.txt" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/Test Output for TemporalAmericanOption.Bubytic.txt" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/Test Output for TemporalAmericanOption.Wajigaj.txt" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/Test Output for TemporalAmericanOption.Qaciwys.txt" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/Test Output for TemporalAmericanOption.Kajymap.txt" />
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/Test Output for TestSeries.Muwalux.txt" />
+    <entry file="file://$PROJECT_DIR$/CoreLib/TecplotPrinter.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="330">
+          <caret line="22" selection-start-line="22" selection-end-line="22" />
+          <folding>
+            <marker date="1554395588744" expanded="true" signature="35:2287" ph="{...}" />
+            <marker date="1554395588744" expanded="true" signature="69:2285" ph="{...}" />
+            <marker date="1554395588744" expanded="true" signature="288:412" ph="{...}" />
+            <marker date="1554395588744" expanded="true" signature="512:1235" ph="{...}" />
+            <marker date="1554395588744" expanded="true" signature="719:1225" ph="{...}" />
+            <marker date="1554395588744" expanded="true" signature="1096:1211" ph="{...}" />
+            <marker date="1554395588744" expanded="true" signature="1352:2279" ph="{...}" />
+            <marker date="1554395588744" expanded="true" signature="1559:2269" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/CoreLib/Parameters.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="300">
+          <caret line="20" column="16" selection-start-line="20" selection-start-column="16" selection-end-line="20" selection-end-column="16" />
+          <folding>
+            <marker date="1555838281602" expanded="true" signature="17:660" ph="{...}" />
+            <marker date="1555838281602" expanded="true" signature="56:658" ph="{...}" />
+            <marker date="1555838281602" expanded="true" signature="451:652" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/PerpetualAmericanOptions/PerpetualParameters.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="60">
+          <caret line="4" column="44" selection-start-line="4" selection-start-column="44" selection-end-line="4" selection-end-column="44" />
+          <folding>
+            <marker date="1555838281591" expanded="true" signature="50:315" ph="{...}" />
+            <marker date="1555838281591" expanded="true" signature="102:313" ph="{...}" />
+            <marker date="1555838281591" expanded="true" signature="287:307" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/AppData/Local/Temp/Rar$DIa1764.4479/EquityOption.cs" />
+    <entry file="file://$PROJECT_DIR$/TemporalAmericanOption/TemporalParameters.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="195">
+          <caret line="13" column="23" selection-start-line="13" selection-start-column="23" selection-end-line="13" selection-end-column="23" />
+          <folding>
+            <marker date="1555838281610" expanded="true" signature="48:418" ph="{...}" />
+            <marker date="1555838281610" expanded="true" signature="99:416" ph="{...}" />
+            <marker date="1555838281610" expanded="true" signature="302:346" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/CoreLib/Utils.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="990">
+          <caret line="66" column="36" selection-start-line="66" selection-start-column="36" selection-end-line="66" selection-end-column="36" />
+          <folding>
+            <marker date="1556024701075" expanded="true" signature="49:5283" ph="{...}" />
+            <marker date="1556024701075" expanded="true" signature="81:5281" ph="{...}" />
+            <marker date="1556024701075" expanded="true" signature="149:364" ph="{...}" />
+            <marker date="1556024701075" expanded="true" signature="247:320" ph="{...}" />
+            <marker date="1556024701075" expanded="true" signature="522:1489" ph="{...}" />
+            <marker date="1556024701075" expanded="true" signature="563:719" ph="{...}" />
+            <marker date="1556024701075" expanded="true" signature="751:907" ph="{...}" />
+            <marker date="1556024701075" expanded="true" signature="940:1097" ph="{...}" />
+            <marker date="1556024701075" expanded="true" signature="1130:1287" ph="{...}" />
+            <marker date="1556024701075" expanded="true" signature="1321:1479" ph="{...}" />
+            <marker date="1556024701075" expanded="true" signature="1560:1733" ph="{...}" />
+            <marker date="1556024701075" expanded="true" signature="1815:2042" ph="{...}" />
+            <marker date="1556024701075" expanded="true" signature="1925:2007" ph="{...}" />
+            <marker date="1556024701075" expanded="true" signature="2103:2292" ph="{...}" />
+            <marker date="1556024701075" expanded="true" signature="2188:2256" ph="{...}" />
+            <marker date="1556024701075" expanded="true" signature="2353:2544" ph="{...}" />
+            <marker date="1556024701075" expanded="true" signature="2439:2511" ph="{...}" />
+            <marker date="1556024701075" expanded="true" signature="2620:3019" ph="{...}" />
+            <marker date="1556024701075" expanded="true" signature="2731:2984" ph="{...}" />
+            <marker date="1556024701075" expanded="true" signature="2765:2829" ph="{...}" />
+            <marker date="1556024701075" expanded="true" signature="2865:2970" ph="{...}" />
+            <marker date="1556024701075" expanded="true" signature="3112:4147" ph="{...}" />
+            <marker date="1556024701075" expanded="true" signature="3154:3631" ph="{...}" />
+            <marker date="1556024701075" expanded="true" signature="3648:4137" ph="{...}" />
+            <marker date="1556024701075" expanded="true" signature="4308:5275" ph="{...}" />
+            <marker date="1556024701075" expanded="true" signature="4349:4505" ph="{...}" />
+            <marker date="1556024701075" expanded="true" signature="4537:4693" ph="{...}" />
+            <marker date="1556024701075" expanded="true" signature="4726:4883" ph="{...}" />
+            <marker date="1556024701075" expanded="true" signature="4916:5073" ph="{...}" />
+            <marker date="1556024701075" expanded="true" signature="5107:5265" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/UnitTests/UnitTestBase.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="270">
+          <caret line="20" column="59" selection-start-line="20" selection-start-column="59" selection-end-line="20" selection-end-column="59" />
+          <folding>
+            <marker date="1556024775161" expanded="false" signature="6:51" ph="..." />
+            <marker date="1556024775161" expanded="true" signature="87:1306" ph="{...}" />
+            <marker date="1556024775161" expanded="true" signature="128:1304" ph="{...}" />
+            <marker date="1556024775161" expanded="true" signature="275:341" ph="{...}" />
+            <marker date="1556024775161" expanded="true" signature="444:575" ph="{...}" />
+            <marker date="1556024775161" expanded="true" signature="666:743" ph="{...}" />
+            <marker date="1556024775161" expanded="true" signature="828:1298" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/CoreLib/AmericanOptionCalculator.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1365">
+          <caret line="91" column="23" selection-start-line="91" selection-start-column="23" selection-end-line="91" selection-end-column="23" />
+          <folding>
+            <marker date="1555838219253" expanded="true" signature="32:2608" ph="{...}" />
+            <marker date="1555838219253" expanded="true" signature="85:2606" ph="{...}" />
+            <marker date="1555838219253" expanded="true" signature="561:607" ph="{...}" />
+            <marker date="1555838219253" expanded="true" signature="634:676" ph="{...}" />
+            <marker date="1555838219253" expanded="true" signature="704:748" ph="{...}" />
+            <marker date="1555838219253" expanded="true" signature="790:832" ph="{...}" />
+            <marker date="1555838219253" expanded="true" signature="881:923" ph="{...}" />
+            <marker date="1555838219253" expanded="true" signature="964:1012" ph="{...}" />
+            <marker date="1555838219253" expanded="true" signature="1044:1088" ph="{...}" />
+            <marker date="1555838219253" expanded="true" signature="1118:1160" ph="{...}" />
+            <marker date="1555838219253" expanded="true" signature="1190:1232" ph="{...}" />
+            <marker date="1555838219253" expanded="true" signature="1262:1304" ph="{...}" />
+            <marker date="1555838219253" expanded="true" signature="1372:1447" ph="{...}" />
+            <marker date="1555838219253" expanded="true" signature="1519:1961" ph="{...}" />
+            <marker date="1555838219253" expanded="true" signature="2012:2295" ph="{...}" />
+            <marker date="1555838219253" expanded="true" signature="2047:2126" ph="{...}" />
+            <marker date="1555838219253" expanded="true" signature="2207:2285" ph="{...}" />
+            <marker date="1555838219253" expanded="true" signature="2335:2600" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/UnitTests/PerpetualAmericanOptionTests.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="135">
+          <caret line="11" column="87" selection-start-line="11" selection-start-column="87" selection-end-line="11" selection-end-column="87" />
+          <folding>
+            <marker date="1555838281596" expanded="false" signature="6:51" ph="..." />
+            <marker date="1555838281596" expanded="true" signature="87:3863" ph="{...}" />
+            <marker date="1555838281596" expanded="true" signature="168:3861" ph="{...}" />
+            <marker date="1555838281596" expanded="true" signature="224:332" ph="{...}" />
+            <marker date="1555838281596" expanded="true" signature="385:702" ph="{...}" />
+            <marker date="1555838281596" expanded="true" signature="764:1840" ph="{...}" />
+            <marker date="1555838281596" expanded="true" signature="1919:2508" ph="{...}" />
+            <marker date="1555838281596" expanded="true" signature="2593:3250" ph="{...}" />
+            <marker date="1555838281596" expanded="true" signature="3319:3855" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/PerpetualAmericanOptions/PerpetualAmericanOptionCalculator.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1110">
+          <caret line="75" column="28" selection-start-line="75" selection-start-column="28" selection-end-line="75" selection-end-column="28" />
+          <folding>
+            <marker date="1555593925209" expanded="false" signature="6:28" ph="..." />
+            <marker date="1555593925209" expanded="true" signature="98:9782" ph="{...}" />
+            <marker date="1555593925209" expanded="true" signature="216:9780" ph="{...}" />
+            <marker date="1555593925209" expanded="true" signature="322:342" ph="{...}" />
+            <marker date="1555593925209" expanded="true" signature="406:3112" ph="{...}" />
+            <marker date="1555593925209" expanded="true" signature="547:685" ph="{...}" />
+            <marker date="1555593925209" expanded="true" signature="1664:3078" ph="{...}" />
+            <marker date="1555593925209" expanded="true" signature="3183:3226" ph="{...}" />
+            <marker date="1555593925209" expanded="true" signature="3317:3476" ph="{...}" />
+            <marker date="1555593925209" expanded="true" signature="3374:3466" ph="{...}" />
+            <marker date="1555593925209" expanded="true" signature="3524:5239" ph="{...}" />
+            <marker date="1555593925209" expanded="true" signature="3886:4727" ph="{...}" />
+            <marker date="1555593925209" expanded="true" signature="5283:5678" ph="{...}" />
+            <marker date="1555593925209" expanded="true" signature="5385:5524" ph="{...}" />
+            <marker date="1555593925209" expanded="true" signature="5538:5615" ph="/* V(S) does not touch 0 ... */" />
+            <marker date="1555593925209" expanded="true" signature="5731:6008" ph="{...}" />
+            <marker date="1555593925209" expanded="true" signature="5833:5973" ph="{...}" />
+            <marker date="1555593925209" expanded="true" signature="6044:6134" ph="{...}" />
+            <marker date="1555593925209" expanded="true" signature="6168:6425" ph="{...}" />
+            <marker date="1555593925209" expanded="true" signature="6270:6390" ph="{...}" />
+            <marker date="1555593925209" expanded="true" signature="6509:6891" ph="{...}" />
+            <marker date="1555593925209" expanded="true" signature="6901:7257" ph="/* n - число уравнений (строк матрицы) ... */" />
+            <marker date="1555593925209" expanded="true" signature="7378:7876" ph="{...}" />
+            <marker date="1555593925209" expanded="true" signature="7468:7780" ph="{...}" />
+            <marker date="1555593925209" expanded="true" signature="7886:7965" ph="/* главная диагональ матрицы A (нумеруется: [0;n-1]) ... */" />
+            <marker date="1555593925209" expanded="true" signature="8069:8984" ph="{...}" />
+            <marker date="1555593925209" expanded="true" signature="8159:8658" ph="{...}" />
+            <marker date="1555593925209" expanded="true" signature="8994:9076" ph="/* диагональ, лежащая над главной (нумеруется: [0;n-2]) ... */" />
+            <marker date="1555593925209" expanded="true" signature="9170:9774" ph="{...}" />
+            <marker date="1555593925209" expanded="true" signature="9260:9462" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/UnitTests/TemporalAmericanOptionTests.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="291">
+          <caret line="20" column="43" selection-start-line="20" selection-start-column="43" selection-end-line="20" selection-end-column="43" />
+          <folding>
+            <marker date="1556470367208" expanded="true" signature="6:143" ph="..." />
+            <marker date="1556470367208" expanded="true" signature="179:12457" ph="{...}" />
+            <marker date="1556470367208" expanded="true" signature="241:12455" ph="{...}" />
+            <marker date="1556470367208" expanded="true" signature="307:1002" ph="{...}" />
+            <marker date="1556470367208" expanded="true" signature="1051:3263" ph="{...}" />
+            <marker date="1556470367208" expanded="true" signature="1774:3146" ph="{...}" />
+            <marker date="1556470367208" expanded="true" signature="1870:3132" ph="{...}" />
+            <marker date="1556470367208" expanded="true" signature="2394:3114" ph="{...}" />
+            <marker date="1556470367208" expanded="true" signature="2841:2944" ph="{...}" />
+            <marker date="1556470367208" expanded="true" signature="2973:3092" ph="{...}" />
+            <marker date="1556470367208" expanded="true" signature="3331:6571" ph="{...}" />
+            <marker date="1556470367208" expanded="true" signature="4359:4469" ph="{...}" />
+            <marker date="1556470367208" expanded="true" signature="4999:5878" ph="{...}" />
+            <marker date="1556470367208" expanded="true" signature="5300:5410" ph="{...}" />
+            <marker date="1556470367208" expanded="true" signature="6077:6204" ph="{...}" />
+            <marker date="1556470367208" expanded="true" signature="6323:6461" ph="{...}" />
+            <marker date="1556470367208" expanded="true" signature="6463:6561" ph="/* PrintTable(table); ... */" />
+            <marker date="1556470367208" expanded="true" signature="6603:6636" ph="{...}" />
+            <marker date="1556470367208" expanded="true" signature="6702:7175" ph="{...}" />
+            <marker date="1556470367208" expanded="true" signature="6943:7061" ph="{...}" />
+            <marker date="1556470367208" expanded="true" signature="7216:7337" ph="{...}" />
+            <marker date="1556470367208" expanded="true" signature="7408:8183" ph="{...}" />
+            <marker date="1556470367208" expanded="true" signature="7551:8028" ph="{...}" />
+            <marker date="1556470367208" expanded="true" signature="7861:7963" ph="{...}" />
+            <marker date="1556470367208" expanded="true" signature="8098:8173" ph="{...}" />
+            <marker date="1556470367208" expanded="true" signature="8281:8521" ph="{...}" />
+            <marker date="1556470367208" expanded="true" signature="8610:8767" ph="{...}" />
+            <marker date="1556470367208" expanded="true" signature="8853:9180" ph="{...}" />
+            <marker date="1556470367208" expanded="true" signature="9055:9138" ph="{...}" />
+            <marker date="1556470367208" expanded="true" signature="9250:9789" ph="{...}" />
+            <marker date="1556470367208" expanded="true" signature="9527:9679" ph="{...}" />
+            <marker date="1556470367208" expanded="true" signature="9869:10199" ph="{...}" />
+            <marker date="1556470367208" expanded="true" signature="9919:10189" ph="{...}" />
+            <marker date="1556470367208" expanded="true" signature="10013:10136" ph="{...}" />
+            <marker date="1556470367208" expanded="true" signature="10269:10901" ph="{...}" />
+            <marker date="1556470367208" expanded="true" signature="10445:10891" ph="{...}" />
+            <marker date="1556470367208" expanded="true" signature="10953:11328" ph="{...}" />
+            <marker date="1556470367208" expanded="true" signature="11500:11603" ph="{...}" />
+            <marker date="1556470367208" expanded="true" signature="11693:12290" ph="{...}" />
+            <marker date="1556470367208" expanded="true" signature="12341:12449" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/TemporalAmericanOption/TemporalAmericanOptionCalculator.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="171">
+          <caret line="73" column="16" selection-start-line="73" selection-start-column="16" selection-end-line="73" selection-end-column="16" />
+          <folding>
+            <marker date="1556470437915" expanded="false" signature="6:75" ph="..." />
+            <marker date="1556470437915" expanded="true" signature="145:14956" ph="{...}" />
+            <marker date="1556470437915" expanded="true" signature="262:14954" ph="{...}" />
+            <marker date="1556470437915" expanded="true" signature="711:1482" ph="{...}" />
+            <marker date="1556470437915" expanded="true" signature="941:1071" ph="{...}" />
+            <marker date="1556470437915" expanded="true" signature="1188:1276" ph="{...}" />
+            <marker date="1556470437915" expanded="true" signature="1386:1472" ph="{...}" />
+            <marker date="1556470437915" expanded="true" signature="1509:1551" ph="{...}" />
+            <marker date="1556470437915" expanded="true" signature="1594:2046" ph="{...}" />
+            <marker date="1556470437915" expanded="true" signature="1750:2011" ph="{...}" />
+            <marker date="1556470437915" expanded="true" signature="1834:1907" ph="{...}" />
+            <marker date="1556470437915" expanded="true" signature="1928:1997" ph="{...}" />
+            <marker date="1556470437915" expanded="true" signature="2079:6198" ph="{...}" />
+            <marker date="1556470437915" expanded="true" signature="2498:2741" ph="{...}" />
+            <marker date="1556470437915" expanded="true" signature="2776:3111" ph="{...}" />
+            <marker date="1556470437915" expanded="true" signature="2866:2978" ph="{...}" />
+            <marker date="1556470437915" expanded="true" signature="3174:6164" ph="{...}" />
+            <marker date="1556470437915" expanded="true" signature="3261:3357" ph="{...}" />
+            <marker date="1556470437915" expanded="true" signature="4228:4388" ph="{...}" />
+            <marker date="1556470437915" expanded="true" signature="4494:5091" ph="{...}" />
+            <marker date="1556470437915" expanded="true" signature="4679:5069" ph="{...}" />
+            <marker date="1556470437915" expanded="true" signature="5137:5347" ph="{...}" />
+            <marker date="1556470437915" expanded="true" signature="5719:5791" ph="{...}" />
+            <marker date="1556470437915" expanded="true" signature="5830:5979" ph="{...}" />
+            <marker date="1556470437915" expanded="true" signature="6021:6150" ph="{...}" />
+            <marker date="1556470437915" expanded="true" signature="6290:8553" ph="{...}" />
+            <marker date="1556470437915" expanded="true" signature="6407:7694" ph="{...}" />
+            <marker date="1556470437915" expanded="true" signature="8647:9086" ph="{...}" />
+            <marker date="1556470437915" expanded="true" signature="9096:9452" ph="/* n - число уравнений (строк матрицы) ... */" />
+            <marker date="1556470437915" expanded="true" signature="9567:10138" ph="{...}" />
+            <marker date="1556470437915" expanded="true" signature="9657:10042" ph="{...}" />
+            <marker date="1556470437915" expanded="true" signature="9846:9949" ph="{...}" />
+            <marker date="1556470437915" expanded="true" signature="10157:10236" ph="/* главная диагональ матрицы A (нумеруется: [0;n-1]) ... */" />
+            <marker date="1556470437915" expanded="true" signature="10333:11601" ph="{...}" />
+            <marker date="1556470437915" expanded="true" signature="10423:10982" ph="{...}" />
+            <marker date="1556470437915" expanded="true" signature="10665:10768" ph="{...}" />
+            <marker date="1556470437915" expanded="true" signature="11611:11693" ph="/* диагональ, лежащая над главной (нумеруется: [0;n-2]) ... */" />
+            <marker date="1556470437915" expanded="true" signature="11780:12413" ph="{...}" />
+            <marker date="1556470437915" expanded="true" signature="11870:12090" ph="{...}" />
+            <marker date="1556470437915" expanded="true" signature="12512:12673" ph="{...}" />
+            <marker date="1556470437915" expanded="true" signature="12569:12663" ph="{...}" />
+            <marker date="1556470437915" expanded="true" signature="12683:14948" ph="/* private void PrintXY(string filename, double h, double[] data, double start, int tl) ... */" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+  </component>
+>>>>>>> f2b8d56... before beta rewriting from 3 to 4
 </project>

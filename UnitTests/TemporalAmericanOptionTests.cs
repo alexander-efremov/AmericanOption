@@ -13,7 +13,7 @@ namespace PerpetualAmericanOptions
         public void TemporalAmericanOption()
         {
             var parameters = GetParameters();
-            var calculator = new TemporalAmericanOptionCalculator(parameters, false, true);
+            var calculator = new TemporalAmericanOptionCalculator(parameters, true, true, Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\AO\\");
 
             PrintParameters(calculator);
             Console.WriteLine();
@@ -230,7 +230,8 @@ namespace PerpetualAmericanOptions
             Console.Write(" sigma_sq = " + sigmaSq);
             Console.WriteLine(" K = " + K);
         }
-private void PrintParamsForSeries2(double r, double sigmaSq, double K )
+        
+        private void PrintParamsForSeries2(double r, double sigmaSq, double K )
         {
             Console.Write("r = " + r); 
             Console.Write(" sigma_sq = " + sigmaSq);
@@ -299,7 +300,7 @@ private void PrintParamsForSeries2(double r, double sigmaSq, double K )
             var r = 0.1d;
             var sigmaSq = 0.2d;
             var K = 5d;
-            var M = 10;
+            var M = 20;
             var S0eps = 1e-5;
             var T = 1d;
             var tau = (T - 0d) / M;
