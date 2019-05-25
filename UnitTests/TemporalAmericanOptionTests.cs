@@ -13,7 +13,9 @@ namespace PerpetualAmericanOptions
         public void TemporalAmericanOption()
         {
             var parameters = GetParameters();
-            var calculator = new TemporalAmericanOptionCalculator(parameters, true, true, Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\AO\\");
+            parameters.SaveVSolutions = true;
+            var folderPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\AO\\";
+            var calculator = new TemporalAmericanOptionCalculator(parameters, true, true, folderPath);      
 
             PrintParameters(calculator);
             Console.WriteLine();
@@ -21,9 +23,33 @@ namespace PerpetualAmericanOptions
             double[] S0Arr = calculator.Solve();
 
             Console.WriteLine("Calculated S0");
-            for (var i = S0Arr.Length - 1; i >= 0; i--) Console.WriteLine("k = " + (i + 1) + " -> " + S0Arr[i]);
+            for (var i = S0Arr.Length - 1; i >= 0; i--)
+            {
+                Console.WriteLine("k = " + (i + 1) + " -> " + S0Arr[i]);
+            }
 
-            Print(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\AO\\" + "s0", S0Arr,
+            List<double[]> exactSols = calculator.GetExactSolutions(S0Arr);
+            List<double[]> vSolutions = calculator.GetVSolutions();
+            Assert.AreEqual(exactSols.Count, vSolutions.Count);
+            Console.WriteLine(vSolutions.Count);
+            for (var i = 0; i < vSolutions.Count; i++)
+            {
+                double[] exactSol = exactSols[i];
+                double[] calcSol = vSolutions[i];
+                var diff = Utils.GetAbsError(exactSol, calcSol);
+                var printer = calculator.GetTecplotPrinter();
+                printer.PrintXY(Path.Combine(folderPath, "exactSol"), 0d, calculator.GetH(), exactSol);
+                printer.PrintXY(Path.Combine(folderPath, "calcSol"), 0d, calculator.GetH(), calcSol);
+                printer.PrintXY(Path.Combine(folderPath, "diff"), 0d, calculator.GetH(), diff);
+                Assert.AreEqual(exactSol.Length, calcSol.Length);
+                for (int j = 0; j < exactSol.Length; j++)
+                {
+                    
+                    Assert.AreEqual(exactSol[j], calcSol[j]);
+                }
+            }
+
+            Print(folderPath + "s0", S0Arr,
                 calculator.GetTau());
 
             Console.WriteLine();
@@ -118,7 +144,7 @@ namespace PerpetualAmericanOptions
             w.Reset();
             w.Start();
             {
-                M = (int) (10 * Math.Pow(4, (Nsteps-1)));
+                M = (int) (10 * Math.Pow(4, (Nsteps - 1)));
                 tau = (T - 0d) / M;
                 var n = (int) Math.Pow(2, Nsteps - 1) * startN;
                 string folderPath = GetTrashFolder();
@@ -299,11 +325,11 @@ namespace PerpetualAmericanOptions
             var r = 0.1d;
             var sigmaSq = 0.2d;
             var K = 5d;
-            var M = 20;
             var S0eps = 1e-5;
-            var T = 1d;
-            var tau = (T - 0d) / M;
-            var n = 100;
+            var M = 2;
+            var tau = 1e-5;
+            var T = M * tau;
+            var n = 4800;
             return new TemporalParameters(a, b, n, r, tau, sigmaSq, K, S0eps, M, T);
         }
 

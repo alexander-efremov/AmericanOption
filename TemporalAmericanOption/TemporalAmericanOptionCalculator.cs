@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using CoreLib;
 using TemporalAmericanOption;
@@ -15,13 +16,20 @@ namespace PerpetualAmericanOptions
         private readonly string _outputPath;
         private readonly string _outputPathStat;
         private readonly string _outputPathRp;
+        private readonly List<double[]> solutions = new List<double[]>();
+        private readonly bool saveSolutions;
         private readonly int M;
+        private readonly double T;
+        private readonly ThomasArrayPrinter thomasArrayPrinter = new ThomasArrayPrinter();
+
         public TemporalAmericanOptionCalculator(TemporalParameters parameters, bool allowOutputFile, bool allowOutputConsole, string outputPath = null) : base(parameters)
         {
             _allowOutputFile = allowOutputFile;
             _allowOutputConsole = allowOutputConsole;
             _outputPath = outputPath;
             M = parameters.M;
+            T = parameters.T;
+            saveSolutions = parameters.SaveVSolutions;
             if (string.IsNullOrEmpty(outputPath))
             {
                 outputPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\AO\\";
@@ -42,19 +50,26 @@ namespace PerpetualAmericanOptions
         public int GetM()
         {
             return M;
+        }public double GetT()
+        {
+            return T;
+        }
+        
+        public List<double[]> GetVSolutions()
+        {
+            return solutions;
         }
         
         private double[] GetVST()
         {
-            var s0 = GetK();
-            UpdateH(s0);
+            UpdateH(GetK());
             var arr = new double[GetN1()];
             for (var i = 0; i < arr.Length; ++i)
             {
-                var S = s0 + i * GetH();
-                if (S <= s0)
+                var S = GetK() + i * GetH();
+                if (S <= GetK())
                 {
-                    arr[i] = s0 - S;
+                    arr[i] = GetK() - S;
                 }
                 else
                 {
@@ -74,23 +89,14 @@ namespace PerpetualAmericanOptions
             //var printer = new ThomasArrayPrinter();
             var tau1 = GetTau();
             var Vk1 = GetVST(); // V(S, T) = (K - S)+
+//            tecplotPrinter.PrintXY(Path.Combine(_outputPath, "VST"), 0d, GetH(), Vk1);
+            PushToSolutions(Vk1);
             var St = new double[GetM()];
             St[St.Length - 1] = GetK();
 
-            if (_allowOutputConsole)
-            {
-                Console.WriteLine("Time step = " + GetM() + string.Format(" h = {0} S(T) = {1}", GetH(), St[St.Length - 1]));
-                Console.WriteLine("--------------------------------------------------");
-            }
-
-            if (_allowOutputFile)
-            {
-                if (File.Exists(Path.Combine(_outputPathStat, "stat.txt")))
-                {
-                    File.Delete(Path.Combine(_outputPathStat, "stat.txt"));
-                }
-                tecplotPrinter.PrintXY(_outputPath + "V" + GetM(), GetTau()*GetM(), GetH(), Vk1,   St[St.Length - 1]);
-            }
+            PrintHeader(St);
+            CreateStatFile();
+            PrintVST(tecplotPrinter, Vk1, St);
             
             for (int k = GetM() - 2; k >= 0; --k)
             {
@@ -106,35 +112,16 @@ namespace PerpetualAmericanOptions
                 double S0New = St[St.Length - (GetM() - ts)];
                 do
                 {
-                    iter++;
-                    
                     S0Old = S0New;
                     UpdateH(S0Old);
-                    var h_old = GetH();
-                    var rp = CalculateRightPart(S0Old, Vk1, h_old, tau1);
-                    var b_t = GetB(GetN1(), S0Old, h_old, GetSquaredSigma(), tau1);
-                    var c_t = GetC(GetN1(), S0Old, h_old, GetSquaredSigma(), tau1, GetR());
-                    var d_t = GetD(GetN1(), S0Old, h_old, GetSquaredSigma(), tau1);
-                    Vk = ThomasAlgorithmCalculator.Calculate(b_t, c_t, d_t, rp);
-                    
+                    double[] rp = CalculateVk(S0Old, Vk1,  GetTau(), out Vk);
                     S0New = GetK() - Vk[0];
-                    if (_allowOutputFile)
-                    {
-                        tecplotPrinter.PrintXY(Path.Combine(_outputPathRp , "temporal-rp"), 0d, GetH(), rp, S0New);
-                    }
-//                    printer.PrintThomasArrays(b_t, c_t, d_t);
-                    if (_allowOutputFile)
-                    {
-                        using (var streamWriter =
-                            File.AppendText(Path.Combine(_outputPathStat, "stat.txt")))
-                        {
-                            streamWriter.WriteLine(
-                                new string(' ', 2) + " Time step = {0} Iteration = " + iter +
-                                " h = {1} S0 = {2} Abs(S0New-S0Old)={3} S0Eps={4} Cnd={5}", k, h_old, S0Old,
-                                Math.Abs(S0New - S0Old), GetS0Eps(), Math.Abs(S0New - S0Old) > GetS0Eps());
-                        }
-                    }
 
+                    PrintRpToTecplot(tecplotPrinter, rp, S0New);
+                    iter++;
+                    PrintStatistics(iter, k, GetH(), S0Old, S0New);
+                    PrintValuesToConsole(iter, GetH(), S0Old, Vk, S0New);
+                    CheckS0NewValidity(S0New);
                     if (_allowOutputConsole)
                     {
                         Console.WriteLine(new string(' ', 2) + "Iteration = " + iter + " h = {0} S0_old = {1} Vk[0] = {2} S0_new = {3}", h_old, S0Old, Vk[0], S0New);
@@ -144,6 +131,8 @@ namespace PerpetualAmericanOptions
                     if (S0New >= GetK()) throw new Exception("S0New >= GetK()");
                 } while (Math.Abs(S0New - S0Old) > GetS0Eps());
 
+                 
+                PushToSolutions(Vk);
                 St[St.Length - (GetM() - ts) - 1] = S0New;
                 for (int i = 0; i < Vk.Length; i++)
                 {
@@ -162,6 +151,110 @@ namespace PerpetualAmericanOptions
             }
 
             return St;
+        }
+
+        public TecplotPrinterSpecial GetTecplotPrinter()
+        {
+            var tecplotPrinter = new TecplotPrinterSpecial(GetN1(),
+                0d,
+                GetRightBoundary(),
+                GetTau());
+            return tecplotPrinter;
+        }
+
+        private void PrintVST(TecplotPrinterSpecial tecplotPrinter, double[] Vk1, double[] St)
+        {
+            if (_allowOutputFile)
+            {
+                tecplotPrinter.PrintXY(_outputPath + "V" + GetM(), GetTau() * GetM(), GetH(), Vk1, St[St.Length - 1]);
+            }
+        }
+
+        private void PrintHeader(double[] St)
+        {
+            if (_allowOutputConsole)
+            {
+                Console.WriteLine("Time step = " + GetM() + string.Format(" h = {0} S(T) = {1}", GetH(), St[St.Length - 1]));
+                Console.WriteLine("--------------------------------------------------");
+            }
+        }
+
+        private void CreateStatFile()
+        {
+            if (_allowOutputFile)
+            {
+                if (File.Exists(Path.Combine(_outputPathStat, "stat.txt")))
+                {
+                    File.Delete(Path.Combine(_outputPathStat, "stat.txt"));
+                }
+            }
+        }
+
+        private void PushToSolutions(double[] Vk1)
+        {
+            if (!saveSolutions)
+            {return;}
+            var r = new double[Vk1.Length];
+            for (int i = 0; i < Vk1.Length; i++)
+            {
+                r[i] = Vk1[i];
+            }
+            solutions.Add(r);
+        }
+
+        private void CheckS0NewValidity(double S0New)
+        {
+            if (S0New <= 0d) throw new Exception("S0New <= 0d");
+            if (S0New >= GetK()) throw new Exception("S0New >= GetK()");
+        }
+
+        private double[] CalculateVk(double S0Old, double[] Vk1, double tau1,   out double[] Vk)
+        {
+            var h_value = GetH();
+            var rp = CalculateRightPart(S0Old, Vk1, h_value, tau1);
+            var b_t = GetB(GetN1(), S0Old, h_value, GetSquaredSigma(), tau1);
+            var c_t = GetC(GetN1(), S0Old, h_value, GetSquaredSigma(), tau1, GetR());
+            var d_t = GetD(GetN1(), S0Old, h_value, GetSquaredSigma(), tau1);
+            Vk = ThomasAlgorithmCalculator.Calculate(b_t, c_t, d_t, rp);
+            //PrintThomasArraysToConsole(b_t, c_t, d_t);
+            return rp;
+        }
+
+        private void PrintValuesToConsole(int iter, double h_old, double S0Old, double[] Vk, double S0New)
+        {
+            if (_allowOutputConsole)
+            {
+                Console.WriteLine(new string(' ', 2) + "Iteration = " + iter + " h = {0} S0_old = {1} Vk[0] = {2} S0_new = {3}",
+                    h_old, S0Old, Vk[0], S0New);
+            }
+        }
+
+        private void PrintStatistics(int iter, int k, double h_old, double S0Old, double S0New)
+        {
+            if (_allowOutputFile)
+            {
+                using (var streamWriter =
+                    File.AppendText(Path.Combine(_outputPathStat, "stat.txt")))
+                {
+                    streamWriter.WriteLine(
+                        new string(' ', 2) + " Time step = {0} Iteration = " + iter +
+                        " h = {1} S0 = {2} Abs(S0New-S0Old)={3} S0Eps={4} Cnd={5}", k, h_old, S0Old,
+                        Math.Abs(S0New - S0Old), GetS0Eps(), Math.Abs(S0New - S0Old) > GetS0Eps());
+                }
+            }
+        }
+
+        private void PrintThomasArraysToConsole(double[] b_t, double[] c_t, double[] d_t)
+        {
+            thomasArrayPrinter.PrintThomasArrays(b_t, c_t, d_t);
+        }
+
+        private void PrintRpToTecplot(TecplotPrinterSpecial tecplotPrinter, double[] rp, double S0New)
+        {
+            if (_allowOutputFile)
+            {
+                tecplotPrinter.PrintXY(Path.Combine(_outputPathRp, "temporal-rp"), 0d, GetH(), rp, S0New);
+            }
         }
 
         private double[] CalculateRightPart(double S0, double[] VK1, double h, double tau)
@@ -219,7 +312,8 @@ namespace PerpetualAmericanOptions
 
         private double GetF(double sigma_sq, double r, double K, int i, double S0, double h)
         {
-//            return 0;
+            //return 0;
+
             var si = S0 + i * h;
             var p1 = sigma_sq / (2d * r);
 
@@ -366,27 +460,47 @@ namespace PerpetualAmericanOptions
 //            }
 //        }
 
-//        public double[] GetExactSolution(double t)
-//        {
-//            var r = new double[GetN1()];
-//            for (int i = 0; i < r.Length; i++)
-//            {
-//                var si = GetLeftBoundary() + i * GetH();
-//                var p1 = GetSquaredSigma() / (2d * GetR());
-//
-//                var arg = GetK() / (1 + GetSquaredSigma() / (2d * GetR()));
-//                var pow = (2d * GetR() + GetSquaredSigma()) / GetSquaredSigma();
-//                var p2 = Math.Pow(arg, pow);
-//
-//                var arg2 = si;
-//                var pow2 = -2d * GetR() / GetSquaredSigma();
-//                var p3 = Math.Pow(arg2, pow2);
-//
-//                var v = p1 * p2 * p3;
-//                r[i] = t*v;
-//            }
-//
-//            return r;
-//        }
+        public List<double[]> GetExactSolutions(double[] s0)
+        {
+            var list = new List<double[]>();
+            if (Math.Abs(GetM() * GetTau() - GetT()) > Double.Epsilon)
+            {
+                throw new Exception("GetExactSolutions");
+            }
+            list.Add(GetVST()); // V(S, T) = (K - S)+
+            for (int k = GetM()-1; k >= 1; k--)
+            {
+                double[] solution = this.GetExactSolution(k, s0);
+                var tecplotPrinter = GetTecplotPrinter();
+                tecplotPrinter.PrintXY(Path.Combine(_outputPath, "solution"), 0d, GetH(), solution);
+                list.Add(solution);
+            }
+
+            return list;
+        }
+        
+        private double[] GetExactSolution(int tl, double[] s0)
+        {
+            var V = new double[GetN1()];
+            for (int i = 0; i < V.Length; i++)
+            {
+                var si = s0[GetM() - 1 - tl] + i * GetH();
+                var p1 = GetSquaredSigma() / (2d * GetR());
+
+                var arg = GetK() / (1 + GetSquaredSigma() / (2d * GetR()));
+                var pow = (2d * GetR() + GetSquaredSigma()) / GetSquaredSigma();
+                var p2 = Math.Pow(arg, pow);
+
+                var arg2 = si;
+                var pow2 = -2d * GetR() / GetSquaredSigma();
+                var p3 = Math.Pow(arg2, pow2);
+
+                var v = p1 * p2 * p3;
+                var t = tl * GetTau();
+                V[i] = t * v;
+            }
+
+            return V;
+        }
     }
 }

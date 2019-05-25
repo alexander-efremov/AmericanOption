@@ -11,6 +11,7 @@ namespace TemporalAmericanOption
             this.T = T;
         }
 
+        public bool SaveVSolutions { get; set; }
         public int M { get; }
         
         public double T { get; }
