@@ -38,7 +38,10 @@ namespace PerpetualAmericanOptions
                 printer.PrintXY(Path.Combine(parameters.WorkDir, "calcSol"), 0d, calculator.GetH(), calcSol);
                 printer.PrintXY(Path.Combine(parameters.WorkDir, "diff"), 0d, calculator.GetH(), diff);
                 Assert.AreEqual(exactSol.Length, calcSol.Length);
-                for (var j = 0; j < exactSol.Length; j++) Assert.AreEqual(exactSol[j], calcSol[j]);
+                for (var j = 0; j < exactSol.Length; j++)
+                {
+                    Assert.AreEqual(exactSol[j], calcSol[j]);
+                }
             }
 
             Print(Path.Combine(parameters.WorkDir, "s0"), S0Arr, calculator.GetTau());
