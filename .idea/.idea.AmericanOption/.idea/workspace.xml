@@ -1,22 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="0412e9d8-7812-497a-938f-ce0758db1fce" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/.idea.AmericanOption/.idea/projectSettingsUpdater.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.AmericanOption/.idea/encodings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.AmericanOption/.idea/encodings.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.AmericanOption/.idea/misc.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.AmericanOption/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.AmericanOption/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/AmericanOption.sln" beforeDir="false" afterPath="$PROJECT_DIR$/AmericanOption.sln" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CoreLib/TecplotPrinterSpecial.cs" beforeDir="false" afterPath="$PROJECT_DIR$/CoreLib/TecplotPrinterSpecial.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PerpetualAmericanOptions/JacobiCalculator.cs" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/PerpetualAmericanOptions/PerpetualAmericanOptionCalculator.cs" beforeDir="false" afterPath="$PROJECT_DIR$/PerpetualAmericanOptions/PerpetualAmericanOptionCalculator.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PerpetualAmericanOptions/PerpetualAmericanOptions.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/PerpetualAmericanOptions/PerpetualAmericanOptions.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TemporalAmericanOption/TemporalAmericanOptionCalculator.cs" beforeDir="false" afterPath="$PROJECT_DIR$/TemporalAmericanOption/TemporalAmericanOptionCalculator.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TemporalAmericanOption/TemporalParameters.cs" beforeDir="false" afterPath="$PROJECT_DIR$/TemporalAmericanOption/TemporalParameters.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UnitTests/TemporalAmericanOptionTests.cs" beforeDir="false" afterPath="$PROJECT_DIR$/UnitTests/TemporalAmericanOptionTests.cs" afterDir="false" />
-    </list>
+    <list default="true" id="0412e9d8-7812-497a-938f-ce0758db1fce" name="Default Changelist" comment="Initial after migration" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -36,6 +21,7 @@
     <setting file="file://$PROJECT_DIR$/CoreLib/TecplotPrinter.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/CoreLib/TecplotPrinterSpecial.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/UnitTests/Properties/AssemblyInfo.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/UnitTests/UnitTestBase.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/TemporalAmericanOption/TemporalParameters.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/UnitTests/TemporalAmericanOptionTests.cs" root0="FORCE_HIGHLIGHTING" />
   </component>
@@ -64,6 +50,7 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="TWShift.4" value="true" />
+    <property name="settings.editor.selected.configurable" value="RiderUnitTestingPageId" />
   </component>
   <component name="ServiceViewManager">
     <option name="viewStates">
@@ -88,14 +75,30 @@
       </map>
     </option>
   </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Initial after migration" />
+    <option name="LAST_COMMIT_MESSAGE" value="Initial after migration" />
+  </component>
   <component name="WindowStateProjectService">
     <state x="552" y="253" key="Rider.ProjectTemplateDialog.Size" timestamp="1577271170498">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="552" y="253" key="Rider.ProjectTemplateDialog.Size/0.0.1920.1040/1920.-1080.3840.2160@0.0.1920.1040" timestamp="1577271170498" />
+    <state x="461" y="163" key="SettingsEditor" timestamp="1577271902987">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="461" y="163" key="SettingsEditor/0.0.1920.1040/1920.-1080.3840.2160@0.0.1920.1040" timestamp="1577271902987" />
     <state width="498" height="446" key="SwitcherDM" timestamp="1577271739920">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="498" height="446" key="SwitcherDM/0.0.1920.1040/1920.-1080.3840.2160@0.0.1920.1040" timestamp="1577271739920" />
+    <state x="620" y="253" width="679" height="534" key="find.popup" timestamp="1577272070475">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="620" y="253" width="679" height="534" key="find.popup/0.0.1920.1040/1920.-1080.3840.2160@0.0.1920.1040" timestamp="1577272070475" />
+    <state x="623" y="225" width="672" height="678" key="search.everywhere.popup" timestamp="1577271822876">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="623" y="225" width="672" height="678" key="search.everywhere.popup/0.0.1920.1040/1920.-1080.3840.2160@0.0.1920.1040" timestamp="1577271822876" />
   </component>
 </project>

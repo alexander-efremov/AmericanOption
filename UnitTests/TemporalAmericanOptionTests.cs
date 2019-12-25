@@ -144,10 +144,12 @@ namespace PerpetualAmericanOptions
                 tau = (T - 0d) / M;
                 var n = (int) Math.Pow(2, i) * startN;
                 string folderPath = GetTrashFolder();
+/*
                 if (allowOutputFile)
                 {
                     folderPath = CreateOutputFolder(K, n, "convergence");
                 }
+*/
                 var parameters = GetSeriesParameters(n, T, K, M, tau, a, b, r, sigmaSq, S0eps);
                 var calculator =
                     new TemporalAmericanOptionCalculator(parameters, allowOutputFile, allowOutputConsole, folderPath);
