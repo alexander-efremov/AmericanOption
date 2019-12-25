@@ -3,6 +3,7 @@ namespace PerpetualAmericanOptions
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Globalization;
     using System.IO;
     using NUnit.Framework;
     using TemporalAmericanOption;
@@ -25,24 +26,32 @@ namespace PerpetualAmericanOptions
                 Console.WriteLine("k = " + (i + 1) + " -> " + s0[i]);
             }
 
-            List<double[]> exactSolutions = calculator.GetExactSolutions(s0);
-            List<double[]> numericSolutions = calculator.GetNumericSolutions();
+            var exactSolutions = calculator.GetExactSolutions(s0);
+            var numericSolutions = calculator.GetNumericSolutions();
+            
+            for (var i = 0; i < numericSolutions.Count; i++)
+            {
+                var exactSolution = exactSolutions[i];
+                var numericSolution = numericSolutions[i];
+                var error = Utils.GetAbsError(exactSolution, numericSolution);
+                
+                var printer = calculator.GetTecplotPrinter();
+                printer.PrintXY(Path.Combine(parameters.WorkDir, "exactSolution"), 0d, calculator.GetH(), exactSolution);
+                printer.PrintXY(Path.Combine(parameters.WorkDir, "numericSolution"), 0d, calculator.GetH(), numericSolution);
+                printer.PrintXY(Path.Combine(parameters.WorkDir, "error"), 0d, calculator.GetH(), error);
+            }
+            
             Assert.AreEqual(exactSolutions.Count, numericSolutions.Count);
             for (var i = 0; i < numericSolutions.Count; i++)
             {
-                var exactSol = exactSolutions[i];
-                var calcSol = numericSolutions[i];
-                var diff = Utils.GetAbsError(exactSol, calcSol);
+                var exactSolution = exactSolutions[i];
+                var numericSolution = numericSolutions[i];
+                var error = Utils.GetAbsError(exactSolution, numericSolution);
                 
-                var printer = calculator.GetTecplotPrinter();
-                printer.PrintXY(Path.Combine(parameters.WorkDir, "exactSol"), 0d, calculator.GetH(), exactSol);
-                printer.PrintXY(Path.Combine(parameters.WorkDir, "calcSol"), 0d, calculator.GetH(), calcSol);
-                printer.PrintXY(Path.Combine(parameters.WorkDir, "diff"), 0d, calculator.GetH(), diff);
-                
-                Assert.AreEqual(exactSol.Length, calcSol.Length);
-                for (var j = 0; j < exactSol.Length; j++)
+                Assert.AreEqual(exactSolution.Length, numericSolution.Length);
+                for (var j = 0; j < exactSolution.Length; j++)
                 {
-                    Assert.AreEqual(exactSol[j], calcSol[j]);
+                    Assert.AreEqual(exactSolution[j], numericSolution[j], error[j].ToString(CultureInfo.InvariantCulture));
                 }
             }
 
