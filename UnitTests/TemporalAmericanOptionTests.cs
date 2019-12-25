@@ -30,13 +30,15 @@ namespace PerpetualAmericanOptions
             Assert.AreEqual(exactSolutions.Count, numericSolutions.Count);
             for (var i = 0; i < numericSolutions.Count; i++)
             {
-                double[] exactSol = exactSolutions[i];
-                double[] calcSol = numericSolutions[i];
-                double[] diff = Utils.GetAbsError(exactSol, calcSol);
+                var exactSol = exactSolutions[i];
+                var calcSol = numericSolutions[i];
+                var diff = Utils.GetAbsError(exactSol, calcSol);
+                
                 var printer = calculator.GetTecplotPrinter();
                 printer.PrintXY(Path.Combine(parameters.WorkDir, "exactSol"), 0d, calculator.GetH(), exactSol);
                 printer.PrintXY(Path.Combine(parameters.WorkDir, "calcSol"), 0d, calculator.GetH(), calcSol);
                 printer.PrintXY(Path.Combine(parameters.WorkDir, "diff"), 0d, calculator.GetH(), diff);
+                
                 Assert.AreEqual(exactSol.Length, calcSol.Length);
                 for (var j = 0; j < exactSol.Length; j++)
                 {
