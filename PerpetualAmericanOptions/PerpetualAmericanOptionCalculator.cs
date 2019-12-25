@@ -1,133 +1,59 @@
-﻿using System;
-using CoreLib;
-
-// ReSharper disable CommentTypo
-
+﻿// ReSharper disable All
 namespace PerpetualAmericanOptions
 {
+    using System;
+
+    using CoreLib;
+
     // from new presentation with FEM
     public class PerpetualAmericanOptionCalculator : AmericanOptionCalculator
     {
-        public PerpetualAmericanOptionCalculator(PerpetualParameters parameters) : base(parameters)
+        public PerpetualAmericanOptionCalculator(Parameters parameters)
+            : base(parameters)
         {
-        }
-        
-        private double[] CalculateRightPart(double S0)
-        {
-            var V = new double[GetN1() + 1]; // add + 1 to calculate right boundary
-            for (var i = 0; i <= GetN1(); i++)
-            {
-                var si = S0 + i * GetH();
-                V[i] = GetV(GetSquaredSigma(), GetR(), GetK(), si);
-            }
-
-            var rp = new double[GetN1()];
-            var si0 = S0 + 0 * GetH();
-            var hph0 = S0 + (0d + 1d) * GetH() - si0; // h_{i+1/2}
-            var hmh0 = si0 - (S0 + (0d - 1d) * GetH()); // h_{i-1/2}
-            var sph0 = si0 + 0.5d * hph0; // s_{i+1/2}
-            var smh0 = si0 - 0.5d * hmh0; // s_{i-1/2}
-            CheckHCorrectness(hph0, GetTau(), sph0, GetR());
-            CheckHCorrectness(hmh0, GetTau(), smh0, GetR());
-            var beta20 = 1d / (8d * GetTau()) *
-                         (3d - 2d * GetTau() * GetR() * sph0 / hph0) *
-                         (1d + 2d * GetTau() * GetR() * sph0 / hph0);
-            var beta30 = 1d / (8d * GetTau()) *
-                         (1d - 2d * GetTau() * GetR() * sph0 / hph0) *
-                         (1d - 2d * GetTau() * GetR() * sph0 / hph0);
-            rp[0] = hph0 * (beta20 * V[0] + beta30 * V[1]) + (GetSquaredSigma() * si0 * si0) / 2d;
-
-            for (var i = 1; i <= GetN1() - 1; i++)
-            {
-                var si = S0 + i * GetH();
-                var hmh = si - (S0 + (i - 1) * GetH()); // h_{i-1/2}
-                var hph = S0 + (i + 1) * GetH() - si; // h_{i+1/2}
-                var smh = si - 0.5d * hmh; // s_{i-1/2}
-                var sph = si + 0.5d * hph; // s_{i+1/2}
-                CheckHCorrectness(hph, GetTau(), sph, GetR());
-                CheckHCorrectness(hmh, GetTau(), sph, GetR());
-                var beta1 = 1d / (8d * GetTau()) *
-                            (1d + 2d * GetTau() * GetR() * smh / GetH()) *
-                            (1d + 2d * GetTau() * GetR() * smh / GetH());
-                var beta2 = 1d / (8d * GetTau()) *
-                            (3d + 2d * GetTau() * GetR() * smh / GetH()) *
-                            (1d - 2d * GetTau() * GetR() * smh / GetH())
-                            +
-                            1d / (8d * GetTau()) *
-                            (3d - 2d * GetTau() * GetR() * sph / GetH()) *
-                            (1d + 2d * GetTau() * GetR() * sph / GetH());
-                var beta3 = 1d / (8d * GetTau()) *
-                            (1d - 2d * GetTau() * GetR() * sph / GetH()) *
-                            (1d - 2d * GetTau() * GetR() * sph / GetH());
-                var val = ((hph + hmh) / 2d) * (beta1 * V[i - 1] + beta2 * V[i] + beta3 * V[i + 1]);
-
-                rp[i] = GetF() + val;
-            }
-
-            return rp;
-        }
-
-        // it is zero for our case
-        private double GetF()
-        {
-            return 0d;
-        }
-
-        private static void CheckHCorrectness(double h, double tau, double sph, double r)
-        {
-            if (tau / h > 1d / (2d * r * sph))
-            {
-                throw new InvalidOperationException("tau / h");
-            }
         }
 
         public Tuple<double[], double> Solve()
         {
-            var tecplotPrinter = new TecplotPrinterSpecial(GetN1(),
-                0d,
-                GetRightBoundary(),
-                GetTau()); 
+            var tecplotPrinter = new TecplotPrinterSpecial(this.GetN1(), 0d, this.GetRightBoundary(), this.GetTau());
 
             double[] V = null;
-            var S0 = GetK();
+            var S0 = this.GetK();
             var iter = 0;
-            while (Math.Abs(GetExactS0() - S0) > GetS0Eps())
+            while (Math.Abs(this.GetExactS0() - S0) > this.GetS0Eps())
             {
                 iter++;
-                UpdateH(S0);
+                this.UpdateH(S0);
                 Console.WriteLine("S0 = " + S0);
-                Console.WriteLine("h = " + GetH());
-                double[] b_t = GetB(GetN1(), S0, GetH(), GetSquaredSigma(), GetTau());
-                double[] c_t = GetC(GetN1(), S0, GetH(), GetSquaredSigma(), GetTau(), GetR());
-                double[] d_t = GetD(GetN1(), S0, GetH(), GetSquaredSigma(), GetTau());
-                double[] rp = CalculateRightPart(S0);
-                V = ThomasAlgorithmCalculator.Calculate(b_t, c_t, d_t, rp);
-                
+                Console.WriteLine("h = " + this.GetH());
+                double[] b_t = GetB(this.GetN1(), S0, this.GetH(), this.GetSquaredSigma(), this.GetTau());
+                double[] c_t = GetC(this.GetN1(), S0, this.GetH(), this.GetSquaredSigma(), this.GetTau(), this.GetR());
+                double[] d_t = GetD(this.GetN1(), S0, this.GetH(), this.GetSquaredSigma(), this.GetTau());
+                double[] rp = this.CalculateRightPart(S0);
+                V = this.ThomasAlgorithmCalculator.Calculate(b_t, c_t, d_t, rp);
+
                 // var printer = new ThomasArrayPrinter();
                 // printer.PrintThomasArrays(b_t, c_t, d_t);
-                tecplotPrinter.PrintXY(GetWorkDir() + "perpetual-rp", 0d, GetH(), rp, S0);
+                tecplotPrinter.PrintXY(this.GetWorkDir() + "perpetual-rp", 0d, this.GetH(), rp, S0);
 
-                S0 = GetK() - V[0];
+                S0 = this.GetK() - V[0];
             }
 
             Console.WriteLine("Iteration count = " + iter);
-            tecplotPrinter.PrintXY(GetWorkDir() + "v", 0d,
-                GetH(), V, S0);
-            double[] KS = GetVKS();
-            tecplotPrinter.PrintXYSpecial(GetTau(), 0d, GetRightBoundary(),
-                GetWorkDir() + "ks_v", 0d, GetH(), GetH(), KS, V,
-                S0);
+            tecplotPrinter.PrintXY(this.GetWorkDir() + "v", 0d, this.GetH(), V, S0);
+            double[] KS = this.GetVKS();
+            TecplotPrinterSpecial.PrintXYSpecial(this.GetTau(), 0d, this.GetRightBoundary(), this.GetWorkDir() + "ks_v", 0d, this.GetH(), this.GetH(), KS, V, S0);
 
             return Tuple.Create(V, S0);
         }
 
         public double[] GetExactSolution()
         {
-            var arr = new double[GetN1()];
+            var arr = new double[this.GetN1()];
             for (var i = 0; i < arr.Length; ++i)
             {
-                var si = 0 + i * GetH();
-                arr[i] = GetV(GetSquaredSigma(), GetR(), GetK(), si);
+                var si = 0 + i * this.GetH();
+                arr[i] = GetV(this.GetSquaredSigma(), this.GetR(), this.GetK(), si);
             }
 
             // V(S) does not touch 0
@@ -138,11 +64,11 @@ namespace PerpetualAmericanOptions
 
         public double[] GetExactSolution(double S0)
         {
-            var arr = new double[GetN1()];
+            var arr = new double[this.GetN1()];
             for (var i = 0; i < arr.Length; ++i)
             {
-                var si = S0 + i * GetH();
-                arr[i] = GetV(GetSquaredSigma(), GetR(), GetK(), si);
+                var si = S0 + i * this.GetH();
+                arr[i] = GetV(this.GetSquaredSigma(), this.GetR(), this.GetK(), si);
             }
 
             return arr;
@@ -150,19 +76,68 @@ namespace PerpetualAmericanOptions
 
         public double GetExactS0()
         {
-            return GetK() / (1d + GetSquaredSigma() / (2d * GetR()));
+            return this.GetK() / (1d + this.GetSquaredSigma() / (2d * this.GetR()));
         }
 
         public double[] GetVKS()
         {
-            var res = new double[GetN1()];
+            var res = new double[this.GetN1()];
             for (var i = 0; i < res.Length; i++)
             {
-                res[i] = GetK() - i * GetH();
-                if (res[i] < 0d) res[i] = 0d;
+                res[i] = this.GetK() - i * this.GetH();
+                if (res[i] < 0d)
+                {
+                    res[i] = 0d;
+                }
             }
 
             return res;
+        }
+
+        private double[] CalculateRightPart(double S0)
+        {
+            var V = new double[this.GetN1() + 1]; // add + 1 to calculate right boundary
+            for (var i = 0; i <= this.GetN1(); i++)
+            {
+                var si = S0 + i * this.GetH();
+                V[i] = GetV(this.GetSquaredSigma(), this.GetR(), this.GetK(), si);
+            }
+
+            var rp = new double[this.GetN1()];
+            var si0 = S0 + 0 * this.GetH();
+            var hph0 = S0 + (0d + 1d) * this.GetH() - si0; // h_{i+1/2}
+            var hmh0 = si0 - (S0 + (0d - 1d) * this.GetH()); // h_{i-1/2}
+            var sph0 = si0 + 0.5d * hph0; // s_{i+1/2}
+            var smh0 = si0 - 0.5d * hmh0; // s_{i-1/2}
+            CheckHCorrectness(hph0, this.GetTau(), sph0, this.GetR());
+            CheckHCorrectness(hmh0, this.GetTau(), smh0, this.GetR());
+            var beta20 = 1d / (8d * this.GetTau()) * (3d - 2d * this.GetTau() * this.GetR() * sph0 / hph0) * (1d + 2d * this.GetTau() * this.GetR() * sph0 / hph0);
+            var beta30 = 1d / (8d * this.GetTau()) * (1d - 2d * this.GetTau() * this.GetR() * sph0 / hph0) * (1d - 2d * this.GetTau() * this.GetR() * sph0 / hph0);
+            rp[0] = hph0 * (beta20 * V[0] + beta30 * V[1]) + (this.GetSquaredSigma() * si0 * si0) / 2d;
+
+            for (var i = 1; i <= this.GetN1() - 1; i++)
+            {
+                var si = S0 + i * this.GetH();
+                var hmh = si - (S0 + (i - 1) * this.GetH()); // h_{i-1/2}
+                var hph = S0 + (i + 1) * this.GetH() - si; // h_{i+1/2}
+                var smh = si - 0.5d * hmh; // s_{i-1/2}
+                var sph = si + 0.5d * hph; // s_{i+1/2}
+                CheckHCorrectness(hph, this.GetTau(), sph, this.GetR());
+                CheckHCorrectness(hmh, this.GetTau(), sph, this.GetR());
+                var beta1 = 1d / (8d * this.GetTau()) * (1d + 2d * this.GetTau() * this.GetR() * smh / this.GetH())
+                                                      * (1d + 2d * this.GetTau() * this.GetR() * smh / this.GetH());
+                var beta2 =
+                    1d / (8d * this.GetTau()) * (3d + 2d * this.GetTau() * this.GetR() * smh / this.GetH()) * (1d - 2d * this.GetTau() * this.GetR() * smh / this.GetH())
+                    + 1d / (8d * this.GetTau()) * (3d - 2d * this.GetTau() * this.GetR() * sph / this.GetH())
+                                                * (1d + 2d * this.GetTau() * this.GetR() * sph / this.GetH());
+                var beta3 = 1d / (8d * this.GetTau()) * (1d - 2d * this.GetTau() * this.GetR() * sph / this.GetH())
+                                                      * (1d - 2d * this.GetTau() * this.GetR() * sph / this.GetH());
+                var val = ((hph + hmh) / 2d) * (beta1 * V[i - 1] + beta2 * V[i] + beta3 * V[i + 1]);
+
+                rp[i] = this.GetF() + val;
+            }
+
+            return rp;
         }
 
         private static double GetV(double sigma_sq, double r, double K, double si)
@@ -189,6 +164,7 @@ namespace PerpetualAmericanOptions
          * f - правая часть (столбец)
          * x - решение, массив x будет содержать ответ
          */
+
         // pass n = n + 1!
         private static double[] GetB(int n, double S0, double h, double sigma_sq, double tau)
         {
@@ -226,10 +202,7 @@ namespace PerpetualAmericanOptions
                     throw new ArgumentException("hmh is invalid");
                 }
 
-                c[i] = sigma_sq * si * si / (2d * hmh) +
-                       sigma_sq * si * si / (2d * hph) +
-                       (hmh + hph) *
-                       (1d / (4d * tau) + r / 2d);
+                c[i] = sigma_sq * si * si / (2d * hmh) + sigma_sq * si * si / (2d * hph) + (hmh + hph) * (1d / (4d * tau) + r / 2d);
             }
 
             // left boundary condition
@@ -263,6 +236,20 @@ namespace PerpetualAmericanOptions
             // right boundary condition
             d[n - 2] = 0d;
             return d;
+        }
+
+        // it is zero for our case
+        private double GetF()
+        {
+            return 0d;
+        }
+
+        private static void CheckHCorrectness(double h, double tau, double sph, double r)
+        {
+            if (tau / h > 1d / (2d * r * sph))
+            {
+                throw new InvalidOperationException("tau / h");
+            }
         }
     }
 }

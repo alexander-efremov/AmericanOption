@@ -8,7 +8,7 @@ namespace CoreLib
         private readonly double b;
         private readonly double K;
         private readonly int n;
-        private readonly int n_1;
+        private readonly int n1;
         private readonly double r;
         private readonly double S0Eps;
         private readonly double sigmaSq;
@@ -16,80 +16,80 @@ namespace CoreLib
         private readonly string workDir;
         private double h;
 
-        public AmericanOptionCalculator(Parameters parameters)
+        protected AmericanOptionCalculator(Parameters parameters)
         {
-            a = parameters.A;
-            b = parameters.B;
-            sigmaSq = parameters.SigmaSq;
-            tau = parameters.Tau;
-            n = parameters.N;
-            n_1 = n + 1;
-            r = parameters.R;
-            K = parameters.K;
-            h = b / n;
-            S0Eps = parameters.S0Eps;
-            workDir = parameters.WorkDir;
+            this.a = parameters.A;
+            this.b = parameters.B;
+            this.sigmaSq = parameters.SigmaSq;
+            this.tau = parameters.Tau;
+            this.n = parameters.N;
+            this.n1 = this.n + 1;
+            this.r = parameters.R;
+            this.K = parameters.K;
+            this.h = this.b / this.n;
+            this.S0Eps = parameters.S0Eps;
+            this.workDir = parameters.WorkDir;
 
-            CheckParameters();
+            this.CheckParameters();
 
-            ThomasAlgorithmCalculator = new ThomasAlgorithmCalculator(n_1);
+            this.ThomasAlgorithmCalculator = new ThomasAlgorithmCalculator(this.n1);
         }
 
-        public ThomasAlgorithmCalculator ThomasAlgorithmCalculator { get; }
-
-        protected string GetWorkDir()
-        {
-            return workDir;
-        }
+        protected ThomasAlgorithmCalculator ThomasAlgorithmCalculator { get; }
 
         public double GetS0Eps()
         {
-            return S0Eps;
+            return this.S0Eps;
         }
 
         public int GetN()
         {
-            return n;
+            return this.n;
         }
 
         public int GetN1()
         {
-            return n_1;
+            return this.n1;
         }
 
         public double GetRightBoundary()
         {
-            return b;
+            return this.b;
         }
 
         public double GetLeftBoundary()
         {
-            return a;
+            return this.a;
         }
 
         public double GetSquaredSigma()
         {
-            return sigmaSq;
+            return this.sigmaSq;
         }
 
         public double GetTau()
         {
-            return tau;
+            return this.tau;
         }
 
         public double GetR()
         {
-            return r;
+            return this.r;
         }
 
         public double GetH()
         {
-            return h;
+            return this.h;
         }
 
         public double GetK()
         {
-            return K;
+            return this.K;
+        }
+
+        protected string GetWorkDir()
+        {
+            return this.workDir;
         }
 
         protected void UpdateH(double S0)
@@ -99,9 +99,9 @@ namespace CoreLib
                 throw new ArgumentException("S0");
             }
 
-            h = (b - S0) / n;
+            this.h = (this.b - S0) / this.n;
 
-            if (h <= 0d)
+            if (this.h <= 0d)
             {
                 throw new ArgumentException("h");
             }
@@ -109,22 +109,22 @@ namespace CoreLib
 
         private void CheckParameters()
         {
-            if (n < 2)
+            if (this.n < 2)
             {
                 throw new ArgumentException("n");
             }
 
-            if (n_1 != n + 1)
+            if (this.n1 != this.n + 1)
             {
                 throw new ArgumentException("n_1");
             }
 
-            if (tau <= 0d)
+            if (this.tau <= 0d)
             {
                 throw new ArgumentException("tau");
             }
 
-            if (K <= 0d)
+            if (this.K <= 0d)
             {
                 throw new ArgumentException("K");
             }

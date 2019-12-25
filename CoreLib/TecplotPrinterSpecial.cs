@@ -8,10 +8,9 @@ namespace CoreLib
         {
         }
 
-        public void PrintXYSpecial(double tau, double a, double b, string filename, double t, double h1, double h2,
-            double[] KS, double[] V, double S0 = 0)
+        public static void PrintXYSpecial(double tau, double a, double b, string filename, double t, double h1, double h2, double[] KS, double[] V, double S0 = 0)
         {
-            var name = string.Format("{0}_hx={1}_t={2}_tau={3}_a={4}_c={5}.dat", filename, h1, t, tau, a, b);
+            var name = $"{filename}_hx={h1}_t={t}_tau={tau}_a={a}_c={b}.dat";
             using (var writer = new StreamWriter(name, false))
             {
                 writer.WriteLine("TITLE = 'DEM DATA'\nVARIABLES = 'x' {0}", "u");

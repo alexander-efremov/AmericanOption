@@ -4,6 +4,7 @@ namespace CoreLib
 
     public class ThomasArrayPrinter
     {
+        // ReSharper disable once UnusedMember.Global
         public void PrintThomasArrays(double[] b_t, double[] c_t, double[] d_t)
         {
             Console.WriteLine("B:");

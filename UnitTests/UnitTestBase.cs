@@ -6,14 +6,7 @@ namespace PerpetualAmericanOptions
 
     public abstract class UnitTestBase
     {
-        protected abstract string GetWorkingDir();
-
-        [SetUp]
-        protected void SetUp()
-        {
-        }
-
-        internal double GetL1Error(AmericanOptionCalculator cal, double[] exact, double[] calculated)
+        internal static double GetL1Error(AmericanOptionCalculator cal, double[] exact, double[] calculated)
         {
             double[] err = Utils.GetError(exact, calculated);
             return Utils.GetL1(cal.GetH(), err);
@@ -22,6 +15,11 @@ namespace PerpetualAmericanOptions
         internal double GetL1Solution(AmericanOptionCalculator cal, double[] calculatedV)
         {
             return Utils.GetL1(cal.GetH(), calculatedV);
+        }
+
+        [SetUp]
+        protected void SetUp()
+        {
         }
 
         protected virtual void PrintParameters(AmericanOptionCalculator calculator)
