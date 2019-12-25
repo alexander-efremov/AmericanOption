@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="0412e9d8-7812-497a-938f-ce0758db1fce" name="Default Changelist" comment="Initial after migration" />
+    <list default="true" id="0412e9d8-7812-497a-938f-ce0758db1fce" name="Default Changelist" comment="Initial after migration">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.AmericanOption/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.AmericanOption/.idea/workspace.xml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -22,6 +25,7 @@
     <setting file="file://$PROJECT_DIR$/CoreLib/TecplotPrinterSpecial.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/UnitTests/Properties/AssemblyInfo.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/UnitTests/UnitTestBase.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/UnitTests/PerpetualAmericanOptionTests.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/TemporalAmericanOption/TemporalParameters.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/UnitTests/TemporalAmericanOptionTests.cs" root0="FORCE_HIGHLIGHTING" />
   </component>
@@ -88,10 +92,10 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="461" y="163" key="SettingsEditor/0.0.1920.1040/1920.-1080.3840.2160@0.0.1920.1040" timestamp="1577271902987" />
-    <state width="498" height="446" key="SwitcherDM" timestamp="1577271739920">
+    <state width="498" height="446" key="SwitcherDM" timestamp="1577272195545">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="498" height="446" key="SwitcherDM/0.0.1920.1040/1920.-1080.3840.2160@0.0.1920.1040" timestamp="1577271739920" />
+    <state width="498" height="446" key="SwitcherDM/0.0.1920.1040/1920.-1080.3840.2160@0.0.1920.1040" timestamp="1577272195545" />
     <state x="620" y="253" width="679" height="534" key="find.popup" timestamp="1577272070475">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
