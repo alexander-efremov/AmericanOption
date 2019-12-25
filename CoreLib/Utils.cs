@@ -1,16 +1,13 @@
-using System;
-
 namespace PerpetualAmericanOptions
 {
+    using System;
+
     public static class Utils
     {
         public static void Print(double[] arr, string header)
         {
             Console.WriteLine(header);
-            for (int i = 0; i < arr.Length; i++)
-            {
-                Console.Write(arr[i] + " ");
-            }
+            for (var i = 0; i < arr.Length; i++) Console.Write(arr[i] + " ");
 
             Console.WriteLine();
         }
@@ -57,15 +54,12 @@ namespace PerpetualAmericanOptions
 
             return err;
         }
-        
+
         public static double[] GetAbsError(double[] exact, double[] num)
         {
             var err = new double[exact.Length];
 
-            for (var i = 0; i < exact.Length; ++i)
-            {
-                err[i] = Math.Abs(exact[i] - num[i]);
-            }
+            for (var i = 0; i < exact.Length; ++i) err[i] = Math.Abs(exact[i] - num[i]);
 
             return err;
         }
@@ -73,38 +67,30 @@ namespace PerpetualAmericanOptions
         public static double GetL1(double h, double[] data)
         {
             var r = 0.0;
-            for (var i = 0; i < data.Length; ++i)
-            {
-                r += Math.Abs(data[i]);
-            }
+            for (var i = 0; i < data.Length; ++i) r += Math.Abs(data[i]);
             return r * h;
         }
-        
+
         public static double GetLInf(double[] data)
         {
             var mx = 0.0;
-            for (var i = 0; i < data.Length; ++i)
-            {
-                mx = Math.Max(data[i], mx);
-            }
+            for (var i = 0; i < data.Length; ++i) mx = Math.Max(data[i], mx);
             return mx;
         }
 
         public static double[] FillArrayDiff(double[] arr1, double[] arr2)
         {
-            double[] err = new double[arr1.Length];
+            var err = new double[arr1.Length];
             for (var i = 0; i < err.Length; ++i)
-            {
                 try
                 {
-err[i] = arr1[i] - arr2[i];
+                    err[i] = arr1[i] - arr2[i];
                 }
                 catch (Exception e)
                 {
                     Console.WriteLine(e);
                     throw;
                 }
-            }
 
             return err;
         }
@@ -137,8 +123,9 @@ err[i] = arr1[i] - arr2[i];
             }
         }
 
-        public static void print_result_arrays(int exp_cnt, double[] l1_10, double[] l1_40, double[] l1_160, double[] l1_640,
-                double[] l1_2560)
+        public static void print_result_arrays(int exp_cnt, double[] l1_10, double[] l1_40, double[] l1_160,
+            double[] l1_640,
+            double[] l1_2560)
         {
             if (l1_10 != null)
             {

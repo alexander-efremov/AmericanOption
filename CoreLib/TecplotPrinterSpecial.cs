@@ -1,7 +1,7 @@
-using System.IO;
-
 namespace CoreLib
 {
+    using System.IO;
+
     public class TecplotPrinterSpecial : TecplotPrinter
     {
         public TecplotPrinterSpecial(int n_1, double a, double b, double tau) : base(n_1, a, b, tau)

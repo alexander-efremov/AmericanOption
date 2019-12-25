@@ -1,21 +1,47 @@
-using System;
-
 namespace CoreLib
 {
+    using System;
+
     public abstract class AmericanOptionCalculator
     {
-        private readonly ThomasAlgorithmCalculator _thomasAlgorithmCalculator;
         private readonly double a;
         private readonly double b;
         private readonly double K;
         private readonly int n;
         private readonly int n_1;
         private readonly double r;
+        private readonly double S0Eps;
         private readonly double sigmaSq;
         private readonly double tau;
-        private readonly double S0Eps;
+        private readonly string workDir;
         private double h;
-        
+
+        public AmericanOptionCalculator(Parameters parameters)
+        {
+            a = parameters.A;
+            b = parameters.B;
+            sigmaSq = parameters.SigmaSq;
+            tau = parameters.Tau;
+            n = parameters.N;
+            n_1 = n + 1;
+            r = parameters.R;
+            K = parameters.K;
+            h = b / n;
+            S0Eps = parameters.S0Eps;
+            workDir = parameters.WorkDir;
+
+            CheckParameters();
+
+            ThomasAlgorithmCalculator = new ThomasAlgorithmCalculator(n_1);
+        }
+
+        public ThomasAlgorithmCalculator ThomasAlgorithmCalculator { get; }
+
+        protected string GetWorkDir()
+        {
+            return workDir;
+        }
+
         public double GetS0Eps()
         {
             return S0Eps;
@@ -35,7 +61,7 @@ namespace CoreLib
         {
             return b;
         }
-        
+
         public double GetLeftBoundary()
         {
             return a;
@@ -66,42 +92,13 @@ namespace CoreLib
             return K;
         }
 
-        public ThomasAlgorithmCalculator ThomasAlgorithmCalculator
-        {
-            get { return _thomasAlgorithmCalculator; }
-        }
-        
-        public AmericanOptionCalculator(Parameters parameters)
-        {
-            a = parameters.A;
-            b = parameters.B;
-            sigmaSq = parameters.SigmaSq;
-            tau = parameters.Tau;
-            n = parameters.N;
-            n_1 = n + 1;
-            r = parameters.R;
-            K = parameters.K;
-            h = b / n;
-            S0Eps = parameters.S0Eps;
-
-            CheckParameters();
-
-            _thomasAlgorithmCalculator = new ThomasAlgorithmCalculator(n_1);
-        }
-        
         protected void UpdateH(double S0)
         {
-            if (S0 < 0d)
-            {
-                throw new ArgumentException("S0");
-            }
-            
+            if (S0 < 0d) throw new ArgumentException("S0");
+
             h = (b - S0) / n;
-            
-            if (h <= 0d)
-            {
-                throw new ArgumentException("h");
-            }
+
+            if (h <= 0d) throw new ArgumentException("h");
         }
 
         private void CheckParameters()

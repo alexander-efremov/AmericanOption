@@ -31,7 +31,7 @@ namespace PerpetualAmericanOptions
             saveSolutions = parameters.SaveVSolutions;
             if (string.IsNullOrEmpty(outputPath))
             {
-                outputPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\AO\\";
+                outputPath = GetWorkDir() + "\\AO\\";
             }
 
             _outputPathStat = Path.Combine(outputPath, "stat");

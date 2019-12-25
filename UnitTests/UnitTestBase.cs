@@ -1,19 +1,16 @@
-using System;
-using CoreLib;
-using NUnit.Framework;
-
 namespace PerpetualAmericanOptions
 {
+    using System;
+    using CoreLib;
+    using NUnit.Framework;
+
     public abstract class UnitTestBase
     {
-        protected string WorkingDirPath;
-
-        protected abstract string SetWorkingDir();
+        protected abstract string GetWorkingDir();
 
         [SetUp]
         protected void SetUp()
         {
-            WorkingDirPath = SetWorkingDir();
         }
 
         internal double GetL1Error(AmericanOptionCalculator cal, double[] exact, double[] calculated)

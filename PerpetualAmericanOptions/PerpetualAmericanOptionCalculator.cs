@@ -105,17 +105,17 @@ namespace PerpetualAmericanOptions
                 
                 // var printer = new ThomasArrayPrinter();
                 // printer.PrintThomasArrays(b_t, c_t, d_t);
-                tecplotPrinter.PrintXY(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\" + "perpetual-rp", 0d, GetH(), rp, S0);
+                tecplotPrinter.PrintXY(GetWorkDir() + "perpetual-rp", 0d, GetH(), rp, S0);
 
                 S0 = GetK() - V[0];
             }
 
             Console.WriteLine("Iteration count = " + iter);
-            tecplotPrinter.PrintXY(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\" + "v", 0d,
+            tecplotPrinter.PrintXY(GetWorkDir() + "v", 0d,
                 GetH(), V, S0);
             double[] KS = GetVKS();
             tecplotPrinter.PrintXYSpecial(GetTau(), 0d, GetRightBoundary(),
-                Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\" + "ks_v", 0d, GetH(), GetH(), KS, V,
+                GetWorkDir() + "ks_v", 0d, GetH(), GetH(), KS, V,
                 S0);
 
             return Tuple.Create(V, S0);

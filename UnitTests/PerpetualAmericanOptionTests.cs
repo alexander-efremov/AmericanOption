@@ -1,17 +1,13 @@
-using System;
-using CoreLib;
-using NUnit.Framework;
-
 namespace PerpetualAmericanOptions
 {
+    using System;
+    using System.IO;
+    using CoreLib;
+    using NUnit.Framework;
+
     [TestFixture]
     public class PerpetualAmericanOptionTests : UnitTestBase
     {
-        protected override string SetWorkingDir()
-        {
-            return Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\";
-        }
-
         private PerpetualParameters GetParameters()
         {
             var a = 0d;
@@ -22,7 +18,12 @@ namespace PerpetualAmericanOptions
             var r = 0.08d;
             var K = 0.5d;
             var S0Eps = 10e-4;
-            return new PerpetualParameters(a, b, n, r, tau, sigmaSq, K, S0Eps);
+            return new PerpetualParameters(a, b, n, r, tau, sigmaSq, K, S0Eps, GetWorkingDir());
+        }
+
+        protected override string GetWorkingDir()
+        {
+            return Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + Path.DirectorySeparatorChar;
         }
 
         [Test]
@@ -62,7 +63,7 @@ namespace PerpetualAmericanOptions
                 0d,
                 calculator.GetRightBoundary(),
                 calculator.GetTau());
-            printer.PrintXY(WorkingDirPath + "exact", 0d, h, VS0, V);
+            printer.PrintXY(GetWorkingDir() + "exact", 0d, h, VS0, V);
         }
 
         [Test]
@@ -77,7 +78,7 @@ namespace PerpetualAmericanOptions
                 0d,
                 calculator.GetRightBoundary(),
                 calculator.GetTau());
-            printer.PrintXYSpecial(parameters.Tau, parameters.A, parameters.B, WorkingDirPath + "exact-S0", 0d, h, h,
+            printer.PrintXYSpecial(parameters.Tau, parameters.A, parameters.B, GetWorkingDir() + "exact-S0", 0d, h, h,
                 VS0, V, calculator.GetExactS0());
         }
 
@@ -92,7 +93,7 @@ namespace PerpetualAmericanOptions
                 0d,
                 calculator.GetRightBoundary(),
                 calculator.GetTau());
-            printer.PrintXY(WorkingDirPath + "VKS", 0d, h, exactS0);
+            printer.PrintXY(GetWorkingDir() + "VKS", 0d, h, exactS0);
         }
     }
 }

@@ -1,9 +1,9 @@
 // ReSharper disable CommentTypo
 
-using System;
-
 namespace CoreLib
 {
+    using System;
+
     public class ThomasAlgorithmCalculator
     {
         private readonly int n;
@@ -42,16 +42,13 @@ namespace CoreLib
 
             return x;
         }
-        
+
         private void CheckDiagonalDominance(double[] lower, double[] central, double[] upper)
         {
-            for (int i = 0; i < central.Length; i++)
-            {
+            for (var i = 0; i < central.Length; i++)
                 if (Math.Abs(central[i]) < Math.Abs(lower[i]) + Math.Abs(upper[i]))
-                {
-                    throw new Exception(string.Format("There is no diagonal dominance! i={0} {1} {2} {3} sum={4} ", i,  Math.Abs(lower[i]), Math.Abs(central[i]), Math.Abs(upper[i]), Math.Abs(lower[i] + upper[i]) ));
-                }
-            }
+                    throw new Exception(string.Format("There is no diagonal dominance! i={0} {1} {2} {3} sum={4} ", i,
+                        Math.Abs(lower[i]), Math.Abs(central[i]), Math.Abs(upper[i]), Math.Abs(lower[i] + upper[i])));
         }
     }
 }

@@ -1,7 +1,7 @@
-using System;
-
 namespace CoreLib
 {
+    using System;
+
     public class ThomasArrayPrinter
     {
         public void PrintThomasArrays(double[] b_t, double[] c_t, double[] d_t)

@@ -1,7 +1,7 @@
-using System.IO;
-
 namespace CoreLib
 {
+    using System.IO;
+
     public class TecplotPrinter
     {
         private readonly double a;
@@ -27,10 +27,7 @@ namespace CoreLib
                     "SubZone");
                 writer.WriteLine("I={0} K={1} ZONETYPE=Ordered", n_1, 1);
                 writer.WriteLine("DATAPACKING=POINT\nDT=(DOUBLE DOUBLE)");
-                for (var i = 0; i < n_1; i++)
-                {
-                    writer.WriteLine("{0:e8} {1:e8}", start + i * h, data[i]);
-                }
+                for (var i = 0; i < n_1; i++) writer.WriteLine("{0:e8} {1:e8}", start + i * h, data[i]);
             }
         }
 
