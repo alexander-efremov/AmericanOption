@@ -44,7 +44,6 @@ namespace PerpetualAmericanOptions
                 Assert.AreEqual(exactSol.Length, calcSol.Length);
                 for (int j = 0; j < exactSol.Length; j++)
                 {
-                    
                     Assert.AreEqual(exactSol[j], calcSol[j]);
                 }
             }

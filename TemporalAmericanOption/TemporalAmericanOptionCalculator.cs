@@ -20,7 +20,6 @@ namespace PerpetualAmericanOptions
         private readonly bool saveSolutions;
         private readonly int M;
         private readonly double T;
-        private readonly ThomasArrayPrinter thomasArrayPrinter = new ThomasArrayPrinter();
 
         public TemporalAmericanOptionCalculator(TemporalParameters parameters, bool allowOutputFile, bool allowOutputConsole, string outputPath = null) : base(parameters)
         {
@@ -86,8 +85,7 @@ namespace PerpetualAmericanOptions
                 0d,
                 GetRightBoundary(),
                 GetTau());
-            //var printer = new ThomasArrayPrinter();
-            var tau1 = GetTau();
+            // var printer = new ThomasArrayPrinter();
             var Vk1 = GetVST(); // V(S, T) = (K - S)+
 //            tecplotPrinter.PrintXY(Path.Combine(_outputPath, "VST"), 0d, GetH(), Vk1);
             PushToSolutions(Vk1);
@@ -124,7 +122,7 @@ namespace PerpetualAmericanOptions
                     CheckS0NewValidity(S0New);
                     if (_allowOutputConsole)
                     {
-                        Console.WriteLine(new string(' ', 2) + "Iteration = " + iter + " h = {0} S0_old = {1} Vk[0] = {2} S0_new = {3}", h_old, S0Old, Vk[0], S0New);
+                        Console.WriteLine(new string(' ', 2) + "Iteration = " + iter + " h = {0} S0_old = {1} Vk[0] = {2} S0_new = {3}", GetH(), S0Old, Vk[0], S0New);
                     }
                     
                     if (S0New <= 0d) throw new Exception("S0New <= 0d");
@@ -242,11 +240,6 @@ namespace PerpetualAmericanOptions
                         Math.Abs(S0New - S0Old), GetS0Eps(), Math.Abs(S0New - S0Old) > GetS0Eps());
                 }
             }
-        }
-
-        private void PrintThomasArraysToConsole(double[] b_t, double[] c_t, double[] d_t)
-        {
-            thomasArrayPrinter.PrintThomasArrays(b_t, c_t, d_t);
         }
 
         private void PrintRpToTecplot(TecplotPrinterSpecial tecplotPrinter, double[] rp, double S0New)
