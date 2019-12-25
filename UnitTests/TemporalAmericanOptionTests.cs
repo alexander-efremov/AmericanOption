@@ -17,7 +17,7 @@ namespace PerpetualAmericanOptions
 
             PrintParameters(calculator);
 
-            var S0Arr = calculator.Solve();
+            double[] S0Arr = calculator.Solve();
 
             Console.WriteLine("Numeric S0:");
             for (var i = S0Arr.Length - 1; i >= 0; i--)
@@ -30,9 +30,9 @@ namespace PerpetualAmericanOptions
             Assert.AreEqual(exactSolutions.Count, numericSolutions.Count);
             for (var i = 0; i < numericSolutions.Count; i++)
             {
-                var exactSol = exactSolutions[i];
-                var calcSol = numericSolutions[i];
-                var diff = Utils.GetAbsError(exactSol, calcSol);
+                double[] exactSol = exactSolutions[i];
+                double[] calcSol = numericSolutions[i];
+                double[] diff = Utils.GetAbsError(exactSol, calcSol);
                 var printer = calculator.GetTecplotPrinter();
                 printer.PrintXY(Path.Combine(parameters.WorkDir, "exactSol"), 0d, calculator.GetH(), exactSol);
                 printer.PrintXY(Path.Combine(parameters.WorkDir, "calcSol"), 0d, calculator.GetH(), calcSol);
@@ -81,7 +81,7 @@ namespace PerpetualAmericanOptions
                     var parameters = GetSeriesParameters(n, T, Ki, M, tau, a, b, r, sigmaSq, S0eps, folderPath);
                     var calculator = new TemporalAmericanOptionCalculator(parameters, allowOutputFile,
                         allowOutputConsole);
-                    var S0Arr = calculator.Solve();
+                    double[] S0Arr = calculator.Solve();
 
                     for (var tl = tls; tl >= 1; tl--)
                     {
@@ -92,9 +92,13 @@ namespace PerpetualAmericanOptions
                         var format = Ki + new string(' ', Ki > 5 ? 9 : 10) + time.ToString("0.00") +
                                      new string(' ', 10);
                         if (table.ContainsKey(format))
+                        {
                             table[format].Add(s1);
+                        }
                         else
+                        {
                             table[format] = new List<double> {s1};
+                        }
                     }
                 }
             }
@@ -168,7 +172,7 @@ namespace PerpetualAmericanOptions
                 var parameters = GetSeriesParameters(n, T, K, M, tau, a, b, r, sigmaSq, S0eps, folderPath);
                 var calculator =
                     new TemporalAmericanOptionCalculator(parameters, allowOutputFile, allowOutputConsole);
-                var S0Arr = calculator.Solve();
+                double[] S0Arr = calculator.Solve();
                 dic[n] = GetErrorLInf(S0ArrGold, S0Arr);
                 Console.WriteLine("Finished step = " + i);
             }
@@ -223,11 +227,18 @@ namespace PerpetualAmericanOptions
                 string[] strings = pair.Key.Split(new[] {' '}, StringSplitOptions.RemoveEmptyEntries);
                 Tuple<string, string> tuple = Tuple.Create(strings[0], strings[1]);
                 var tupleItem1 = tuple.Item1 + ";" + tuple.Item2;
-                foreach (var tt1 in pair.Value) tupleItem1 += ";" + tt1.ToString("0.0000000");
+                foreach (var tt1 in pair.Value)
+                {
+                    tupleItem1 += ";" + tt1.ToString("0.0000000");
+                }
+
                 dictionary[pair.Key] = tupleItem1;
             }
 
-            foreach (KeyValuePair<string, string> pair in dictionary) Console.WriteLine(pair.Value);
+            foreach (KeyValuePair<string, string> pair in dictionary)
+            {
+                Console.WriteLine(pair.Value);
+            }
         }
 
         private void PrintParamsForSeries(double r, double sigmaSq, double K, int M, double tau)
@@ -249,7 +260,10 @@ namespace PerpetualAmericanOptions
         private string CreateOutputFolder(double Ki, int n, string subfolder)
         {
             var folderPath = GetWorkingDir() + "/AO/" + subfolder + "/" + Ki + "_" + "_" + n + "/";
-            if (!Directory.Exists(folderPath)) Directory.CreateDirectory(folderPath);
+            if (!Directory.Exists(folderPath))
+            {
+                Directory.CreateDirectory(folderPath);
+            }
 
             return folderPath;
         }
@@ -275,7 +289,10 @@ namespace PerpetualAmericanOptions
             foreach (KeyValuePair<string, List<double>> pair in table)
             {
                 var s = pair.Key;
-                foreach (var t in pair.Value) s += t.ToString("0.0000000") + new string(' ', t > 10d ? 10 : 11);
+                foreach (var t in pair.Value)
+                {
+                    s += t.ToString("0.0000000") + new string(' ', t > 10d ? 10 : 11);
+                }
 
                 Console.WriteLine(s);
             }
@@ -291,7 +308,10 @@ namespace PerpetualAmericanOptions
                     "SubZone");
                 writer.WriteLine("I={0} K={1} ZONETYPE=Ordered", St.Length, 1);
                 writer.WriteLine("DATAPACKING=POINT\nDT=(DOUBLE DOUBLE)");
-                for (var i = 0; i < St.Length; i++) writer.WriteLine("{0:e8} {1:e8}", St[i], i);
+                for (var i = 0; i < St.Length; i++)
+                {
+                    writer.WriteLine("{0:e8} {1:e8}", St[i], i);
+                }
             }
         }
 

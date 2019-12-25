@@ -7,7 +7,10 @@ namespace PerpetualAmericanOptions
         public static void Print(double[] arr, string header)
         {
             Console.WriteLine(header);
-            for (var i = 0; i < arr.Length; i++) Console.Write(arr[i] + " ");
+            for (var i = 0; i < arr.Length; i++)
+            {
+                Console.Write(arr[i] + " ");
+            }
 
             Console.WriteLine();
         }
@@ -17,31 +20,51 @@ namespace PerpetualAmericanOptions
         {
             if (l1_10 != null)
             {
-                for (var i = 0; i < exp_cnt; ++i) Console.WriteLine("{0};", l1_10[i]);
+                for (var i = 0; i < exp_cnt; ++i)
+                {
+                    Console.WriteLine("{0};", l1_10[i]);
+                }
+
                 Console.WriteLine("\n");
             }
 
             if (l1_40 != null)
             {
-                for (var i = 0; i < exp_cnt; ++i) Console.WriteLine("{0};", l1_40[i]);
+                for (var i = 0; i < exp_cnt; ++i)
+                {
+                    Console.WriteLine("{0};", l1_40[i]);
+                }
+
                 Console.WriteLine("\n");
             }
 
             if (l1_160 != null)
             {
-                for (var i = 0; i < exp_cnt; ++i) Console.WriteLine("{0};", l1_160[i]);
+                for (var i = 0; i < exp_cnt; ++i)
+                {
+                    Console.WriteLine("{0};", l1_160[i]);
+                }
+
                 Console.WriteLine("\n");
             }
 
             if (l1_640 != null)
             {
-                for (var i = 0; i < exp_cnt; ++i) Console.WriteLine("{0};", l1_640[i]);
+                for (var i = 0; i < exp_cnt; ++i)
+                {
+                    Console.WriteLine("{0};", l1_640[i]);
+                }
+
                 Console.WriteLine("\n");
             }
 
             if (l1_2560 != null)
             {
-                for (var i = 0; i < exp_cnt; ++i) Console.WriteLine("{0};", l1_2560[i]);
+                for (var i = 0; i < exp_cnt; ++i)
+                {
+                    Console.WriteLine("{0};", l1_2560[i]);
+                }
+
                 Console.WriteLine("\n");
             }
         }
@@ -50,7 +73,10 @@ namespace PerpetualAmericanOptions
         {
             var err = new double[exact.Length];
 
-            for (var i = 0; i < exact.Length; ++i) err[i] = exact[i] - num[i];
+            for (var i = 0; i < exact.Length; ++i)
+            {
+                err[i] = exact[i] - num[i];
+            }
 
             return err;
         }
@@ -59,7 +85,10 @@ namespace PerpetualAmericanOptions
         {
             var err = new double[exact.Length];
 
-            for (var i = 0; i < exact.Length; ++i) err[i] = Math.Abs(exact[i] - num[i]);
+            for (var i = 0; i < exact.Length; ++i)
+            {
+                err[i] = Math.Abs(exact[i] - num[i]);
+            }
 
             return err;
         }
@@ -67,14 +96,22 @@ namespace PerpetualAmericanOptions
         public static double GetL1(double h, double[] data)
         {
             var r = 0.0;
-            for (var i = 0; i < data.Length; ++i) r += Math.Abs(data[i]);
+            for (var i = 0; i < data.Length; ++i)
+            {
+                r += Math.Abs(data[i]);
+            }
+
             return r * h;
         }
 
         public static double GetLInf(double[] data)
         {
             var mx = 0.0;
-            for (var i = 0; i < data.Length; ++i) mx = Math.Max(data[i], mx);
+            for (var i = 0; i < data.Length; ++i)
+            {
+                mx = Math.Max(data[i], mx);
+            }
+
             return mx;
         }
 
@@ -82,6 +119,7 @@ namespace PerpetualAmericanOptions
         {
             var err = new double[arr1.Length];
             for (var i = 0; i < err.Length; ++i)
+            {
                 try
                 {
                     err[i] = arr1[i] - arr2[i];
@@ -91,6 +129,7 @@ namespace PerpetualAmericanOptions
                     Console.WriteLine(e);
                     throw;
                 }
+            }
 
             return err;
         }
@@ -100,26 +139,50 @@ namespace PerpetualAmericanOptions
             if (check_solution)
             {
                 if (norm_type == 1)
+                {
                     Console.WriteLine("\nL1 of u");
+                }
                 else if (norm_type == 2)
+                {
                     Console.WriteLine("\nL_inf of u");
-                else if (norm_type == 3) Console.WriteLine("\nL_2 of u");
+                }
+                else if (norm_type == 3)
+                {
+                    Console.WriteLine("\nL_2 of u");
+                }
+
                 if (use_betas)
+                {
                     Console.WriteLine(" using beta approach.\n");
+                }
                 else
+                {
                     Console.WriteLine(" using integration approach,\n");
+                }
             }
             else
             {
                 if (norm_type == 1)
+                {
                     Console.WriteLine("\nL1 of error");
+                }
                 else if (norm_type == 2)
+                {
                     Console.WriteLine("\nL_inf of error");
-                else if (norm_type == 3) Console.WriteLine("\nL_2 of error");
+                }
+                else if (norm_type == 3)
+                {
+                    Console.WriteLine("\nL_2 of error");
+                }
+
                 if (use_betas)
+                {
                     Console.WriteLine(" using beta approach.\n");
+                }
                 else
+                {
                     Console.WriteLine(" using integration approach.\n");
+                }
             }
         }
 
@@ -129,31 +192,51 @@ namespace PerpetualAmericanOptions
         {
             if (l1_10 != null)
             {
-                for (var i = 0; i < exp_cnt; ++i) Console.WriteLine("{0};", l1_10[i]);
+                for (var i = 0; i < exp_cnt; ++i)
+                {
+                    Console.WriteLine("{0};", l1_10[i]);
+                }
+
                 Console.WriteLine("\n");
             }
 
             if (l1_40 != null)
             {
-                for (var i = 0; i < exp_cnt; ++i) Console.WriteLine("{0};", l1_40[i]);
+                for (var i = 0; i < exp_cnt; ++i)
+                {
+                    Console.WriteLine("{0};", l1_40[i]);
+                }
+
                 Console.WriteLine("\n");
             }
 
             if (l1_160 != null)
             {
-                for (var i = 0; i < exp_cnt; ++i) Console.WriteLine("{0};", l1_160[i]);
+                for (var i = 0; i < exp_cnt; ++i)
+                {
+                    Console.WriteLine("{0};", l1_160[i]);
+                }
+
                 Console.WriteLine("\n");
             }
 
             if (l1_640 != null)
             {
-                for (var i = 0; i < exp_cnt; ++i) Console.WriteLine("{0};", l1_640[i]);
+                for (var i = 0; i < exp_cnt; ++i)
+                {
+                    Console.WriteLine("{0};", l1_640[i]);
+                }
+
                 Console.WriteLine("\n");
             }
 
             if (l1_2560 != null)
             {
-                for (var i = 0; i < exp_cnt; ++i) Console.WriteLine("{0};", l1_2560[i]);
+                for (var i = 0; i < exp_cnt; ++i)
+                {
+                    Console.WriteLine("{0};", l1_2560[i]);
+                }
+
                 Console.WriteLine("\n");
             }
         }

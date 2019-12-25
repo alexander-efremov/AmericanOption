@@ -94,19 +94,40 @@ namespace CoreLib
 
         protected void UpdateH(double S0)
         {
-            if (S0 < 0d) throw new ArgumentException("S0");
+            if (S0 < 0d)
+            {
+                throw new ArgumentException("S0");
+            }
 
             h = (b - S0) / n;
 
-            if (h <= 0d) throw new ArgumentException("h");
+            if (h <= 0d)
+            {
+                throw new ArgumentException("h");
+            }
         }
 
         private void CheckParameters()
         {
-            if (n < 2) throw new ArgumentException("n");
-            if (n_1 != n + 1) throw new ArgumentException("n_1");
-            if (tau <= 0d) throw new ArgumentException("tau");
-            if (K <= 0d) throw new ArgumentException("K");
+            if (n < 2)
+            {
+                throw new ArgumentException("n");
+            }
+
+            if (n_1 != n + 1)
+            {
+                throw new ArgumentException("n_1");
+            }
+
+            if (tau <= 0d)
+            {
+                throw new ArgumentException("tau");
+            }
+
+            if (K <= 0d)
+            {
+                throw new ArgumentException("K");
+            }
         }
     }
 }

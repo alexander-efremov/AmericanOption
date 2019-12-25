@@ -23,7 +23,10 @@ namespace CoreLib
             var beta = new double[n];
             var lambda = new double[n];
 
-            if (Math.Abs(c[0]) < double.Epsilon) throw new InvalidOperationException("c[0] == 0");
+            if (Math.Abs(c[0]) < double.Epsilon)
+            {
+                throw new InvalidOperationException("c[0] == 0");
+            }
 
             delta[0] = c[0];
             beta[0] = -d[0] / delta[0];
@@ -38,7 +41,10 @@ namespace CoreLib
 
             var x = new double[n];
             x[n - 1] = lambda[n - 1];
-            for (var i = n - 2; i >= 0; i--) x[i] = beta[i] * x[i + 1] + lambda[i];
+            for (var i = n - 2; i >= 0; i--)
+            {
+                x[i] = beta[i] * x[i + 1] + lambda[i];
+            }
 
             return x;
         }
@@ -46,9 +52,13 @@ namespace CoreLib
         private void CheckDiagonalDominance(double[] lower, double[] central, double[] upper)
         {
             for (var i = 0; i < central.Length; i++)
+            {
                 if (Math.Abs(central[i]) < Math.Abs(lower[i]) + Math.Abs(upper[i]))
+                {
                     throw new Exception(string.Format("There is no diagonal dominance! i={0} {1} {2} {3} sum={4} ", i,
                         Math.Abs(lower[i]), Math.Abs(central[i]), Math.Abs(upper[i]), Math.Abs(lower[i] + upper[i])));
+                }
+            }
         }
     }
 }

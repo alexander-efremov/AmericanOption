@@ -197,7 +197,10 @@ namespace PerpetualAmericanOptions
             {
                 var si = S0 + i * h;
                 var hmh = si - (S0 + (i - 1) * h); // h_{i - 1/2}
-                if (hmh * hmh > 4d * tau * sigma_sq * si) throw new ArgumentException("hmh is invalid");
+                if (hmh * hmh > 4d * tau * sigma_sq * si)
+                {
+                    throw new ArgumentException("hmh is invalid");
+                }
 
                 b[i] = hmh / (4d * tau) - sigma_sq * si * si / (2d * hmh);
             }
@@ -218,7 +221,10 @@ namespace PerpetualAmericanOptions
                 var si = S0 + i * h;
                 var hmh = si - (S0 + (i - 1) * h); // h_{i-1/2}
                 var hph = S0 + (i + 1) * h - si; // h_{i+1/2}
-                if (hmh * hmh > 4d * tau * sigma_sq * si) throw new ArgumentException("hmh is invalid");
+                if (hmh * hmh > 4d * tau * sigma_sq * si)
+                {
+                    throw new ArgumentException("hmh is invalid");
+                }
 
                 c[i] = sigma_sq * si * si / (2d * hmh) +
                        sigma_sq * si * si / (2d * hph) +

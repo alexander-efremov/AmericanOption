@@ -18,12 +18,18 @@ namespace CoreLib
                 writer.WriteLine("ZONE T='ONE'");
                 writer.WriteLine("I={0} K={1} ZONETYPE=Ordered", KS.Length, 1);
                 writer.WriteLine("DATAPACKING=POINT\nDT=(DOUBLE DOUBLE)");
-                for (var i = 0; i < KS.Length; i++) writer.WriteLine("{0:e8}  {1:e8}", a + i * h1, KS[i]);
+                for (var i = 0; i < KS.Length; i++)
+                {
+                    writer.WriteLine("{0:e8}  {1:e8}", a + i * h1, KS[i]);
+                }
 
                 writer.WriteLine("\nZONE T='TWO'");
                 writer.WriteLine("I={0} K={1} ZONETYPE=Ordered", V.Length, 1);
                 writer.WriteLine("DATAPACKING=POINT\nDT=(DOUBLE DOUBLE)");
-                for (var i = 0; i < V.Length; i++) writer.WriteLine("{0:e8}  {1:e8}", S0 + i * h2, V[i]);
+                for (var i = 0; i < V.Length; i++)
+                {
+                    writer.WriteLine("{0:e8}  {1:e8}", S0 + i * h2, V[i]);
+                }
             }
         }
     }
