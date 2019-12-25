@@ -31,7 +31,7 @@ namespace PerpetualAmericanOptions
             saveSolutions = parameters.SaveVSolutions;
             if (string.IsNullOrEmpty(outputPath))
             {
-                outputPath = GetWorkDir() + "\\AO\\";
+                outputPath = GetWorkDir() + "AO/";
             }
 
             _outputPathStat = Path.Combine(outputPath, "stat");

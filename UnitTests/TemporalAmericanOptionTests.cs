@@ -13,7 +13,7 @@ namespace PerpetualAmericanOptions
         public void TemporalAmericanOption()
         {
             var parameters = GetParameters(true);
-            var folderPath = GetWorkingDir() + "\\AO\\";
+            var folderPath = GetWorkingDir() + "AO/";
             var calculator = new TemporalAmericanOptionCalculator(parameters, true, true, folderPath);
 
             PrintParameters(calculator);
