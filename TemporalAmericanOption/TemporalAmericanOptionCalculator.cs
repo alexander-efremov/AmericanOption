@@ -71,7 +71,7 @@ namespace PerpetualAmericanOptions
                 0d,
                 GetRightBoundary(),
                 GetTau());
-            var printer = new ThomasArrayPrinter();
+            //var printer = new ThomasArrayPrinter();
             var tau1 = GetTau();
             var Vk1 = GetVST(); // V(S, T) = (K - S)+
             var St = new double[GetM()];
@@ -142,7 +142,6 @@ namespace PerpetualAmericanOptions
                     
                     if (S0New <= 0d) throw new Exception("S0New <= 0d");
                     if (S0New >= GetK()) throw new Exception("S0New >= GetK()");
-                    
                 } while (Math.Abs(S0New - S0Old) > GetS0Eps());
 
                 St[St.Length - (GetM() - ts) - 1] = S0New;

@@ -61,14 +61,14 @@ namespace PerpetualAmericanOptions
                             (1d - 2d * GetTau() * GetR() * sph / GetH());
                 var val = ((hph + hmh) / 2d) * (beta1 * V[i - 1] + beta2 * V[i] + beta3 * V[i + 1]);
 
-                rp[i] = GetF(i) + val;
+                rp[i] = GetF() + val;
             }
 
             return rp;
         }
 
         // it is zero for our case
-        private double GetF(int i)
+        private double GetF()
         {
             return 0d;
         }
@@ -77,7 +77,7 @@ namespace PerpetualAmericanOptions
         {
             if (tau / h > 1d / (2d * r * sph))
             {
-                throw new ArgumentOutOfRangeException("tau/h");
+                throw new InvalidOperationException("tau / h");
             }
         }
 
@@ -87,7 +87,6 @@ namespace PerpetualAmericanOptions
                 0d,
                 GetRightBoundary(),
                 GetTau()); 
-            var printer = new ThomasArrayPrinter();
 
             double[] V = null;
             var S0 = GetK();
@@ -104,7 +103,8 @@ namespace PerpetualAmericanOptions
                 double[] rp = CalculateRightPart(S0);
                 V = ThomasAlgorithmCalculator.Calculate(b_t, c_t, d_t, rp);
                 
-                //printer.PrintThomasArrays(b_t, c_t, d_t);
+                // var printer = new ThomasArrayPrinter();
+                // printer.PrintThomasArrays(b_t, c_t, d_t);
                 tecplotPrinter.PrintXY(Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + "\\" + "perpetual-rp", 0d, GetH(), rp, S0);
 
                 S0 = GetK() - V[0];

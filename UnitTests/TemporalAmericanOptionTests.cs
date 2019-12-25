@@ -122,10 +122,12 @@ namespace PerpetualAmericanOptions
                 tau = (T - 0d) / M;
                 var n = (int) Math.Pow(2, Nsteps - 1) * startN;
                 string folderPath = GetTrashFolder();
+/*
                 if (allowOutputFile)
                 {
                     folderPath = CreateOutputFolder(K, n, "convergence");
                 }
+*/
 
                 var parameters = GetSeriesParameters(n, T, K, M, tau, a, b, r, sigmaSq, S0eps);
                 var calculator =
@@ -174,11 +176,6 @@ namespace PerpetualAmericanOptions
 //            PrintTable(table);
 //            Console.WriteLine();
 //            PrintCsv(table);
-        }
-
-        public void QuantLib()
-        {
-            
         }
 
         private double GetErrorLInf(double[] gold, double[] sol)

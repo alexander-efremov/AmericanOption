@@ -8,9 +8,11 @@ namespace TemporalAmericanOption
             base(a, b, n, r, tau, sigma_sq, k, S0Eps)
         {
             this.M = M;
+            this.T = T;
         }
 
         public int M { get; }
+        
         public double T { get; }
     }
 }

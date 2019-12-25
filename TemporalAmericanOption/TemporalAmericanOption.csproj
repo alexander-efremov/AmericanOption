@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{2DB8C15A-BFC7-48BC-86C7-26D6EB13DA17}</ProjectGuid>
+    <ProjectGuid>{9EAF1809-118B-4049-942A-5F1E9A54B742}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>PerpetualAmericanOptions</RootNamespace>
-    <AssemblyName>PerpetualAmericanOptions</AssemblyName>
+    <RootNamespace>TemporalAmericanOption</RootNamespace>
+    <AssemblyName>TemporalAmericanOption</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -38,9 +38,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="PerpetualAmericanOptionCalculator.cs" />
-    <Compile Include="PerpetualParameters.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TemporalAmericanOptionCalculator.cs" />
+    <Compile Include="TemporalParameters.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CoreLib\CoreLib.csproj">
