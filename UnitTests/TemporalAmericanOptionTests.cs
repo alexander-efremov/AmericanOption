@@ -12,39 +12,36 @@ namespace PerpetualAmericanOptions
         [Test]
         public void TemporalAmericanOption()
         {
-            var parameters = GetParameters(true);
-            var folderPath = GetWorkingDir() + "AO/";
-            var calculator = new TemporalAmericanOptionCalculator(parameters, true, true, folderPath);
+            var parameters = GetParameters(true, GetWorkingDir() + "AO/");
+            var calculator = new TemporalAmericanOptionCalculator(parameters, true, true);
 
             PrintParameters(calculator);
-            Console.WriteLine();
 
-            double[] S0Arr = calculator.Solve();
+            var S0Arr = calculator.Solve();
 
-            Console.WriteLine("Calculated S0");
-            for (var i = S0Arr.Length - 1; i >= 0; i--) Console.WriteLine("k = " + (i + 1) + " -> " + S0Arr[i]);
-
-            List<double[]> exactSols = calculator.GetExactSolutions(S0Arr);
-            List<double[]> vSolutions = calculator.GetVSolutions();
-            Assert.AreEqual(exactSols.Count, vSolutions.Count);
-            Console.WriteLine(vSolutions.Count);
-            for (var i = 0; i < vSolutions.Count; i++)
+            Console.WriteLine("Numeric S0:");
+            for (var i = S0Arr.Length - 1; i >= 0; i--)
             {
-                double[] exactSol = exactSols[i];
-                double[] calcSol = vSolutions[i];
-                double[] diff = Utils.GetAbsError(exactSol, calcSol);
+                Console.WriteLine("k = " + (i + 1) + " -> " + S0Arr[i]);
+            }
+
+            List<double[]> exactSolutions = calculator.GetExactSolutions(S0Arr);
+            List<double[]> numericSolutions = calculator.GetNumericSolutions();
+            Assert.AreEqual(exactSolutions.Count, numericSolutions.Count);
+            for (var i = 0; i < numericSolutions.Count; i++)
+            {
+                var exactSol = exactSolutions[i];
+                var calcSol = numericSolutions[i];
+                var diff = Utils.GetAbsError(exactSol, calcSol);
                 var printer = calculator.GetTecplotPrinter();
-                printer.PrintXY(Path.Combine(folderPath, "exactSol"), 0d, calculator.GetH(), exactSol);
-                printer.PrintXY(Path.Combine(folderPath, "calcSol"), 0d, calculator.GetH(), calcSol);
-                printer.PrintXY(Path.Combine(folderPath, "diff"), 0d, calculator.GetH(), diff);
+                printer.PrintXY(Path.Combine(parameters.WorkDir, "exactSol"), 0d, calculator.GetH(), exactSol);
+                printer.PrintXY(Path.Combine(parameters.WorkDir, "calcSol"), 0d, calculator.GetH(), calcSol);
+                printer.PrintXY(Path.Combine(parameters.WorkDir, "diff"), 0d, calculator.GetH(), diff);
                 Assert.AreEqual(exactSol.Length, calcSol.Length);
                 for (var j = 0; j < exactSol.Length; j++) Assert.AreEqual(exactSol[j], calcSol[j]);
             }
 
-            Print(folderPath + "s0", S0Arr,
-                calculator.GetTau());
-
-            Console.WriteLine();
+            Print(Path.Combine(parameters.WorkDir, "s0"), S0Arr, calculator.GetTau());
         }
 
         [Test]
@@ -78,10 +75,10 @@ namespace PerpetualAmericanOptions
                 {
                     var n = (int) Math.Pow(2, i) * startN;
                     var folderPath = CreateOutputFolder(Ki, n, string.Empty);
-                    var parameters = GetSeriesParameters(n, T, Ki, M, tau, a, b, r, sigmaSq, S0eps);
+                    var parameters = GetSeriesParameters(n, T, Ki, M, tau, a, b, r, sigmaSq, S0eps, folderPath);
                     var calculator = new TemporalAmericanOptionCalculator(parameters, allowOutputFile,
-                        allowOutputConsole, folderPath);
-                    double[] S0Arr = calculator.Solve();
+                        allowOutputConsole);
+                    var S0Arr = calculator.Solve();
 
                     for (var tl = tls; tl >= 1; tl--)
                     {
@@ -144,9 +141,9 @@ namespace PerpetualAmericanOptions
                 }
 */
 
-                var parameters = GetSeriesParameters(n, T, K, M, tau, a, b, r, sigmaSq, S0eps);
+                var parameters = GetSeriesParameters(n, T, K, M, tau, a, b, r, sigmaSq, S0eps, folderPath);
                 var calculator =
-                    new TemporalAmericanOptionCalculator(parameters, allowOutputFile, allowOutputConsole, folderPath);
+                    new TemporalAmericanOptionCalculator(parameters, allowOutputFile, allowOutputConsole);
                 S0ArrGold = calculator.Solve();
             }
             Console.WriteLine("Finished Nsteps - 1");
@@ -165,12 +162,11 @@ namespace PerpetualAmericanOptions
                     folderPath = CreateOutputFolder(K, n, "convergence");
                 }
 */
-                var parameters = GetSeriesParameters(n, T, K, M, tau, a, b, r, sigmaSq, S0eps);
+                var parameters = GetSeriesParameters(n, T, K, M, tau, a, b, r, sigmaSq, S0eps, folderPath);
                 var calculator =
-                    new TemporalAmericanOptionCalculator(parameters, allowOutputFile, allowOutputConsole, folderPath);
-                double[] S0Arr = calculator.Solve();
-                var lInf = GetErrorLInf(S0ArrGold, S0Arr);
-                dic[n] = lInf;
+                    new TemporalAmericanOptionCalculator(parameters, allowOutputFile, allowOutputConsole);
+                var S0Arr = calculator.Solve();
+                dic[n] = GetErrorLInf(S0ArrGold, S0Arr);
                 Console.WriteLine("Finished step = " + i);
             }
 
@@ -207,7 +203,7 @@ namespace PerpetualAmericanOptions
                 error[i] = Math.Abs(gold[i] - nSol[i]);
             }
 
-//            double[] error = Utils.GetAbsError(gold, nSol);
+//            var error = Utils.GetAbsError(gold, nSol);
             return Utils.GetLInf(error);
         }
 
@@ -296,7 +292,7 @@ namespace PerpetualAmericanOptions
             }
         }
 
-        private TemporalParameters GetParameters(bool saveSolutions)
+        private TemporalParameters GetParameters(bool saveSolutions, string workPath)
         {
             var a = 0d;
             var b = 50d;
@@ -308,14 +304,14 @@ namespace PerpetualAmericanOptions
             var tau = 1e-5;
             var T = M * tau;
             var n = 4800;
-            return new TemporalParameters(a, b, n, r, tau, sigmaSq, K, S0eps, M, T, GetWorkingDir())
+            return new TemporalParameters(a, b, n, r, tau, sigmaSq, K, S0eps, M, T, workPath)
                 {SaveVSolutions = saveSolutions};
         }
 
         private TemporalParameters GetSeriesParameters(int n, double T, double K, int M, double tau, double a, double b,
-            double r, double sigma, double S0eps)
+            double r, double sigma, double S0eps, string workDir)
         {
-            return new TemporalParameters(a, b, n, r, tau, sigma, K, S0eps, M, T, GetWorkingDir());
+            return new TemporalParameters(a, b, n, r, tau, sigma, K, S0eps, M, T, workDir);
         }
 
         private static void PrintParameters(TemporalAmericanOptionCalculator calculator)
@@ -328,7 +324,9 @@ namespace PerpetualAmericanOptions
             Console.WriteLine("sigma_sq = " + calculator.GetSquaredSigma());
             Console.WriteLine("K = " + calculator.GetK());
             Console.WriteLine("M = " + calculator.GetM());
+            Console.WriteLine("T = " + calculator.GetT());
             Console.WriteLine("S0 Eps = " + calculator.GetS0Eps());
+            Console.WriteLine();
         }
 
         protected override string GetWorkingDir()

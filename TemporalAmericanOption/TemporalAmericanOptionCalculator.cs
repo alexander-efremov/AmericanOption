@@ -4,11 +4,12 @@ using System.IO;
 using CoreLib;
 using TemporalAmericanOption;
 
-// ReSharper disable CommentTypo
-
 namespace PerpetualAmericanOptions
 {
+    using System.Diagnostics.CodeAnalysis;
+
     // from new presentation with FEM
+    [SuppressMessage("ReSharper", "CommentTypo")]
     public class TemporalAmericanOptionCalculator : AmericanOptionCalculator
     {
         private readonly bool _allowOutputFile;
@@ -21,25 +22,25 @@ namespace PerpetualAmericanOptions
         private readonly int M;
         private readonly double T;
 
-        public TemporalAmericanOptionCalculator(TemporalParameters parameters, bool allowOutputFile, bool allowOutputConsole, string outputPath = null) : base(parameters)
+        public TemporalAmericanOptionCalculator(TemporalParameters parameters, bool allowOutputFile, bool allowOutputConsole) : base(parameters)
         {
             _allowOutputFile = allowOutputFile;
             _allowOutputConsole = allowOutputConsole;
-            _outputPath = outputPath;
+            _outputPath = parameters.WorkDir;
+            if (string.IsNullOrEmpty(_outputPath))
+            {
+                _outputPath = GetWorkDir() + "AO/";
+            }
             M = parameters.M;
             T = parameters.T;
             saveSolutions = parameters.SaveVSolutions;
-            if (string.IsNullOrEmpty(outputPath))
-            {
-                outputPath = GetWorkDir() + "AO/";
-            }
 
-            _outputPathStat = Path.Combine(outputPath, "stat");
+            _outputPathStat = Path.Combine(_outputPath, "stat");
             if (!Directory.Exists(_outputPathStat))
             {
                 Directory.CreateDirectory(_outputPathStat);
             }
-            _outputPathRp = Path.Combine(outputPath, "rp");
+            _outputPathRp = Path.Combine(_outputPath, "rp");
             if (!Directory.Exists(_outputPathRp))
             {
                 Directory.CreateDirectory(_outputPathRp);
@@ -49,12 +50,14 @@ namespace PerpetualAmericanOptions
         public int GetM()
         {
             return M;
-        }public double GetT()
+        }
+        
+        public double GetT()
         {
             return T;
         }
         
-        public List<double[]> GetVSolutions()
+        public List<double[]> GetNumericSolutions()
         {
             return solutions;
         }
