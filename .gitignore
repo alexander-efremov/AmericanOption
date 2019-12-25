@@ -85,7 +85,7 @@ CHANGES.md
 **/.idea/**/tasks.xml
 **/.idea/shelf/*
 **/.idea/dictionaries
-**/.idea/workspace.xml
+*workspace.xml
 
 # Sensitive or high-churn files
 **/.idea/**/dataSources/
