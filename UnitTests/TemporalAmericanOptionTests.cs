@@ -329,16 +329,16 @@ namespace PerpetualAmericanOptions
         private TemporalParameters GetParameters(bool saveSolutions, string workPath)
         {
             var a = 0d;
-            var b = 50d;
+            var b = 10d;
             var r = 0.1d;
+            var n = 300;
+            var tau = 2e-5;
             var sigmaSq = 0.2d;
+            var eps = 1e-5;
             var K = 5d;
-            var S0eps = 1e-5;
             var M = 2;
-            var tau = 1e-5;
             var T = M * tau;
-            var n = 4800;
-            return new TemporalParameters(a, b, n, r, tau, sigmaSq, K, S0eps, M, T, workPath)
+            return new TemporalParameters(a, b, n, r, tau, sigmaSq, K, eps, M, T, workPath)
                        {
                            SaveVSolutions = saveSolutions
                        };

@@ -76,32 +76,31 @@
 
         public double[] Solve()
         {
-            var tecplotPrinter = new TecplotPrinterSpecial(this.GetN1(), 0d, this.GetRightBoundary(), this.GetTau());
-
             // var printer = new ThomasArrayPrinter();
             var Vk1 = this.GetVST(); // V(S, T) = (K - S)+
 
+            var tecplotPrinter = new TecplotPrinterSpecial(this.GetN1(), 0d, this.GetRightBoundary(), this.GetTau());
             // tecplotPrinter.PrintXY(Path.Combine(_outputPath, "VST"), 0d, GetH(), Vk1);
-            this.PushToSolutions(Vk1);
-            var St = new double[this.GetM()];
+            this.SaveNumericalSolutions(Vk1);
+            var St = new double[this.GetM() + 1];
             St[St.Length - 1] = this.GetK();
 
             this.PrintHeader(St);
-            this.CreateStatFile();
+            this.CreateFileWithStatistics();
             this.PrintVST(tecplotPrinter, Vk1, St);
 
-            for (int k = this.GetM() - 2; k >= 0; --k)
+            for (int k = this.GetM() - 1; k >= 0; --k)
             {
-                var ts = k + 1;
                 if (this.allowOutputConsole)
                 {
-                    Console.WriteLine("Time step = " + ts);
+                    Console.WriteLine("Time step = " + k);
                 }
 
                 double[] Vk;
                 int iter = 0;
                 double S0Old;
-                double S0New = St[St.Length - (this.GetM() - ts)];
+                var ts = k;
+                double S0New = St[k+1];
                 do
                 {
                     S0Old = S0New;
@@ -136,7 +135,7 @@
                 }
                 while (Math.Abs(S0New - S0Old) > this.GetS0Eps());
 
-                this.PushToSolutions(Vk);
+                this.SaveNumericalSolutions(Vk);
                 St[St.Length - (this.GetM() - ts) - 1] = S0New;
                 for (int i = 0; i < Vk.Length; i++)
                 {
@@ -159,11 +158,8 @@
 
         public TecplotPrinterSpecial GetTecplotPrinter()
         {
-            var tecplotPrinter = new TecplotPrinterSpecial(this.GetN1(), 0d, this.GetRightBoundary(), this.GetTau());
-            return tecplotPrinter;
+            return new TecplotPrinterSpecial(this.GetN1(), 0d, this.GetRightBoundary(), this.GetTau());
         }
-
-        
 
         // private void PrintXY(string filename, double h, double[] data, double start, int tl)
         // {
@@ -192,19 +188,23 @@
         // }
         public List<double[]> GetExactSolutions(double[] s0)
         {
-            var list = new List<double[]>();
             if (Math.Abs(this.GetM() * this.GetTau() - this.GetT()) > double.Epsilon)
             {
                 throw new Exception("GetExactSolutions");
             }
 
-            list.Add(this.GetVST()); // V(S, T) = (K - S)+
-            for (int k = this.GetM() - 1; k >= 1; k--)
+            var list = new List<double[]>
             {
-                double[] solution = this.GetExactSolution(k, s0);
-                var tecplotPrinter = this.GetTecplotPrinter();
-                tecplotPrinter.PrintXY(Path.Combine(this.outputPath, "solution"), 0d, this.GetH(), solution);
+                this.GetVST() // V(S, T) = (K - S)+
+            };
+            
+            var printer = this.GetTecplotPrinter();
+            
+            for (int k = this.GetM() - 1; k >= 0; k--)
+            {
+                var solution = this.GetExactSolution(k, s0);
                 list.Add(solution);
+                printer.PrintXY(Path.Combine(this.outputPath, "solution"), this.GetTau() * k, this.GetH(), solution);
             }
 
             return list;
@@ -242,23 +242,25 @@
         {
             if (this.allowOutputConsole)
             {
-                Console.WriteLine("Time step = " + this.GetM() + string.Format(" h = {0} S(T) = {1}", this.GetH(), St[St.Length - 1]));
+                Console.WriteLine($"Number of time steps = " + this.GetM() + $" h = {this.GetH()} S(T) = {St[St.Length - 1]}");
                 Console.WriteLine("--------------------------------------------------");
             }
         }
 
-        private void CreateStatFile()
+        private void CreateFileWithStatistics()
         {
-            if (this.allowOutputFile)
+            if (!this.allowOutputFile)
             {
-                if (File.Exists(Path.Combine(this.outputPathStat, "stat.txt")))
-                {
-                    File.Delete(Path.Combine(this.outputPathStat, "stat.txt"));
-                }
+                return;
+            }
+
+            if (File.Exists(Path.Combine(this.outputPathStat, "stat.txt")))
+            {
+                File.Delete(Path.Combine(this.outputPathStat, "stat.txt"));
             }
         }
 
-        private void PushToSolutions(double[] Vk1)
+        private void SaveNumericalSolutions(double[] Vk1)
         {
             if (!this.saveSolutions)
             {
@@ -300,14 +302,6 @@
             return rp;
         }
 
-        private void PrintValuesToConsole(int iter, double h_old, double S0Old, double[] Vk, double S0New)
-        {
-            if (this.allowOutputConsole)
-            {
-                Console.WriteLine(new string(' ', 2) + "Iteration = " + iter + " h = {0} S0_old = {1} Vk[0] = {2} S0_new = {3}", h_old, S0Old, Vk[0], S0New);
-            }
-        }
-
         private void PrintStatistics(int iter, int k, double h_old, double S0Old, double S0New)
         {
             if (this.allowOutputFile)
@@ -323,6 +317,14 @@
                         this.GetS0Eps(),
                         Math.Abs(S0New - S0Old) > this.GetS0Eps());
                 }
+            }
+        }
+
+        private void PrintValuesToConsole(int iter, double h_old, double S0Old, double[] Vk, double S0New)
+        {
+            if (this.allowOutputConsole)
+            {
+                Console.WriteLine(new string(' ', 2) + "Iteration = " + iter + " h = {0} S0_old = {1} Vk[0] = {2} S0_new = {3}", h_old, S0Old, Vk[0], S0New);
             }
         }
 
@@ -375,20 +377,20 @@
 
         private double GetF(double sigma_sq, double r, double K, int i, double S0, double h)
         {
-            // return 0;
-            var si = S0 + i * h;
-            var p1 = sigma_sq / (2d * r);
-
-            var arg = K / (1 + sigma_sq / (2d * r));
-            var pow = (2d * r + sigma_sq) / sigma_sq;
-            var p2 = Math.Pow(arg, pow);
-
-            var arg2 = si;
-            var pow2 = -2d * r / sigma_sq;
-            var p3 = Math.Pow(arg2, pow2);
-
-            var v = p1 * p2 * p3;
-            return v;
+            return 0;
+            // var si = S0 + i * h;
+            // var p1 = sigma_sq / (2d * r);
+            //
+            // var arg = K / (1 + sigma_sq / (2d * r));
+            // var pow = (2d * r + sigma_sq) / sigma_sq;
+            // var p2 = Math.Pow(arg, pow);
+            //
+            // var arg2 = si;
+            // var pow2 = -2d * r / sigma_sq;
+            // var p3 = Math.Pow(arg2, pow2);
+            //
+            // var v = p1 * p2 * p3;
+            // return v;
         }
 
         /**
@@ -408,7 +410,7 @@
             {
                 var si = S0 + i * h;
                 var hmh = (S0 + i * h) - (S0 + (i - 1) * h); // h_{i - 1/2}
-                if (hmh * hmh > 2d * tau * sigmaSq * si * si)
+                if (hmh * hmh > 4d * tau * sigmaSq * si * si)
                 {
                     throw new ArgumentException("hmh is invalid");
                 }
@@ -432,7 +434,7 @@
                 var si = S0 + i * h;
                 var hmh = si - (S0 + (i - 1) * h); // h_{i-1/2}
                 var hph = (S0 + (i + 1) * h) - si; // h_{i+1/2}
-                if (hmh * hmh > 2d * tau * sigma_sq * si * si)
+                if (hmh * hmh > 4d * tau * sigma_sq * si * si)
                 {
                     throw new ArgumentException("hmh is invalid");
                 }
