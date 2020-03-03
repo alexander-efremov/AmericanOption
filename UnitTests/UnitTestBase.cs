@@ -1,18 +1,20 @@
-namespace PerpetualAmericanOptions
+namespace UnitTests
 {
     using System;
+    using System.Collections.Generic;
     using CoreLib;
+    using CoreLib.Utils;
     using NUnit.Framework;
 
     public abstract class UnitTestBase
     {
-        internal static double GetL1Error(AmericanOptionCalculator cal, double[] exact, double[] calculated)
+        internal static double GetL1Error(AmericanOptionCalculatorBase cal, double[] exact, double[] calculated)
         {
-            double[] err = Utils.GetError(exact, calculated);
+            var err = Utils.GetError(exact, calculated);
             return Utils.GetL1(cal.GetH(), err);
         }
 
-        internal double GetL1Solution(AmericanOptionCalculator cal, double[] calculatedV)
+        internal static double GetL1Solution(AmericanOptionCalculatorBase cal, IEnumerable<double> calculatedV)
         {
             return Utils.GetL1(cal.GetH(), calculatedV);
         }
@@ -22,7 +24,7 @@ namespace PerpetualAmericanOptions
         {
         }
 
-        protected virtual void PrintParameters(AmericanOptionCalculator calculator)
+        protected virtual void PrintParameters(AmericanOptionCalculatorBase calculator)
         {
             Console.WriteLine("b = " + calculator.GetRightBoundary());
             Console.WriteLine("r = " + calculator.GetR());

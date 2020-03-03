@@ -1,6 +1,8 @@
-namespace PerpetualAmericanOptions
+namespace CoreLib.Utils
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
 
     public static class Utils
     {
@@ -15,7 +17,7 @@ namespace PerpetualAmericanOptions
             Console.WriteLine();
         }
 
-        public static double[] GetError(double[] exact, double[] num)
+        public static IEnumerable<double> GetError(double[] exact, double[] num)
         {
             var err = new double[exact.Length];
 
@@ -39,26 +41,15 @@ namespace PerpetualAmericanOptions
             return err;
         }
 
-        public static double GetL1(double h, double[] data)
+        public static double GetL1(double h, IEnumerable<double> data)
         {
-            var r = 0.0;
-            for (var i = 0; i < data.Length; ++i)
-            {
-                r += Math.Abs(data[i]);
-            }
-
+            var r = data.Sum(Math.Abs);
             return r * h;
         }
 
-        public static double GetLInf(double[] data)
+        public static double GetLInf(IEnumerable<double> data)
         {
-            var mx = 0.0;
-            for (var i = 0; i < data.Length; ++i)
-            {
-                mx = Math.Max(data[i], mx);
-            }
-
-            return mx;
+            return data.Concat(new[] {0.0}).Max();
         }
     }
 }

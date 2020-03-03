@@ -1,16 +1,17 @@
 namespace CoreLib
 {
     using System;
+    using System.Collections.Generic;
 
     public class ThomasAlgorithmCalculator
     {
         private readonly int n;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ThomasAlgorithmCalculator"/> class. 
+        ///     Initializes a new instance of the <see cref="ThomasAlgorithmCalculator" /> class.
         /// </summary>
         /// <param name="n">
-        /// Pass n + 1
+        ///     Pass n + 1
         /// </param>
         internal ThomasAlgorithmCalculator(int n)
         {
@@ -50,20 +51,14 @@ namespace CoreLib
             return x;
         }
 
-        private void CheckDiagonalDominance(double[] lower, double[] central, double[] upper)
+        private void CheckDiagonalDominance(IReadOnlyList<double> lower, IReadOnlyList<double> central, IReadOnlyList<double> upper)
         {
-            for (var i = 0; i < central.Length; i++)
+            for (var i = 0; i < central.Count; i++)
             {
                 if (Math.Abs(central[i]) < Math.Abs(lower[i]) + Math.Abs(upper[i]))
                 {
                     throw new Exception(
-                        string.Format(
-                            "There is no diagonal dominance! i={0} {1} {2} {3} sum={4} ",
-                            i,
-                            Math.Abs(lower[i]),
-                            Math.Abs(central[i]),
-                            Math.Abs(upper[i]),
-                            Math.Abs(lower[i] + upper[i])));
+                        $"There is no diagonal dominance! i={i} {Math.Abs(lower[i])} {Math.Abs(central[i])} {Math.Abs(upper[i])} sum={Math.Abs(lower[i] + upper[i])} ");
                 }
             }
         }

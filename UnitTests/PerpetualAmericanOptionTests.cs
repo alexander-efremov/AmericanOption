@@ -1,13 +1,33 @@
-namespace PerpetualAmericanOptions
+namespace UnitTests
 {
     using System;
     using System.IO;
     using CoreLib;
+    using CoreLib.Utils;
     using NUnit.Framework;
+    using PerpetualAmericanOptions;
 
     [TestFixture]
     public class PerpetualAmericanOptionTests : UnitTestBase
     {
+        private string GetWorkingDir()
+        {
+            return Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + Path.DirectorySeparatorChar;
+        }
+
+        private PerpetualParameters GetParameters()
+        {
+            const double a = 0d;
+            const double b = 2d;
+            const double sigmaSq = 0.1d;
+            const double tau = 1e-3;
+            const int n = 400;
+            const double r = 0.08d;
+            const double K = 0.5d;
+            const double S0Eps = 10e-4;
+            return new PerpetualParameters(a, b, n, r, tau, sigmaSq, K, S0Eps, this.GetWorkingDir());
+        }
+
         [Test]
         public void PerpetualAmericanOption()
         {
@@ -20,15 +40,15 @@ namespace PerpetualAmericanOptions
             this.PrintParameters(calculator);
             Console.WriteLine();
 
-            Tuple<double[], double> answer = calculator.Solve();
-            double[] exactV = calculator.GetExactSolution(calculator.GetExactS0());
-            var l1Error = GetL1Error(calculator, calculator.GetExactSolution(calculator.GetExactS0()), answer.Item1);
-            var l1Solution = this.GetL1Solution(calculator, answer.Item1);
+            (double[] item1, var item2) = calculator.Solve();
+            var exactV = calculator.GetExactSolution(calculator.GetExactS0());
+            var l1Error = GetL1Error(calculator, calculator.GetExactSolution(calculator.GetExactS0()), item1);
+            var l1Solution = GetL1Solution(calculator, item1);
 
             Utils.Print(exactV, "V_exact");
-            Utils.Print(answer.Item1, "V_num");
-            Console.WriteLine("S0 = {0}", answer.Item2);
-            Console.WriteLine("S0 - exactS0 = {0}", Math.Abs(answer.Item2 - calculator.GetExactS0()));
+            Utils.Print(item1, "V_num");
+            Console.WriteLine("S0 = {0}", item2);
+            Console.WriteLine("S0 - exactS0 = {0}", Math.Abs(item2 - calculator.GetExactS0()));
             Console.WriteLine("L1 of error = " + l1Error);
             Console.WriteLine("L1 of solution = " + l1Solution);
         }
@@ -38,15 +58,14 @@ namespace PerpetualAmericanOptions
         {
             var parameters = this.GetParameters();
             var calculator = new PerpetualAmericanOptionCalculator(parameters);
-            double[] V = calculator.GetExactSolution();
-            double[] VS0 = calculator.GetVKS();
+            var V = calculator.GetExactSolution();
+            var VS0 = calculator.GetVKS();
             var h = (calculator.GetRightBoundary() - calculator.GetExactS0()) / calculator.GetN();
             var printer = new TecplotPrinter(
-                calculator.GetN1(),
                 0d,
                 calculator.GetRightBoundary(),
                 calculator.GetTau());
-            printer.PrintXY(this.GetWorkingDir() + "exact", 0d, h, VS0, V);
+            printer.PrintXY(this.GetWorkingDir() + "exact", 0d, h, VS0, V, 0d);
         }
 
         [Test]
@@ -54,8 +73,8 @@ namespace PerpetualAmericanOptions
         {
             var parameters = this.GetParameters();
             var calculator = new PerpetualAmericanOptionCalculator(parameters);
-            double[] V = calculator.GetExactSolution(calculator.GetExactS0());
-            double[] VS0 = calculator.GetVKS();
+            var V = calculator.GetExactSolution(calculator.GetExactS0());
+            var VS0 = calculator.GetVKS();
             var h = calculator.GetH();
 
             // var printer = new TecplotPrinterSpecial(
@@ -63,7 +82,8 @@ namespace PerpetualAmericanOptions
             //    0d,
             //    calculator.GetRightBoundary(),
             //    calculator.GetTau());
-            TecplotPrinterSpecial.PrintXYSpecial(parameters.Tau, parameters.A, parameters.B, this.GetWorkingDir() + "exact-S0", 0d, h, h, VS0, V, calculator.GetExactS0());
+            TecplotPrinterSpecial.PrintXYSpecial(parameters.Tau, parameters.A, parameters.B,
+                this.GetWorkingDir() + "exact-S0", 0d, h, h, VS0, V, calculator.GetExactS0());
         }
 
         [Test]
@@ -72,31 +92,12 @@ namespace PerpetualAmericanOptions
             var parameters = this.GetParameters();
             var calculator = new PerpetualAmericanOptionCalculator(parameters);
             var h = (calculator.GetRightBoundary() - calculator.GetExactS0()) / calculator.GetN();
-            double[] exactS0 = calculator.GetVKS();
+            var exactS0 = calculator.GetVKS();
             var printer = new TecplotPrinter(
-                calculator.GetN1(),
                 0d,
                 calculator.GetRightBoundary(),
                 calculator.GetTau());
             printer.PrintXY(this.GetWorkingDir() + "VKS", 0d, h, exactS0);
-        }
-
-        private string GetWorkingDir()
-        {
-            return Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + Path.DirectorySeparatorChar;
-        }
-
-        private PerpetualParameters GetParameters()
-        {
-            var a = 0d;
-            var b = 2d;
-            var sigmaSq = 0.1d;
-            var tau = 1e-3;
-            var n = 400;
-            var r = 0.08d;
-            var K = 0.5d;
-            var S0Eps = 10e-4;
-            return new PerpetualParameters(a, b, n, r, tau, sigmaSq, K, S0Eps, this.GetWorkingDir());
         }
     }
 }

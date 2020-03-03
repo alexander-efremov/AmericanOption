@@ -4,7 +4,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreLib", "CoreLib\CoreLib.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerpetualAmericanOptions", "PerpetualAmericanOptions\PerpetualAmericanOptions.csproj", "{2DB8C15A-BFC7-48BC-86C7-26D6EB13DA17}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TemporalAmericanOption", "TemporalAmericanOption\TemporalAmericanOption.csproj", "{9EAF1809-118B-4049-942A-5F1E9A54B742}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmericanOption", "AmericanOption\AmericanOption.csproj", "{9EAF1809-118B-4049-942A-5F1E9A54B742}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{2CDCE620-9946-493F-A801-EEAA748598B7}"
 EndProject

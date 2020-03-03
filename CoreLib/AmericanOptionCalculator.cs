@@ -2,7 +2,7 @@ namespace CoreLib
 {
     using System;
 
-    public abstract class AmericanOptionCalculator
+    public abstract class AmericanOptionCalculatorBase
     {
         private readonly double a;
         private readonly double b;
@@ -16,7 +16,7 @@ namespace CoreLib
         private readonly string workDir;
         private double h;
 
-        protected AmericanOptionCalculator(Parameters parameters)
+        protected AmericanOptionCalculatorBase(Parameters parameters)
         {
             this.a = parameters.A;
             this.b = parameters.B;

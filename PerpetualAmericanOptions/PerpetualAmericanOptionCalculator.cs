@@ -6,7 +6,7 @@ namespace PerpetualAmericanOptions
     using CoreLib;
 
     // from new presentation with FEM
-    public class PerpetualAmericanOptionCalculator : AmericanOptionCalculator
+    public class PerpetualAmericanOptionCalculator : AmericanOptionCalculatorBase
     {
         public PerpetualAmericanOptionCalculator(Parameters parameters)
             : base(parameters)
@@ -15,9 +15,9 @@ namespace PerpetualAmericanOptions
 
         public Tuple<double[], double> Solve()
         {
-            var tecplotPrinter = new TecplotPrinterSpecial(this.GetN1(), 0d, this.GetRightBoundary(), this.GetTau());
+            var tecplotPrinter = new TecplotPrinterSpecial(0d, this.GetRightBoundary(), this.GetTau());
 
-            double[] V = null;
+            double[] V = new double[this.GetN()];
             var S0 = this.GetK();
             var iter = 0;
             while (Math.Abs(this.GetExactS0() - S0) > this.GetS0Eps())
@@ -202,7 +202,8 @@ namespace PerpetualAmericanOptions
                     throw new ArgumentException("hmh is invalid");
                 }
 
-                c[i] = sigma_sq * si * si / (2d * hmh) + sigma_sq * si * si / (2d * hph) + (hmh + hph) * (1d / (4d * tau) + r / 2d);
+                c[i] = sigma_sq * si * si / (2d * hmh) + sigma_sq * si * si / (2d * hph) +
+                       (hmh + hph) * (1d / (4d * tau) + r / 2d);
             }
 
             // left boundary condition

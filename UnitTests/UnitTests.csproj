@@ -45,13 +45,17 @@
   <ItemGroup>
     <Compile Include="PerpetualAmericanOptionTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="TemporalAmericanOptionTests.cs" />
+    <Compile Include="AmericanOptionTests.cs" />
     <Compile Include="UnitTestBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AmericanOption\AmericanOption.csproj">
+      <Project>{9eaf1809-118b-4049-942a-5f1e9a54b742}</Project>
+      <Name>AmericanOption</Name>
+    </ProjectReference>
     <ProjectReference Include="..\CoreLib\CoreLib.csproj">
       <Project>{d141cee6-5426-4167-a944-b80367a0b4a1}</Project>
       <Name>CoreLib</Name>
@@ -59,10 +63,6 @@
     <ProjectReference Include="..\PerpetualAmericanOptions\PerpetualAmericanOptions.csproj">
       <Project>{2db8c15a-bfc7-48bc-86c7-26d6eb13da17}</Project>
       <Name>PerpetualAmericanOptions</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\TemporalAmericanOption\TemporalAmericanOption.csproj">
-      <Project>{9eaf1809-118b-4049-942a-5f1e9a54b742}</Project>
-      <Name>TemporalAmericanOption</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
