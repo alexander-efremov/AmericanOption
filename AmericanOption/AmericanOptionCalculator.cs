@@ -120,7 +120,7 @@
                 {
                     this.UpdateH(S0Current);
                     
-                    // calculate new V(S_i, t_k)
+                    // calculate new V(S, t_k)
                     VCurrent = this.CalculateV(S0Current, VNext, this.GetTau(), k, out double[] rp);
 
                     // calculate new S0(t)_i
@@ -210,6 +210,7 @@
             var K = this.GetK();
             var T = this.GetT();
             var sigma_sq = this.GetSquaredSigma();
+            UpdateH(S0);
             for (var i = 0; i < V.Length; i++)
             {
                 // the first version (based on t*(exact_soltion_perp_am_option)) that is not working
@@ -230,15 +231,23 @@
                 // the second version
                 // the second version (check validation-equation-am_option.nb and validation-equation-am_option.docx)
                 // missed
-                
-                // the third version 
                 var S = S0 + i * this.GetH();
 
                 // Vi
                 var Vi = (T - t)
                          * (sigma_sq / (2d * r))
                          * Math.Pow(K / (1d + (sigma_sq / (2d * r))), (2d * r + sigma_sq) / sigma_sq)
-                         * Math.Pow(S - S0 + (K - S0) * ((2d * r) / sigma_sq), (-2d * r) / sigma_sq);
+                         * Math.Pow(S - (this.Get_a0(T, K) * t), (-2d * r) / sigma_sq);
+                         // * Math.Pow(S - S0 + (K - S0) * ((2d * r) / (sigma_sq)), (-2d * r) / sigma_sq);
+                
+                // the third version 
+                // var S = S0 + i * this.GetH();
+                //
+                // // Vi
+                // var Vi = (T - t)
+                //          * (sigma_sq / (2d * r))
+                //          * Math.Pow(K / (1d + (sigma_sq / (2d * r))), (2d * r + sigma_sq) / sigma_sq)
+                //          * Math.Pow(S - S0 + (K - S0) * ((2d * r) / sigma_sq), (-2d * r) / sigma_sq);
 
                 V[i] = Vi;
             }
@@ -322,12 +331,11 @@
 
         private double[] CalculateV(double s0Old, IReadOnlyList<double> Vk1, double tau, int k, out double[] rp)
         {
-            var h = this.GetH();
-            var squaredSigma = this.GetSquaredSigma();
-            rp = this.CalculateRightPart(s0Old, Vk1, h, tau, k);
-            double[] b_t = this.GetB(this.GetN1(), s0Old, h, squaredSigma, tau);
-            double[] c_t = this.GetC(this.GetN1(), s0Old, h, squaredSigma, tau, this.GetR());
-            double[] d_t = this.GetD(this.GetN1(), s0Old, h, squaredSigma, tau);
+            rp = this.CalculateRightPart(s0Old, Vk1, this.GetH(), tau, k);
+
+            double[] b_t = this.GetB(this.GetN1(), s0Old, this.GetH(), this.GetSquaredSigma(), tau);
+            double[] c_t = this.GetC(this.GetN1(), s0Old, this.GetH(), this.GetSquaredSigma(), tau, this.GetR());
+            double[] d_t = this.GetD(this.GetN1(), s0Old, this.GetH(), this.GetSquaredSigma(), tau);
             double[] Vk = this.ThomasAlgorithmCalculator.Calculate(b_t, c_t, d_t, rp);
 
             // PrintThomasArraysToConsole(b_t, c_t, d_t);
@@ -385,11 +393,11 @@
             var betam1 = 1d / (8d * tau) * (1d + (2d * tau * r * smh0) / hmh0) * (1d + (2d * tau * r * smh0) / hmh0);
             var beta0 =  1d / (8d * tau) * (3d - 2d * tau * r * smh0 / hmh0) * (1d + 2d * tau * r * smh0 / hmh0) 
                 + 1d / (8d * tau) * (3d + (2d * tau * r * sph0) / hph0) * (1d - (2d * tau * r * sph0) / hph0);
-            var beta1 = 1d / (8d * tau) * (1d - (2d * tau * r * sph0) / hph0) * (1d - (2d * tau * r * sph0) / hph0);
+            var betap1 = 1d / (8d * tau) * (1d - (2d * tau * r * sph0) / hph0) * (1d - (2d * tau * r * sph0) / hph0);
             var f0 = this.GetF(sigma, r, this.GetK(), h, S0, this.GetTau(), k, this.GetT(), S0);
 
-            rp[0] = ((-hph0 / 2d) * f0) + ((sigma * S0 * S0) / 2d) 
-                                        + (hph0/2d) * (betam1 * 0d /*Vk1[-1]*/ + beta0 * Vk1[0] + beta1 * Vk1[1]);
+            rp[0] = ((-hph0 / 2d) * f0) + ((sigma * S0 * S0) / 2d)
+                                        + (hph0 / 2d) * (betam1 * 0d /*Vk1[-1]*/ + beta0 * Vk1[0] + betap1 * Vk1[1]);
 
             for (var i = 1; i < rp.Length - 1; ++i)
             {
@@ -449,42 +457,42 @@
             // return v;
             
             // the second version (check validation-equation-am_option.nb and validation-equation-am_option.docx)
-            // var t = tau * k;
-            // //a = Calculate_a0(t, S, K, r, sigma_sq);
-            //
-            // // dV/dt
-            // var dvdtNumerator = K * Math.Pow(K / ((sigma_sq / (2d * r)) + 1d), (2d * r) / sigma_sq)
-            //                       * Math.Pow(S - a * t, ((-2d * r) / sigma_sq) - 1d)
-            //                       * (2d * a * r * t - 2d * a * r * T - a * sigma_sq * t + sigma_sq * S);
-            // var dvdtDenominator = 2d * r + sigma_sq;
-            // var dvdt = -1d * (dvdtNumerator / dvdtDenominator);
-            // var p1 = dvdt;
-            //
-            // // d^2V/dS^2
-            // var d2VdS2Numerator = 2d * K * r * (t - T)
-            //                       * Math.Pow(K / ((sigma_sq / (2d * r)) + 1), (2d * r) / sigma_sq)
-            //                       * Math.Pow(S - a * t, ((-2d * r) / sigma_sq) - 2d);
-            // var d2VdS2Denominator = sigma_sq;
-            // var d2VdS2 = (-1d * (d2VdS2Numerator / d2VdS2Denominator));
-            // // (sigma^2/2)*S^2*d^2V/dS^2
-            // var p2 = (sigma_sq / 2d) * S * S * d2VdS2;
-            //
-            // // dV/dS
-            // var dVdS = (t - T)
-            //            * Math.Pow(K / ((sigma_sq / (2d * r)) + 1d), (2d * r + sigma_sq) / sigma_sq)
-            //            * Math.Pow(S - a * t, ((-2d * r) / sigma_sq) - 1d);
-            // // r*S*dV/dS
-            // var p3 = r * S * dVdS;
-            //
-            // // V
-            // var V = (T - t)
-            //         * (sigma_sq / (2d * r))
-            //         * Math.Pow(K / (1d + (sigma_sq / (2d * r))), (2d * r + sigma_sq) / sigma_sq)
-            //         * Math.Pow(S - a * t, (-2d * r) / sigma_sq);
-            // // r*V
-            // var p4 = r * V;
-            //
-            // return p1 + p2 + p3 - p4;
+            var t = tau * k;
+            var a0 = this.Get_a0(T, K);
+            
+            // dV/dt
+            var dvdtNumerator = K * Math.Pow(K / ((sigma / (2d * r)) + 1d), (2d * r) / sigma)
+                                  * Math.Pow(S - a0 * t, ((-2d * r) / sigma) - 1d)
+                                  * (2d * a0 * r * t - 2d * a0 * r * T - a0 * sigma * t + sigma * S);
+            var dvdtDenominator = 2d * r + sigma;
+            var dvdt = -1d * (dvdtNumerator / dvdtDenominator);
+            var p1 = dvdt;
+            
+            // d^2V/dS^2
+            var d2VdS2Numerator = 2d * K * r * (t - T)
+                                  * Math.Pow(K / ((sigma / (2d * r)) + 1), (2d * r) / sigma)
+                                  * Math.Pow(S - a0 * t, ((-2d * r) / sigma) - 2d);
+            var d2VdS2Denominator = sigma;
+            var d2VdS2 = (-1d * (d2VdS2Numerator / d2VdS2Denominator));
+            // (sigma^2/2)*S^2*d^2V/dS^2
+            var p2 = (sigma / 2d) * S * S * d2VdS2;
+            
+            // dV/dS
+            var dVdS = (t - T)
+                       * Math.Pow(K / ((sigma / (2d * r)) + 1d), (2d * r + sigma) / sigma)
+                       * Math.Pow(S - a0 * t, ((-2d * r) / sigma) - 1d);
+            // r*S*dV/dS
+            var p3 = r * S * dVdS;
+            
+            // V
+            var V = (T - t)
+                    * (sigma / (2d * r))
+                    * Math.Pow(K / (1d + (sigma / (2d * r))), (2d * r + sigma) / sigma)
+                    * Math.Pow(S - a0 * t, (-2d * r) / sigma);
+            // r*V
+            var p4 = r * V;
+            
+            return p1 + p2 + p3 - p4;
             
             // the third version (check third-try-validation-equation-am_option.nb)
             // var t = tau * k;
@@ -578,52 +586,50 @@
 
             #endregion
             
-            // the third updated version (check third-try-validation-equation-am_option.nb)
-            var t = tau * k;
+            // // the third updated version (check third-try-validation-equation-am_option.nb)
+            // var t = tau * k;
+            //
+            // // dV/dt
+            // var dVdtNumerator = -K * sigma
+            //                        * Math.Pow(K / ((sigma / (2d * r)) + 1d), (2d * r) / sigma)
+            //                        * Math.Pow(( (2d * r * (K - S0)) / sigma) - S0 + S, (-2d * r) / sigma);
+            // var dVdtDenominator = 2d * r + sigma;
+            // var dVdt = dVdtNumerator / dVdtDenominator;
+            // var p1 = dVdt;
+            //
+            // // d^2V/dS^2
+            // var d2VdS2 = ( ((-2d * r) / sigma) - 1d)
+            //              * (t-T) // = -(T-t)
+            //              * Math.Pow(K / ((sigma / (2d * r)) + 1d), (2d * r + sigma) / sigma)
+            //              * Math.Pow( ((2d * r * (K - S0)) / sigma) - S0 + S, ((-2d * r) / sigma) - 2d);
+            // // (sigma^2/2)*S^2*d^2V/dS^2
+            // var p2 = (sigma / 2d) * S * S * d2VdS2;
+            //
+            // // dV/dS
+            // var dVdS = (t - T)
+            //            * Math.Pow(K / ((sigma / (2d * r)) + 1d), (2d * r + sigma) / sigma)
+            //            * Math.Pow(((2d * r * (K - S0)) / sigma) - S0 + S, ((-2d * r) / sigma) - 1d);
+            // // r*S*dV/dS
+            // var p3 = r * S * dVdS;
+            //
+            // // V
+            // var V = (T - t)
+            //         * (sigma / (2d * r))
+            //         * Math.Pow(K / (1d + (sigma / (2d * r))), (2d * r + sigma) / sigma)
+            //         * Math.Pow((S - S0 + (K - S0) * ((2d * r) / sigma)), (-2d * r) / sigma);
+            // // r*V
+            // var p4 = r * V;
             
-            // dV/dt
-            var dVdtNumerator = -K * sigma
-                                   * Math.Pow(K / ((sigma / (2d * r)) + 1d), (2d * r) / sigma)
-                                   * Math.Pow(( (2d * r * (K - S0)) / sigma) - S0 + S, (-2d * r) / sigma);
-            var dVdtDenominator = 2d * r + sigma;
-            var dVdt = dVdtNumerator / dVdtDenominator;
-            var p1 = dVdt;
             
-            // d^2V/dS^2
-            var d2VdS2 = ( ((-2d * r) / sigma) - 1d)
-                         * (t-T) // = -(T-t)
-                         * Math.Pow(K / ((sigma / (2d * r)) + 1d), (2d * r + sigma) / sigma)
-                         * Math.Pow( ((2d * r * (K - S0)) / sigma) - S0 + S, ((-2d * r) / sigma) - 2d);
-            // (sigma^2/2)*S^2*d^2V/dS^2
-            var p2 = (sigma / 2d) * S * S * d2VdS2;
-            
-            // dV/dS
-            var dVdS = (t - T)
-                       * Math.Pow(K / ((sigma / (2d * r)) + 1d), (2d * r + sigma) / sigma)
-                       * Math.Pow(((2d * r * (K - S0)) / sigma) - S0 + S, ((-2d * r) / sigma) - 1d);
-            // r*S*dV/dS
-            var p3 = r * S * dVdS;
 
-            // V
-            var V = (T - t)
-                    * (sigma / (2d * r))
-                    * Math.Pow(K / (1d + (sigma / (2d * r))), (2d * r + sigma) / sigma)
-                    * Math.Pow((S - S0 + (K - S0) * ((2d * r) / sigma)), (-2d * r) / sigma);
-            // r*V
-            var p4 = r * V;
-            
-            // if we are on the T-1 time layer
-            // K=S0
-            if (k == this.GetM() - 1)
-            {
-                p1 = 0d;
-                p2 = 0d;
-                p3 = 0d;
-                p4 = 0d;
-            }
-
-            return p1 + p2 + p3 - p4;
+            // return p1 + p2 + p3 - p4;
             // return 0;
+        }
+
+        private double Get_a0(double T,  double K)
+        {
+            var calculateA0 = K / (2d * T);
+            return calculateA0;
         }
 
         /**

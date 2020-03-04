@@ -16,6 +16,22 @@ namespace UnitTests
     [TestFixture]
     public class AmericanOptionTests : UnitTestBase
     {
+        // [Test]
+        // public void AmericanOption()
+        // {
+        //     var parameters = this.GetParameters(true, this.GetWorkingDir() + "AO/");
+        //     var calculator = new AmericanOptionCalculator(parameters, true, true);
+        //
+        //     PrintParameters(calculator);
+        //
+        //     // get S0t in direct order 
+        //     double[] S0t = calculator.Solve();
+        //     // get V(S(t), S0(t)) in direct order 
+        //     List<SolutionData> numericSolutions = calculator.GetNumericSolutions();
+        //
+        //     List<SolutionData> exactSolutions = calculator.GetExactSolutions(S0t);
+        // }
+
         [Test]
         public void AmericanOption()
         {
@@ -74,7 +90,7 @@ namespace UnitTests
                     break;
                 }
             }
-            
+
             Console.WriteLine();
             Console.WriteLine("Print Errors");
             for (var index = 0; index < numericSolutions.Count; index++)
@@ -98,28 +114,41 @@ namespace UnitTests
             ClearData(parameters);
 
             var printer = calculator.GetTecplotPrinter();
-            var solutionsCount = numericSolutions.Count;
-            for (var k = 0; k < solutionsCount; k++)
-            {
-                var exactSolution = exactSolutions[k];
-                var numericSolution = numericSolutions[k];
-                double[] error = Utils.GetAbsError(exactSolution.Solution, numericSolution.Solution);
-
-                printer.PrintXY(Path.Combine(parameters.WorkDir , "exactSolution"), calculator.GetTau() * k, calculator.GetH(),
-                    exactSolution.Solution, k, "exact_" + k);
-                printer.PrintXY(Path.Combine(parameters.WorkDir, "numericSolution"), calculator.GetTau() * k, calculator.GetH(),
-                    numericSolution.Solution, k, "numeric_" + k);
-                printer.PrintXY(Path.Combine(parameters.WorkDir, "error"), calculator.GetTau() * k, calculator.GetH(), error);
-            }
-            
-            for (var i = 0; i < solutionsCount; i++)
+            for (var i = 0; i < numericSolutions.Count; i++)
             {
                 var exactSolution = exactSolutions[i];
                 var numericSolution = numericSolutions[i];
-                Assert.AreEqual(exactSolution.Solution.Length, numericSolution.Solution.Length);
-                
+                double[] error = Utils.GetAbsError(exactSolution.Solution, numericSolution.Solution);
+
+                printer.PrintXY(
+                    Path.Combine(parameters.WorkDir, "exactSolution"),
+                    calculator.GetTau() * i,
+                    calculator.GetH(),
+                    exactSolution.Solution,
+                    i,
+                    "exact_" + i);
+                printer.PrintXY(
+                    Path.Combine(parameters.WorkDir, "numericSolution"),
+                    calculator.GetTau() * i,
+                    calculator.GetH(),
+                    numericSolution.Solution,
+                    i,
+                    "numeric_" + i);
+                printer.PrintXY(Path.Combine(parameters.WorkDir, "error"), calculator.GetTau() * i, calculator.GetH(), error);
+                if (i > 2)
+                {
+                    break;
+                }
+            }
+
+            for (var i = 0; i <  numericSolutions.Count; i++)
+            {
+                var exactSolution = exactSolutions[i];
+                var numericSolution = numericSolutions[i];
                 double[] error = Utils.GetAbsError(exactSolution.Solution, numericSolution.Solution);
                 
+                Assert.AreEqual(exactSolution.Solution.Length, numericSolution.Solution.Length);
+
                 for (var j = 0; j < exactSolution.Solution.Length; j++)
                 {
                     try
