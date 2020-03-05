@@ -33,6 +33,8 @@
 
         private readonly double TValue;
         
+        private readonly double smoothness;
+        
         public AmericanOptionCalculator(AmericanOptionParameters parameters, bool allowOutputFile, bool allowOutputConsole)
             : base(parameters)
         {
@@ -46,6 +48,7 @@
 
             this.MValue = parameters.M;
             this.TValue = parameters.T;
+            this.smoothness = parameters.Smoothness;
             this.saveSolutions = parameters.SaveVSolutions;
 
             this.outputPathStat = Path.Combine(this.outputPath, "stat");
@@ -64,6 +67,11 @@
         public int GetM()
         {
             return this.MValue;
+        }
+        
+        public double GetSmoothness()
+        {
+            return this.smoothness;
         }
 
         public double GetT()
@@ -237,7 +245,7 @@
                 var Vi = (T - t)
                          * (sigma_sq / (2d * r))
                          * Math.Pow(K / (1d + (sigma_sq / (2d * r))), (2d * r + sigma_sq) / sigma_sq)
-                         * Math.Pow(S - (this.Get_a0(T, K) * t), (-2d * r) / sigma_sq);
+                         * Math.Pow(S - (this.Get_a0(T, K, this.GetSmoothness()) * t), (-2d * r) / sigma_sq);
                          // * Math.Pow(S - S0 + (K - S0) * ((2d * r) / (sigma_sq)), (-2d * r) / sigma_sq);
                 
                 // the third version 
@@ -251,9 +259,61 @@
 
                 V[i] = Vi;
             }
+
+            return V;
+        }
+        
+        /// <summary>
+        /// Returns exact solutions V(S(t)) in reversed order (from the M to the 0 time step)
+        /// </summary>
+        /// <returns></returns>
+        public List<SolutionData> GetExactSolutions2(double smoothness)
+        {
+            if (Math.Abs(this.GetM() * this.GetTau() - this.GetT()) > double.Epsilon)
+            {
+                throw new Exception("GetExactSolutions");
+            }
             
-            // TODO: why we get some negative values instead of zero?
-            RemoveNegativeValues(V);
+            var list = new List<SolutionData>
+            {
+                new SolutionData(0d, this.GetM())
+                {
+                    Solution = this.GetVST() // V(S, T) = (K - S)+
+                }
+            };
+            
+            for (var k = this.GetM() - 1; k >= 0; k--)
+            {
+                double[] solution = this.GetExactSolution2(k * this.GetTau(), smoothness);
+                var solutionData = new SolutionData(0d, k)
+                {
+                    Solution = solution
+                };
+                list.Add(solutionData);
+            }
+
+            return list;
+        }
+
+        private double[] GetExactSolution2(double t, double smoothness)
+        {
+            var len = this.Getb() - this.Geta();
+            var h = len / this.GetN();
+            var V = new double[this.GetN1()];
+            var r = this.GetR();
+            var K = this.GetK();
+            var T = this.GetT();
+            var sigma = this.GetSquaredSigma();
+            for (var i = 0; i < V.Length; i++)
+            {
+                var S = this.Geta() + i * h;
+
+                // Vi
+                V[i] = (T - t)
+                       * (sigma / (2d * r))
+                       * Math.Pow(K / (1d + (sigma / (2d * r))), (2d * r + sigma) / sigma)
+                       * Math.Pow(S - (this.Get_a0(T, K, smoothness) * t), (-2d * r) / sigma);
+            }
 
             return V;
         }
@@ -390,14 +450,16 @@
             var sph0 = S0 + 0.5d * hph0; // s_{i+1/2}
             CheckHCorrectness(hmh0, tau, sph0, r);
             CheckHCorrectness(hph0, tau, sph0, r);
-            var betam1 = 1d / (8d * tau) * (1d + (2d * tau * r * smh0) / hmh0) * (1d + (2d * tau * r * smh0) / hmh0);
+            // var betam1 = 1d / (8d * tau) * (1d + (2d * tau * r * smh0) / hmh0) * (1d + (2d * tau * r * smh0) / hmh0);
             var beta0 =  1d / (8d * tau) * (3d - 2d * tau * r * smh0 / hmh0) * (1d + 2d * tau * r * smh0 / hmh0) 
                 + 1d / (8d * tau) * (3d + (2d * tau * r * sph0) / hph0) * (1d - (2d * tau * r * sph0) / hph0);
             var betap1 = 1d / (8d * tau) * (1d - (2d * tau * r * sph0) / hph0) * (1d - (2d * tau * r * sph0) / hph0);
             var f0 = this.GetF(sigma, r, this.GetK(), h, S0, this.GetTau(), k, this.GetT(), S0);
 
-            rp[0] = ((-hph0 / 2d) * f0) + ((sigma * S0 * S0) / 2d)
-                                        + (hph0 / 2d) * (betam1 * 0d /*Vk1[-1]*/ + beta0 * Vk1[0] + betap1 * Vk1[1]);
+            var s0 = ((-hph0 / 2d) * f0) + ((sigma * S0 * S0) / 2d)
+                                         + (hph0 / 2d) * (beta0 * Vk1[0] + betap1 * Vk1[1]);
+            // s0 /= 100;
+            rp[0] = s0;
 
             for (var i = 1; i < rp.Length - 1; ++i)
             {
@@ -458,7 +520,7 @@
             
             // the second version (check validation-equation-am_option.nb and validation-equation-am_option.docx)
             var t = tau * k;
-            var a0 = this.Get_a0(T, K);
+            var a0 = this.Get_a0(T, K, this.GetSmoothness());
             
             // dV/dt
             var dvdtNumerator = K * Math.Pow(K / ((sigma / (2d * r)) + 1d), (2d * r) / sigma)
@@ -620,15 +682,13 @@
             // // r*V
             // var p4 = r * V;
             
-            
-
             // return p1 + p2 + p3 - p4;
             // return 0;
         }
 
-        private double Get_a0(double T,  double K)
+        private double Get_a0(double T,  double K, double smoothness)
         {
-            var calculateA0 = K / (2d * T);
+            var calculateA0 = K / (smoothness * T);
             return calculateA0;
         }
 

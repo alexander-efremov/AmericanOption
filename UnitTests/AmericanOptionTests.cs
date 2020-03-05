@@ -7,31 +7,15 @@ namespace UnitTests
     using System.IO;
     using System.Linq;
     using System.Text;
-    using NUnit.Framework;
     using AmericanOption;
     using AmericanOptions;
     using CoreLib;
     using CoreLib.Utils;
+    using NUnit.Framework;
 
     [TestFixture]
     public class AmericanOptionTests : UnitTestBase
     {
-        // [Test]
-        // public void AmericanOption()
-        // {
-        //     var parameters = this.GetParameters(true, this.GetWorkingDir() + "AO/");
-        //     var calculator = new AmericanOptionCalculator(parameters, true, true);
-        //
-        //     PrintParameters(calculator);
-        //
-        //     // get S0t in direct order 
-        //     double[] S0t = calculator.Solve();
-        //     // get V(S(t), S0(t)) in direct order 
-        //     List<SolutionData> numericSolutions = calculator.GetNumericSolutions();
-        //
-        //     List<SolutionData> exactSolutions = calculator.GetExactSolutions(S0t);
-        // }
-
         [Test]
         public void AmericanOption()
         {
@@ -44,7 +28,7 @@ namespace UnitTests
             double[] S0t = calculator.Solve();
             // get V(S(t), S0(t)) in direct order 
             List<SolutionData> numericSolutions = calculator.GetNumericSolutions();
-            
+
             Console.WriteLine("Numeric S0:");
             for (var i = S0t.Length - 1; i >= 0; i--)
             {
@@ -114,39 +98,42 @@ namespace UnitTests
             ClearData(parameters);
 
             var printer = calculator.GetTecplotPrinter();
-            for (var i = 0; i < numericSolutions.Count; i++)
+
+            // checks solutions from the 0 to T level
+            for (var i = numericSolutions.Count - 1; i >= 0; i--)
             {
                 var exactSolution = exactSolutions[i];
                 var numericSolution = numericSolutions[i];
                 double[] error = Utils.GetAbsError(exactSolution.Solution, numericSolution.Solution);
 
                 printer.PrintXY(
-                    Path.Combine(parameters.WorkDir, "exactSolution"),
+                    Path.Combine(parameters.WorkDir + "/exact/", "exactSolution"),
                     calculator.GetTau() * i,
                     calculator.GetH(),
                     exactSolution.Solution,
                     i,
                     "exact_" + i);
                 printer.PrintXY(
-                    Path.Combine(parameters.WorkDir, "numericSolution"),
+                    Path.Combine(parameters.WorkDir + "/numeric/", "numericSolution"),
                     calculator.GetTau() * i,
                     calculator.GetH(),
                     numericSolution.Solution,
                     i,
                     "numeric_" + i);
-                printer.PrintXY(Path.Combine(parameters.WorkDir, "error"), calculator.GetTau() * i, calculator.GetH(), error);
+                printer.PrintXY(Path.Combine(parameters.WorkDir + "/error/", "error"), calculator.GetTau() * i, calculator.GetH(), error);
                 if (i > 2)
                 {
                     break;
                 }
             }
 
-            for (var i = 0; i <  numericSolutions.Count; i++)
+            // checks solutions from the 0 to T level
+            for (var i = numericSolutions.Count - 1; i >= 0; i--)
             {
                 var exactSolution = exactSolutions[i];
                 var numericSolution = numericSolutions[i];
                 double[] error = Utils.GetAbsError(exactSolution.Solution, numericSolution.Solution);
-                
+
                 Assert.AreEqual(exactSolution.Solution.Length, numericSolution.Solution.Length);
 
                 for (var j = 0; j < exactSolution.Solution.Length; j++)
@@ -154,18 +141,21 @@ namespace UnitTests
                     try
                     {
                         Assert.AreEqual(
-                            exactSolution.k, 
+                            exactSolution.k,
                             numericSolution.k,
                             "k is wrong");
                         Assert.AreEqual(
-                            exactSolution.S0, 
+                            exactSolution.S0,
                             numericSolution.S0,
                             "S0 is wrong");
                         Assert.AreEqual(
-                            exactSolution.Solution[j], 
+                            exactSolution.Solution[j],
                             numericSolution.Solution[j],
                             // 10e-6,
-                            error[j].ToString(CultureInfo.InvariantCulture));
+                            "ex: " + exactSolution.Solution[j].ToString("e8", CultureInfo.InvariantCulture)
+                                   + " num: " + numericSolution.Solution[j].ToString("e8", CultureInfo.CurrentCulture)
+                                   + " err: " + error[j].ToString("e8", CultureInfo.CurrentCulture)
+                                   + " rel: " + numericSolution.Solution[j] / exactSolution.Solution[j]);
                     }
                     catch (Exception)
                     {
@@ -178,22 +168,90 @@ namespace UnitTests
             this.Print(Path.Combine(parameters.WorkDir, "s0"), S0t, calculator.GetTau());
         }
 
-        private static void ClearData(Parameters parameters)
+        [Test]
+        public void AmericanOptionExactSolutionDraw()
         {
-            var di = new DirectoryInfo(parameters.WorkDir);
-            var files = di.GetFiles("*.dat")
-                .Where(p => p.Extension == ".dat").ToArray();
-            foreach (var file in files)
+            var parameters = this.GetParameters(true, this.GetWorkingDir() + "AO/");
+            var calculator = new AmericanOptionCalculator(parameters, true, true);
+
+            PrintParameters(calculator);
+            ClearData(parameters);
+
+            var smoothness = 1000d;
+
+            List<SolutionData> exactSolutions = calculator.GetExactSolutions2(smoothness);
+            var printer = calculator.GetTecplotPrinter();
+            // checks solutions from the 0 to T level
+            for (var i = exactSolutions.Count - 1; i >= 0; i--)
             {
-                try
+                var exactSolution = exactSolutions[i];
+
+                printer.PrintXY(
+                    Path.Combine(parameters.WorkDir + "/exact/", "exactSolution"),
+                    calculator.GetTau() * i,
+                    calculator.GetH(),
+                    exactSolution.Solution,
+                    i,
+                    "exact_" + i);
+            }
+        }
+
+        [Test]
+        public void AmericanOptionNumericSolutionDraw()
+        {
+            var parameters = this.GetParameters(true, this.GetWorkingDir() + "AO/");
+            var calculator = new AmericanOptionCalculator(parameters, true, true);
+            // get S0t in direct order 
+            calculator.Solve();
+            // get V(S(t), S0(t)) in direct order 
+            List<SolutionData> numericSolutions = calculator.GetNumericSolutions();
+            ClearData(parameters);
+            var printer = calculator.GetTecplotPrinter();
+            for (var index = 0; index < numericSolutions.Count; index++)
+            {
+                var solution = numericSolutions[index];
+                calculator.UpdateH(solution.S0);
+                var n0toS0 = (int)(Math.Floor(solution.S0 - calculator.Geta()) / calculator.GetH());
+                //int nS0tob = (int)(Math.Floor(calculator.Getb() - solution.S0)/calculator.GetH());
+                var nS0tob = solution.Solution.Length;
+                var sol = new double[n0toS0 + nS0tob];
+
+                for (var i = 0; i <= n0toS0; i++)
                 {
-                    file.Attributes = FileAttributes.Normal;
-                    File.Delete(file.FullName);
+                    sol[i] = calculator.GetK() - (calculator.Geta() + i * calculator.GetH());
                 }
-                catch
+
+                for (var j = 0; j < solution.Solution.Length; j++)
                 {
-                    // ignored
+                    sol[n0toS0 + j] = solution.Solution[j];
                 }
+
+                printer.PrintXY(
+                    Path.Combine(parameters.WorkDir + "/numeric/", "numericSolution"),
+                    calculator.GetTau() * index,
+                    calculator.GetH(),
+                    sol,
+                    index,
+                    "numeric_" + index);
+            }
+
+            PrintParameters(calculator);
+
+
+            List<SolutionData> exactSolutions = calculator.GetExactSolutions2(parameters.Smoothness);
+
+            // checks solutions from the 0 to T level
+            for (var i = exactSolutions.Count - 1; i >= 0; i--)
+            {
+                var exactSolution = exactSolutions[i];
+
+                printer.PrintXY(
+                    Path.Combine(parameters.WorkDir + "/exact/", "exactSolution"),
+                    calculator.GetTau() * i,
+                    calculator.GetH(),
+                    exactSolution.Solution,
+                    i,
+                    "exact_" + i);
             }
         }
 
@@ -224,16 +282,16 @@ namespace UnitTests
                 var Ki = K * ki;
                 for (var i = 0; i < Nsteps; i++)
                 {
-                    var n = (int) Math.Pow(2, i) * startN;
+                    var n = (int)Math.Pow(2, i) * startN;
                     var folderPath = this.CreateOutputFolder(Ki, n, string.Empty);
-                    var parameters = this.GetSeriesParameters(n, Ki, M, tau, a, b, r, sigmaSq, S0eps, folderPath);
+                    var parameters = this.GetSeriesParameters(n, Ki, M, tau, a, b, r, sigmaSq, S0eps, 1000d, folderPath);
                     var calculator = new AmericanOptionCalculator(parameters, false, false);
                     double[] S0Arr = calculator.Solve();
 
                     for (var tl = tls; tl >= 1; tl--)
                     {
                         var time = tau * (5d * tl);
-                        var timeIndex = (int) (time / tau);
+                        var timeIndex = (int)(time / tau);
                         var value = S0Arr[timeIndex];
                         var s1 = value;
                         var format = Ki + new string(' ', Ki > 5 ? 9 : 10) + time.ToString("0.00") +
@@ -262,8 +320,8 @@ namespace UnitTests
             const int Nsteps = 7; // 3;
 
             const double startK = 5d;
-            const double  a = 0d;
-            const double  b = 50d;
+            const double a = 0d;
+            const double b = 50d;
             const double r = 0.1d;
             const double sigmaSq = 0.2d;
             const double K = startK;
@@ -281,9 +339,9 @@ namespace UnitTests
             watch.Reset();
             watch.Start();
             {
-                M = (int) (10 * Math.Pow(4, Nsteps - 1));
+                M = (int)(10 * Math.Pow(4, Nsteps - 1));
                 tau = (T - 0d) / M;
-                var n = (int) Math.Pow(2, Nsteps - 1) * startN;
+                var n = (int)Math.Pow(2, Nsteps - 1) * startN;
                 var folderPath = this.GetTrashFolder();
 
                 /*
@@ -292,7 +350,7 @@ namespace UnitTests
                         folderPath = CreateOutputFolder(K, n, "convergence");
                     }
                 */
-                var parameters = this.GetSeriesParameters(n, K, M, tau, a, b, r, sigmaSq, S0eps, folderPath);
+                var parameters = this.GetSeriesParameters(n, K, M, tau, a, b, r, sigmaSq, S0eps, 1000d, folderPath);
                 var calculator = new AmericanOptionCalculator(parameters, false, false);
                 S0ArrGold = calculator.Solve();
             }
@@ -303,9 +361,9 @@ namespace UnitTests
             for (var i = 0; i < Nsteps - 1; i++)
             {
                 Console.WriteLine("Started step " + i);
-                M = (int) (10 * Math.Pow(4, i));
+                M = (int)(10 * Math.Pow(4, i));
                 tau = (T - 0d) / M;
-                var n = (int) Math.Pow(2, i) * startN;
+                var n = (int)Math.Pow(2, i) * startN;
                 var folderPath = this.GetTrashFolder();
 
                 /*
@@ -314,9 +372,9 @@ namespace UnitTests
                         folderPath = CreateOutputFolder(K, n, "convergence");
                     }
                 */
-                var parameters = this.GetSeriesParameters(n, K, M, tau, a, b, r, sigmaSq, S0eps, folderPath);
+                var parameters = this.GetSeriesParameters(n, K, M, tau, a, b, r, sigmaSq, S0eps, 1000d, folderPath);
                 var calculator = new AmericanOptionCalculator(parameters, false, false);
-                var S0Arr = calculator.Solve();
+                double[] S0Arr = calculator.Solve();
                 dictionary[n] = this.GetErrorLInf(S0ArrGold, S0Arr);
                 Console.WriteLine("Finished step = " + i);
             }
@@ -343,14 +401,128 @@ namespace UnitTests
             // PrintCsv(table);
         }
 
-        private string GetWorkingDir()
+        private static void ClearData(Parameters parameters)
         {
-            return Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + Path.DirectorySeparatorChar;
+            var di = new DirectoryInfo(parameters.WorkDir);
+            FileInfo[] files = di.GetFiles("*.dat")
+                .Where(p => p.Extension == ".dat").ToArray();
+            foreach (var file in files)
+            {
+                try
+                {
+                    file.Attributes = FileAttributes.Normal;
+                    File.Delete(file.FullName);
+                }
+                catch
+                {
+                    // ignored
+                }
+            }
+
+            di = new DirectoryInfo(parameters.WorkDir + "numeric/");
+            files = di.GetFiles("*.dat")
+                .Where(p => p.Extension == ".dat").ToArray();
+            foreach (var file in files)
+            {
+                try
+                {
+                    file.Attributes = FileAttributes.Normal;
+                    File.Delete(file.FullName);
+                }
+                catch
+                {
+                    // ignored
+                }
+            }
+
+            di = new DirectoryInfo(parameters.WorkDir + "exact/");
+            files = di.GetFiles("*.dat")
+                .Where(p => p.Extension == ".dat").ToArray();
+            foreach (var file in files)
+            {
+                try
+                {
+                    file.Attributes = FileAttributes.Normal;
+                    File.Delete(file.FullName);
+                }
+                catch
+                {
+                    // ignored
+                }
+            }
+
+            di = new DirectoryInfo(parameters.WorkDir + "error/");
+            files = di.GetFiles("*.dat")
+                .Where(p => p.Extension == ".dat").ToArray();
+            foreach (var file in files)
+            {
+                try
+                {
+                    file.Attributes = FileAttributes.Normal;
+                    File.Delete(file.FullName);
+                }
+                catch
+                {
+                    // ignored
+                }
+            }
+        }
+
+        private static void PrintParameters(AmericanOptionCalculator calculator)
+        {
+            Console.WriteLine("a = " + calculator.GetLeftBoundary());
+            Console.WriteLine("b = " + calculator.GetRightBoundary());
+            Console.WriteLine("r = " + calculator.GetR());
+            Console.WriteLine("N = " + calculator.GetN());
+            Console.WriteLine("N_1 = " + calculator.GetN1());
+            Console.WriteLine("tau = " + calculator.GetTau());
+            Console.WriteLine("sigma_sq = " + calculator.GetSquaredSigma());
+            Console.WriteLine("K = " + calculator.GetK());
+            Console.WriteLine("M = " + calculator.GetM());
+            Console.WriteLine("T = " + calculator.GetT());
+            Console.WriteLine("S0 Eps = " + calculator.GetS0Eps());
+            Console.WriteLine();
+        }
+
+        private static void PrintTable(Dictionary<string, List<double>> table)
+        {
+            foreach (KeyValuePair<string, List<double>> pair in table)
+            {
+                var value = pair.Value.Aggregate(pair.Key, (current, t) => current + t.ToString("0.0000000") + new string(' ', t > 10d ? 10 : 11));
+                Console.WriteLine(value);
+            }
+        }
+
+        private static void PrintTableHeader(int Nsteps, int startN)
+        {
+            var whitespaceNumber = 25 * Nsteps;
+            Console.WriteLine(new string('=', whitespaceNumber));
+            Console.Write("K" + new string(' ', 10));
+            Console.Write("t" + new string(' ', 13));
+            for (var i = 0; i < Nsteps; i++)
+            {
+                var n = (int)Math.Pow(2, i) * startN;
+                Console.Write("N(" + n + ")" + new string(' ', 15));
+            }
+
+            Console.WriteLine();
+            Console.WriteLine(new string('=', whitespaceNumber));
+        }
+
+        private string CreateOutputFolder(double Ki, int n, string subfolder)
+        {
+            var folderPath = this.GetWorkingDir() + "/AO/" + subfolder + "/" + Ki + "_" + "_" + n + "/";
+            if (!Directory.Exists(folderPath))
+            {
+                Directory.CreateDirectory(folderPath);
+            }
+
+            return folderPath;
         }
 
         private double GetErrorLInf(IReadOnlyList<double> gold, IReadOnlyList<double> sol)
         {
-            var stride = (int) ((double) gold.Count / sol.Count);
+            var stride = (int)((double)gold.Count / sol.Count);
             var nSol = new double[gold.Count];
             var error = new double[gold.Count];
             for (int i = 0, k = 0; i < gold.Count; i += stride, k++)
@@ -363,25 +535,79 @@ namespace UnitTests
             return Utils.GetLInf(error);
         }
 
+        private AmericanOptionParameters GetParameters(bool saveSolutions, string workPath)
+        {
+            const double a = 0d;
+            const double b = 8d;
+            const double r = 0.1d;
+            const int n = 300;
+            const double tau = 1e-5d;
+            const double sigmaSq = 0.2d;
+            const double eps = 1e-5d;
+            const double K = 5d;
+            const int M = 365;
+            const double smoothness = 1000d;
+            return new AmericanOptionParameters(a, b, n, r, tau, sigmaSq, K, eps, M, workPath, saveSolutions, smoothness);
+        }
+
+        private AmericanOptionParameters GetSeriesParameters(
+            int n,
+            double K,
+            int M,
+            double tau,
+            double a,
+            double b,
+            double r,
+            double sigma,
+            double S0eps,
+            double smoothness,
+            string workDir)
+        {
+            return new AmericanOptionParameters(a, b, n, r, tau, sigma, K, S0eps, M, workDir, false, smoothness);
+        }
+
         private string GetTrashFolder()
         {
             return this.GetWorkingDir() + "AO/trash";
         }
 
+        private string GetWorkingDir()
+        {
+            return Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + Path.DirectorySeparatorChar;
+        }
+
+        private void Print(string filename, IReadOnlyList<double> St, double tau)
+        {
+            var name = $"{filename}_nx={St.Count}_tau={tau}.dat";
+            using (var writer = new StreamWriter(name, false))
+            {
+                writer.WriteLine(
+                    "TITLE = 'DEM DATA | DEM DATA | DEM DATA | DEM DATA'\nVARIABLES = S {0}\nZONE T='{1}'",
+                    "t",
+                    "SubZone");
+                writer.WriteLine($"I={St.Count} K={1} ZONETYPE=Ordered");
+                writer.WriteLine("DATAPACKING=POINT\nDT=(DOUBLE DOUBLE)");
+                for (var i = 0; i < St.Count; i++)
+                {
+                    writer.WriteLine("{0:e8} {1:e8}", St[i], i);
+                }
+            }
+        }
+
         private void PrintCsv(Dictionary<string, List<double>> table)
         {
             var dictionary = new Dictionary<string, string>();
-            foreach (var pair in table)
+            foreach (KeyValuePair<string, List<double>> pair in table)
             {
                 string[] strings = pair.Key.Split(new[] {' '}, StringSplitOptions.RemoveEmptyEntries);
                 var (item1, item2) = Tuple.Create(strings[0], strings[1]);
                 var tupleItem1 = item1 + ";" + item2;
-                tupleItem1 = pair.Value.Aggregate(tupleItem1, (current, tt1) => current + (";" + tt1.ToString("0.0000000")));
+                tupleItem1 = pair.Value.Aggregate(tupleItem1, (current, tt1) => current + ";" + tt1.ToString("0.0000000"));
 
                 dictionary[pair.Key] = tupleItem1;
             }
 
-            foreach (var pair in dictionary)
+            foreach (KeyValuePair<string, string> pair in dictionary)
             {
                 Console.WriteLine(pair.Value);
             }
@@ -401,103 +627,6 @@ namespace UnitTests
             Console.Write("r = " + r);
             Console.Write(" sigma_sq = " + sigmaSq);
             Console.WriteLine(" K = " + K);
-        }
-
-        private string CreateOutputFolder(double Ki, int n, string subfolder)
-        {
-            var folderPath = this.GetWorkingDir() + "/AO/" + subfolder + "/" + Ki + "_" + "_" + n + "/";
-            if (!Directory.Exists(folderPath))
-            {
-                Directory.CreateDirectory(folderPath);
-            }
-
-            return folderPath;
-        }
-
-        private static void PrintTableHeader(int Nsteps, int startN)
-        {
-            var whitespaceNumber = 25 * Nsteps;
-            Console.WriteLine(new string('=', whitespaceNumber));
-            Console.Write("K" + new string(' ', 10));
-            Console.Write("t" + new string(' ', 13));
-            for (var i = 0; i < Nsteps; i++)
-            {
-                var n = (int) Math.Pow(2, i) * startN;
-                Console.Write("N(" + n + ")" + new string(' ', 15));
-            }
-
-            Console.WriteLine();
-            Console.WriteLine(new string('=', whitespaceNumber));
-        }
-
-        private static void PrintTable(Dictionary<string, List<double>> table)
-        {
-            foreach (KeyValuePair<string, List<double>> pair in table)
-            {
-                var value = pair.Value.Aggregate(pair.Key, (current, t) => current + (t.ToString("0.0000000") + new string(' ', t > 10d ? 10 : 11)));
-                Console.WriteLine(value);
-            }
-        }
-
-        private void Print(string filename, IReadOnlyList<double> St, double tau)
-        {
-            var name = $"{filename}_nx={St.Count}_tau={tau}.dat";
-            using (var writer = new StreamWriter(name, false))
-            {
-                writer.WriteLine("TITLE = 'DEM DATA | DEM DATA | DEM DATA | DEM DATA'\nVARIABLES = S {0}\nZONE T='{1}'",
-                    "t", "SubZone");
-                writer.WriteLine($"I={St.Count} K={1} ZONETYPE=Ordered");
-                writer.WriteLine("DATAPACKING=POINT\nDT=(DOUBLE DOUBLE)");
-                for (var i = 0; i < St.Count; i++)
-                {
-                    writer.WriteLine("{0:e8} {1:e8}", St[i], i);
-                }
-            }
-        }
-
-        private AmericanOptionParameters GetParameters(bool saveSolutions, string workPath)
-        {
-            const double a = 0d;
-            const double b = 8d;
-            const double r = 0.1d;
-            const int n = 300;
-            const double tau = 1e-5d;
-            const double sigmaSq = 0.2d;
-            const double eps = 1e-5d;
-            const double K = 5d;
-            const int M = 365;
-            return new AmericanOptionParameters(a, b, n, r, tau, sigmaSq, K, eps, M, workPath, saveSolutions);
-        }
-
-        private AmericanOptionParameters GetSeriesParameters(
-            int n,
-            double K,
-            int M,
-            double tau,
-            double a,
-            double b,
-            double r,
-            double sigma,
-            double S0eps,
-            string workDir)
-        {
-            return new AmericanOptionParameters(a, b, n, r, tau, sigma, K, S0eps, M, workDir, false);
-        }
-
-        private static void PrintParameters(AmericanOptionCalculator calculator)
-        {
-            Console.WriteLine("a = " + calculator.GetLeftBoundary());
-            Console.WriteLine("b = " + calculator.GetRightBoundary());
-            Console.WriteLine("r = " + calculator.GetR());
-            Console.WriteLine("N = " + calculator.GetN());
-            Console.WriteLine("N_1 = " + calculator.GetN1());
-            Console.WriteLine("tau = " + calculator.GetTau());
-            Console.WriteLine("sigma_sq = " + calculator.GetSquaredSigma());
-            Console.WriteLine("K = " + calculator.GetK());
-            Console.WriteLine("M = " + calculator.GetM());
-            Console.WriteLine("T = " + calculator.GetT());
-            Console.WriteLine("S0 Eps = " + calculator.GetS0Eps());
-            Console.WriteLine();
         }
     }
 }

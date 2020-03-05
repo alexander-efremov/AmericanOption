@@ -41,6 +41,16 @@ namespace CoreLib
         {
             return this.S0Eps;
         }
+        
+        public double Geta()
+        {
+            return this.a;
+        }
+
+        public double Getb()
+        {
+            return this.b;
+        }
 
         public int GetN()
         {
@@ -92,7 +102,7 @@ namespace CoreLib
             return this.workDir;
         }
 
-        protected void UpdateH(double S0)
+        public void UpdateH(double S0)
         {
             if (S0 < 0d)
             {
