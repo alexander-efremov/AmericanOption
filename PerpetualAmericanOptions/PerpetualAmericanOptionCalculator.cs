@@ -13,6 +13,53 @@ namespace PerpetualAmericanOptions
         {
         }
 
+        public double GetExactS0()
+        {
+            return this.GetK() / (1d + this.GetSquaredSigma() / (2d * this.GetR()));
+        }
+
+        public double[] GetExactSolution()
+        {
+            var arr = new double[this.GetN1()];
+            for (var i = 0; i < arr.Length; ++i)
+            {
+                var si = 0 + i * this.GetH();
+                arr[i] = GetV(this.GetSquaredSigma(), this.GetR(), this.GetK(), si);
+            }
+
+            // V(S) does not touch 0
+            // adjust value for better visualization
+            arr[0] = arr[1];
+            return arr;
+        }
+
+        public double[] GetExactSolution(double S0)
+        {
+            var arr = new double[this.GetN1()];
+            for (var i = 0; i < arr.Length; ++i)
+            {
+                var si = S0 + i * this.GetH();
+                arr[i] = GetV(this.GetSquaredSigma(), this.GetR(), this.GetK(), si);
+            }
+
+            return arr;
+        }
+
+        public double[] GetVKS()
+        {
+            var res = new double[this.GetN1()];
+            for (var i = 0; i < res.Length; i++)
+            {
+                res[i] = this.GetK() - i * this.GetH();
+                if (res[i] < 0d)
+                {
+                    res[i] = 0d;
+                }
+            }
+
+            return res;
+        }
+
         public Tuple<double[], double> Solve()
         {
             var tecplotPrinter = new TecplotPrinterSpecial(0d, this.GetRightBoundary(), this.GetTau());
@@ -47,113 +94,12 @@ namespace PerpetualAmericanOptions
             return Tuple.Create(V, S0);
         }
 
-        public double[] GetExactSolution()
+        private static void CheckHCorrectness(double h, double tau, double sph, double r)
         {
-            var arr = new double[this.GetN1()];
-            for (var i = 0; i < arr.Length; ++i)
+            if (tau / h > 1d / (2d * r * sph))
             {
-                var si = 0 + i * this.GetH();
-                arr[i] = GetV(this.GetSquaredSigma(), this.GetR(), this.GetK(), si);
+                throw new InvalidOperationException("tau / h");
             }
-
-            // V(S) does not touch 0
-            // adjust value for better visualization
-            arr[0] = arr[1];
-            return arr;
-        }
-
-        public double[] GetExactSolution(double S0)
-        {
-            var arr = new double[this.GetN1()];
-            for (var i = 0; i < arr.Length; ++i)
-            {
-                var si = S0 + i * this.GetH();
-                arr[i] = GetV(this.GetSquaredSigma(), this.GetR(), this.GetK(), si);
-            }
-
-            return arr;
-        }
-
-        public double GetExactS0()
-        {
-            return this.GetK() / (1d + this.GetSquaredSigma() / (2d * this.GetR()));
-        }
-
-        public double[] GetVKS()
-        {
-            var res = new double[this.GetN1()];
-            for (var i = 0; i < res.Length; i++)
-            {
-                res[i] = this.GetK() - i * this.GetH();
-                if (res[i] < 0d)
-                {
-                    res[i] = 0d;
-                }
-            }
-
-            return res;
-        }
-
-        private double[] CalculateRightPart(double S0)
-        {
-            var V = new double[this.GetN1() + 1]; // add + 1 to calculate right boundary
-            for (var i = 0; i <= this.GetN1(); i++)
-            {
-                var si = S0 + i * this.GetH();
-                V[i] = GetV(this.GetSquaredSigma(), this.GetR(), this.GetK(), si);
-            }
-
-            var rp = new double[this.GetN1()];
-            var si0 = S0 + 0 * this.GetH();
-            var hph0 = S0 + (0d + 1d) * this.GetH() - si0; // h_{i+1/2}
-            var hmh0 = si0 - (S0 + (0d - 1d) * this.GetH()); // h_{i-1/2}
-            var sph0 = si0 + 0.5d * hph0; // s_{i+1/2}
-            var smh0 = si0 - 0.5d * hmh0; // s_{i-1/2}
-            CheckHCorrectness(hph0, this.GetTau(), sph0, this.GetR());
-            CheckHCorrectness(hmh0, this.GetTau(), smh0, this.GetR());
-            var beta20 = 1d / (8d * this.GetTau()) * (3d - 2d * this.GetTau() * this.GetR() * sph0 / hph0) * (1d + 2d * this.GetTau() * this.GetR() * sph0 / hph0);
-            var beta30 = 1d / (8d * this.GetTau()) * (1d - 2d * this.GetTau() * this.GetR() * sph0 / hph0) * (1d - 2d * this.GetTau() * this.GetR() * sph0 / hph0);
-            rp[0] = hph0 * (beta20 * V[0] + beta30 * V[1]) + (this.GetSquaredSigma() * si0 * si0) / 2d;
-
-            for (var i = 1; i <= this.GetN1() - 1; i++)
-            {
-                var si = S0 + i * this.GetH();
-                var hmh = si - (S0 + (i - 1) * this.GetH()); // h_{i-1/2}
-                var hph = S0 + (i + 1) * this.GetH() - si; // h_{i+1/2}
-                var smh = si - 0.5d * hmh; // s_{i-1/2}
-                var sph = si + 0.5d * hph; // s_{i+1/2}
-                CheckHCorrectness(hph, this.GetTau(), sph, this.GetR());
-                CheckHCorrectness(hmh, this.GetTau(), sph, this.GetR());
-                var beta1 = 1d / (8d * this.GetTau()) * (1d + 2d * this.GetTau() * this.GetR() * smh / this.GetH())
-                                                      * (1d + 2d * this.GetTau() * this.GetR() * smh / this.GetH());
-                var beta2 =
-                    1d / (8d * this.GetTau()) * (3d + 2d * this.GetTau() * this.GetR() * smh / this.GetH()) * (1d - 2d * this.GetTau() * this.GetR() * smh / this.GetH())
-                    + 1d / (8d * this.GetTau()) * (3d - 2d * this.GetTau() * this.GetR() * sph / this.GetH())
-                                                * (1d + 2d * this.GetTau() * this.GetR() * sph / this.GetH());
-                var beta3 = 1d / (8d * this.GetTau()) * (1d - 2d * this.GetTau() * this.GetR() * sph / this.GetH())
-                                                      * (1d - 2d * this.GetTau() * this.GetR() * sph / this.GetH());
-                var val = ((hph + hmh) / 2d) * (beta1 * V[i - 1] + beta2 * V[i] + beta3 * V[i + 1]);
-
-                rp[i] = this.GetF() + val;
-            }
-
-            return rp;
-        }
-
-        private static double GetV(double sigma_sq, double r, double K, double si)
-        {
-            var p1 = sigma_sq / (2d * r);
-
-            var arg = K / (1 + sigma_sq / (2d * r));
-            var pow = (2d * r + sigma_sq) / sigma_sq;
-            var p2 = Math.Pow(arg, pow);
-
-            var arg2 = si;
-            var pow2 = -2d * r / sigma_sq;
-            var p3 = Math.Pow(arg2, pow2);
-
-            var v = p1 * p2 * p3;
-            return v;
         }
 
         /**
@@ -239,18 +185,72 @@ namespace PerpetualAmericanOptions
             return d;
         }
 
+        private static double GetV(double sigma_sq, double r, double K, double si)
+        {
+            var p1 = sigma_sq / (2d * r);
+
+            var arg = K / (1 + sigma_sq / (2d * r));
+            var pow = (2d * r + sigma_sq) / sigma_sq;
+            var p2 = Math.Pow(arg, pow);
+
+            var arg2 = si;
+            var pow2 = -2d * r / sigma_sq;
+            var p3 = Math.Pow(arg2, pow2);
+
+            var v = p1 * p2 * p3;
+            return v;
+        }
+
+        private double[] CalculateRightPart(double S0)
+        {
+            var V = new double[this.GetN1() + 1]; // add + 1 to calculate right boundary
+            for (var i = 0; i <= this.GetN1(); i++)
+            {
+                var si = S0 + i * this.GetH();
+                V[i] = GetV(this.GetSquaredSigma(), this.GetR(), this.GetK(), si);
+            }
+
+            var rp = new double[this.GetN1()];
+            var si0 = S0 + 0 * this.GetH();
+            var hph0 = S0 + (0d + 1d) * this.GetH() - si0; // h_{i+1/2}
+            var hmh0 = si0 - (S0 + (0d - 1d) * this.GetH()); // h_{i-1/2}
+            var sph0 = si0 + 0.5d * hph0; // s_{i+1/2}
+            var smh0 = si0 - 0.5d * hmh0; // s_{i-1/2}
+            CheckHCorrectness(hph0, this.GetTau(), sph0, this.GetR());
+            CheckHCorrectness(hmh0, this.GetTau(), smh0, this.GetR());
+            var beta20 = 1d / (8d * this.GetTau()) * (3d - 2d * this.GetTau() * this.GetR() * sph0 / hph0) * (1d + 2d * this.GetTau() * this.GetR() * sph0 / hph0);
+            var beta30 = 1d / (8d * this.GetTau()) * (1d - 2d * this.GetTau() * this.GetR() * sph0 / hph0) * (1d - 2d * this.GetTau() * this.GetR() * sph0 / hph0);
+            rp[0] = hph0 * (beta20 * V[0] + beta30 * V[1]) + (this.GetSquaredSigma() * si0 * si0) / 2d;
+
+            for (var i = 1; i <= this.GetN1() - 1; i++)
+            {
+                var si = S0 + i * this.GetH();
+                var hmh = si - (S0 + (i - 1) * this.GetH()); // h_{i-1/2}
+                var hph = S0 + (i + 1) * this.GetH() - si; // h_{i+1/2}
+                var smh = si - 0.5d * hmh; // s_{i-1/2}
+                var sph = si + 0.5d * hph; // s_{i+1/2}
+                CheckHCorrectness(hph, this.GetTau(), sph, this.GetR());
+                CheckHCorrectness(hmh, this.GetTau(), sph, this.GetR());
+                var beta1 = 1d / (8d * this.GetTau()) * (1d + 2d * this.GetTau() * this.GetR() * smh / this.GetH())
+                                                      * (1d + 2d * this.GetTau() * this.GetR() * smh / this.GetH());
+                var beta2 =
+                    1d / (8d * this.GetTau()) * (3d + 2d * this.GetTau() * this.GetR() * smh / this.GetH()) * (1d - 2d * this.GetTau() * this.GetR() * smh / this.GetH())
+                    + 1d / (8d * this.GetTau()) * (3d - 2d * this.GetTau() * this.GetR() * sph / this.GetH())
+                                                * (1d + 2d * this.GetTau() * this.GetR() * sph / this.GetH());
+                var beta3 = 1d / (8d * this.GetTau()) * (1d - 2d * this.GetTau() * this.GetR() * sph / this.GetH())
+                                                      * (1d - 2d * this.GetTau() * this.GetR() * sph / this.GetH());
+                var val = ((hph + hmh) / 2d) * (beta1 * V[i - 1] + beta2 * V[i] + beta3 * V[i + 1]);
+
+                rp[i] = this.GetF() + val;
+            }
+
+            return rp;
+        }
+
         // it is zero for our case
         private double GetF()
         {
             return 0d;
-        }
-
-        private static void CheckHCorrectness(double h, double tau, double sph, double r)
-        {
-            if (tau / h > 1d / (2d * r * sph))
-            {
-                throw new InvalidOperationException("tau / h");
-            }
         }
     }
 }

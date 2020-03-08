@@ -1,7 +1,9 @@
 namespace CoreLib
 {
     using System;
+    using System.Diagnostics.CodeAnalysis;
 
+    [SuppressMessage("ReSharper", "UnusedType.Global", Justification = "UsedType")]
     public class ThomasArrayPrinter
     {
         // ReSharper disable once UnusedMember.Global

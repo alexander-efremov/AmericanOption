@@ -10,24 +10,6 @@ namespace UnitTests
     [TestFixture]
     public class PerpetualAmericanOptionTests : UnitTestBase
     {
-        private string GetWorkingDir()
-        {
-            return Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + Path.DirectorySeparatorChar;
-        }
-
-        private PerpetualParameters GetParameters()
-        {
-            const double a = 0d;
-            const double b = 2d;
-            const double sigmaSq = 0.1d;
-            const double tau = 1e-3;
-            const int n = 400;
-            const double r = 0.08d;
-            const double K = 0.5d;
-            const double S0Eps = 10e-4;
-            return new PerpetualParameters(a, b, n, r, tau, sigmaSq, K, S0Eps, this.GetWorkingDir());
-        }
-
         [Test]
         public void PerpetualAmericanOption()
         {
@@ -41,7 +23,7 @@ namespace UnitTests
             Console.WriteLine();
 
             (double[] item1, var item2) = calculator.Solve();
-            var exactV = calculator.GetExactSolution(calculator.GetExactS0());
+            double[] exactV = calculator.GetExactSolution(calculator.GetExactS0());
             var l1Error = GetL1Error(calculator, calculator.GetExactSolution(calculator.GetExactS0()), item1);
             var l1Solution = GetL1Solution(calculator, item1);
 
@@ -58,8 +40,8 @@ namespace UnitTests
         {
             var parameters = this.GetParameters();
             var calculator = new PerpetualAmericanOptionCalculator(parameters);
-            var V = calculator.GetExactSolution();
-            var VS0 = calculator.GetVKS();
+            double[] V = calculator.GetExactSolution();
+            double[] VS0 = calculator.GetVKS();
             var h = (calculator.GetRightBoundary() - calculator.GetExactS0()) / calculator.GetN();
             var printer = new TecplotPrinter(
                 0d,
@@ -73,8 +55,8 @@ namespace UnitTests
         {
             var parameters = this.GetParameters();
             var calculator = new PerpetualAmericanOptionCalculator(parameters);
-            var V = calculator.GetExactSolution(calculator.GetExactS0());
-            var VS0 = calculator.GetVKS();
+            double[] V = calculator.GetExactSolution(calculator.GetExactS0());
+            double[] VS0 = calculator.GetVKS();
             var h = calculator.GetH();
 
             // var printer = new TecplotPrinterSpecial(
@@ -82,8 +64,17 @@ namespace UnitTests
             //    0d,
             //    calculator.GetRightBoundary(),
             //    calculator.GetTau());
-            TecplotPrinterSpecial.PrintXYSpecial(parameters.Tau, parameters.A, parameters.B,
-                this.GetWorkingDir() + "exact-S0", 0d, h, h, VS0, V, calculator.GetExactS0());
+            TecplotPrinterSpecial.PrintXYSpecial(
+                parameters.Tau,
+                parameters.A,
+                parameters.B,
+                this.GetWorkingDir() + "exact-S0",
+                0d,
+                h,
+                h,
+                VS0,
+                V,
+                calculator.GetExactS0());
         }
 
         [Test]
@@ -92,12 +83,30 @@ namespace UnitTests
             var parameters = this.GetParameters();
             var calculator = new PerpetualAmericanOptionCalculator(parameters);
             var h = (calculator.GetRightBoundary() - calculator.GetExactS0()) / calculator.GetN();
-            var exactS0 = calculator.GetVKS();
+            double[] exactS0 = calculator.GetVKS();
             var printer = new TecplotPrinter(
                 0d,
                 calculator.GetRightBoundary(),
                 calculator.GetTau());
             printer.PrintXY(this.GetWorkingDir() + "VKS", 0d, h, exactS0);
+        }
+
+        private PerpetualParameters GetParameters()
+        {
+            const double a = 0d;
+            const double b = 2d;
+            const double sigmaSq = 0.1d;
+            const double tau = 1e-3;
+            const int n = 400;
+            const double r = 0.08d;
+            const double K = 0.5d;
+            const double S0Eps = 10e-4;
+            return new PerpetualParameters(a, b, n, r, tau, sigmaSq, K, S0Eps, this.GetWorkingDir());
+        }
+
+        private string GetWorkingDir()
+        {
+            return Environment.GetFolderPath(Environment.SpecialFolder.Desktop) + Path.DirectorySeparatorChar;
         }
     }
 }

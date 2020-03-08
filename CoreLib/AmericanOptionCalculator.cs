@@ -37,54 +37,9 @@ namespace CoreLib
 
         protected ThomasAlgorithmCalculator ThomasAlgorithmCalculator { get; }
 
-        public double GetS0Eps()
-        {
-            return this.S0Eps;
-        }
-        
         public double Geta()
         {
             return this.a;
-        }
-
-        public double Getb()
-        {
-            return this.b;
-        }
-
-        public int GetN()
-        {
-            return this.n;
-        }
-
-        public int GetN1()
-        {
-            return this.n1;
-        }
-
-        public double GetRightBoundary()
-        {
-            return this.b;
-        }
-
-        public double GetLeftBoundary()
-        {
-            return this.a;
-        }
-
-        public double GetSquaredSigma()
-        {
-            return this.sigmaSq;
-        }
-
-        public double GetTau()
-        {
-            return this.tau;
-        }
-
-        public double GetR()
-        {
-            return this.r;
         }
 
         public double GetH()
@@ -97,9 +52,44 @@ namespace CoreLib
             return this.K;
         }
 
-        protected string GetWorkDir()
+        public double GetLeftBoundary()
         {
-            return this.workDir;
+            return this.a;
+        }
+
+        public int GetN()
+        {
+            return this.n;
+        }
+
+        public int GetN1()
+        {
+            return this.n1;
+        }
+
+        public double GetR()
+        {
+            return this.r;
+        }
+
+        public double GetRightBoundary()
+        {
+            return this.b;
+        }
+
+        public double GetS0Eps()
+        {
+            return this.S0Eps;
+        }
+
+        public double GetSquaredSigma()
+        {
+            return this.sigmaSq;
+        }
+
+        public double GetTau()
+        {
+            return this.tau;
         }
 
         public void UpdateH(double S0)
@@ -115,6 +105,16 @@ namespace CoreLib
             {
                 throw new ArgumentException("h");
             }
+        }
+
+        protected double Getb()
+        {
+            return this.b;
+        }
+
+        protected string GetWorkDir()
+        {
+            return this.workDir;
         }
 
         private void CheckParameters()

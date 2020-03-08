@@ -2,7 +2,15 @@ namespace CoreLib
 {
     public abstract class Parameters
     {
-        protected Parameters(double a, double b, int n, double r, double tau, double sigmaSq, double k, double s0eps,
+        protected Parameters(
+            double a,
+            double b,
+            int n,
+            double r,
+            double tau,
+            double sigmaSq,
+            double k,
+            double s0eps,
             string workDir)
         {
             this.A = a;
@@ -20,17 +28,17 @@ namespace CoreLib
 
         public double B { get; }
 
+        public double K { get; }
+
         public int N { get; }
 
         public double R { get; }
 
-        public double Tau { get; }
+        public double S0Eps { get; }
 
         public double SigmaSq { get; }
 
-        public double K { get; }
-
-        public double S0Eps { get; }
+        public double Tau { get; }
 
         public string WorkDir { get; private set; }
     }

@@ -8,8 +8,17 @@ namespace CoreLib
         {
         }
 
-        public static void PrintXYSpecial(double tau, double a, double b, string filename, double t, double h1,
-            double h2, double[] KS, double[] V, double S0 = 0)
+        public static void PrintXYSpecial(
+            double tau,
+            double a,
+            double b,
+            string filename,
+            double t,
+            double h1,
+            double h2,
+            double[] KS,
+            double[] V,
+            double S0 = 0)
         {
             var name = $"{filename}_hx={h1}_t={t}_tau={tau}_a={a}_c={b}.dat";
             using (var writer = new StreamWriter(name, false))

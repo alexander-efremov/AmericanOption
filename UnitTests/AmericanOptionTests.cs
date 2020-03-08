@@ -20,20 +20,13 @@ namespace UnitTests
         public void AmericanOption()
         {
             var parameters = this.GetParameters(true, this.GetWorkingDir() + "AO/");
-            var calculator = new AmericanOptionCalculator(parameters, true, true);
+            var calculator = new AmericanOptionCalculator(parameters, true, false);
 
             PrintParameters(calculator);
 
-            // get S0t in direct order 
             double[] S0t = calculator.Solve();
-            // get V(S(t), S0(t)) in direct order 
+            this.ConvexityCheck(S0t);
             List<SolutionData> numericSolutions = calculator.GetNumericSolutions();
-
-            Console.WriteLine("Numeric S0:");
-            for (var i = S0t.Length - 1; i >= 0; i--)
-            {
-                Console.WriteLine("k = " + (i + 1) + " -> " + S0t[i]);
-            }
 
             List<SolutionData> exactSolutions = calculator.GetExactSolutions(S0t);
 
@@ -47,7 +40,7 @@ namespace UnitTests
                 var sb = new StringBuilder();
                 foreach (var d in exactSolution.Solution.Take(5))
                 {
-                    sb.Append(d.ToString("e8", CultureInfo.InvariantCulture) + " ");
+                    sb.Append(d.VS.ToString("e8", CultureInfo.InvariantCulture) + " ");
                 }
 
                 Console.WriteLine(exactSolution.k + " " + exactSolution.S0.ToString("e8", CultureInfo.InvariantCulture) + " " + sb);
@@ -65,7 +58,7 @@ namespace UnitTests
                 var sb = new StringBuilder();
                 foreach (var d in numericSolution.Solution.Take(5))
                 {
-                    sb.Append(d.ToString("e8", CultureInfo.InvariantCulture) + " ");
+                    sb.Append(d.VS.ToString("e8", CultureInfo.InvariantCulture) + " ");
                 }
 
                 Console.WriteLine(numericSolution.k + " " + numericSolution.S0.ToString("e8", CultureInfo.InvariantCulture) + " " + sb);
@@ -81,11 +74,11 @@ namespace UnitTests
             {
                 var exactSolution = exactSolutions[index];
                 var numericSolution = numericSolutions[index];
-                double[] error = Utils.GetAbsError(exactSolution.Solution, numericSolution.Solution);
+                Point[] error = Utils.GetAbsError(exactSolution.Solution, numericSolution.Solution);
                 var sb = new StringBuilder();
                 foreach (var d in error.Take(5))
                 {
-                    sb.Append(d.ToString("e8", CultureInfo.InvariantCulture) + " ");
+                    sb.Append(d.VS.ToString("e8", CultureInfo.InvariantCulture) + " ");
                 }
 
                 Console.WriteLine(numericSolution.k + " " + numericSolution.S0.ToString("e8", CultureInfo.InvariantCulture) + " " + sb);
@@ -99,40 +92,46 @@ namespace UnitTests
 
             var printer = calculator.GetTecplotPrinter();
 
-            // checks solutions from the 0 to T level
-            for (var i = numericSolutions.Count - 1; i >= 0; i--)
+            // checks solutions from the T to 0 time
+            for (var i = 0; i < numericSolutions.Count; i++)
             {
                 var exactSolution = exactSolutions[i];
                 var numericSolution = numericSolutions[i];
-                double[] error = Utils.GetAbsError(exactSolution.Solution, numericSolution.Solution);
+                Point[] error = Utils.GetAbsError(exactSolution.Solution, numericSolution.Solution);
 
                 printer.PrintXY(
                     Path.Combine(parameters.WorkDir + "/exact/", "exactSolution"),
-                    calculator.GetTau() * i,
+                    calculator.GetTau() * (calculator.GetM() - i),
                     calculator.GetH(),
                     exactSolution.Solution,
-                    i,
-                    "exact_" + i);
+                    calculator.GetM() - i,
+                    "exact_" + (calculator.GetM() - i));
                 printer.PrintXY(
                     Path.Combine(parameters.WorkDir + "/numeric/", "numericSolution"),
-                    calculator.GetTau() * i,
+                    calculator.GetTau() * (calculator.GetM() - i),
                     calculator.GetH(),
                     numericSolution.Solution,
-                    i,
-                    "numeric_" + i);
-                printer.PrintXY(Path.Combine(parameters.WorkDir + "/error/", "error"), calculator.GetTau() * i, calculator.GetH(), error);
+                    calculator.GetM() - i,
+                    "numeric_" + (calculator.GetM() - i));
+                printer.PrintXY(
+                    Path.Combine(parameters.WorkDir + "/error/", "error"),
+                    calculator.GetTau() * (calculator.GetM() - i),
+                    calculator.GetH(),
+                    error,
+                    calculator.GetM() - i,
+                    "error_" + (calculator.GetM() - i));
                 if (i > 2)
                 {
                     break;
                 }
             }
 
-            // checks solutions from the 0 to T level
-            for (var i = numericSolutions.Count - 1; i >= 0; i--)
+            // checks solutions from the T to 0 time
+            for (var i = 0; i < numericSolutions.Count; i++)
             {
                 var exactSolution = exactSolutions[i];
                 var numericSolution = numericSolutions[i];
-                double[] error = Utils.GetAbsError(exactSolution.Solution, numericSolution.Solution);
+                Point[] error = Utils.GetAbsError(exactSolution.Solution, numericSolution.Solution);
 
                 Assert.AreEqual(exactSolution.Solution.Length, numericSolution.Solution.Length);
 
@@ -152,10 +151,10 @@ namespace UnitTests
                             exactSolution.Solution[j],
                             numericSolution.Solution[j],
                             // 10e-6,
-                            "ex: " + exactSolution.Solution[j].ToString("e8", CultureInfo.InvariantCulture)
-                                   + " num: " + numericSolution.Solution[j].ToString("e8", CultureInfo.CurrentCulture)
-                                   + " err: " + error[j].ToString("e8", CultureInfo.CurrentCulture)
-                                   + " rel: " + numericSolution.Solution[j] / exactSolution.Solution[j]);
+                            "ex: " + exactSolution.Solution[j].VS.ToString("e8", CultureInfo.InvariantCulture)
+                                   + " num: " + numericSolution.Solution[j].VS.ToString("e8", CultureInfo.CurrentCulture)
+                                   + " err: " + error[j].VS.ToString("e8", CultureInfo.CurrentCulture)
+                                   + " rel: " + numericSolution.Solution[j].VS / exactSolution.Solution[j].VS);
                     }
                     catch (Exception)
                     {
@@ -169,89 +168,99 @@ namespace UnitTests
         }
 
         [Test]
-        public void AmericanOptionExactSolutionDraw()
-        {
-            var parameters = this.GetParameters(true, this.GetWorkingDir() + "AO/");
-            var calculator = new AmericanOptionCalculator(parameters, true, true);
-
-            PrintParameters(calculator);
-            ClearData(parameters);
-
-            var smoothness = 1000d;
-
-            List<SolutionData> exactSolutions = calculator.GetExactSolutions2(smoothness);
-            var printer = calculator.GetTecplotPrinter();
-            // checks solutions from the 0 to T level
-            for (var i = exactSolutions.Count - 1; i >= 0; i--)
-            {
-                var exactSolution = exactSolutions[i];
-
-                printer.PrintXY(
-                    Path.Combine(parameters.WorkDir + "/exact/", "exactSolution"),
-                    calculator.GetTau() * i,
-                    calculator.GetH(),
-                    exactSolution.Solution,
-                    i,
-                    "exact_" + i);
-            }
-        }
-
-        [Test]
         public void AmericanOptionNumericSolutionDraw()
         {
             var parameters = this.GetParameters(true, this.GetWorkingDir() + "AO/");
-            var calculator = new AmericanOptionCalculator(parameters, true, true);
-            // get S0t in direct order 
+
+            var calculator = new AmericanOptionCalculator(parameters, true, false);
             calculator.Solve();
-            // get V(S(t), S0(t)) in direct order 
             List<SolutionData> numericSolutions = calculator.GetNumericSolutions();
             ClearData(parameters);
+
             var printer = calculator.GetTecplotPrinter();
             for (var index = 0; index < numericSolutions.Count; index++)
             {
                 var solution = numericSolutions[index];
                 calculator.UpdateH(solution.S0);
                 var n0toS0 = (int)(Math.Floor(solution.S0 - calculator.Geta()) / calculator.GetH());
-                //int nS0tob = (int)(Math.Floor(calculator.Getb() - solution.S0)/calculator.GetH());
-                var nS0tob = solution.Solution.Length;
-                var sol = new double[n0toS0 + nS0tob];
+                var sol = new List<Point>();
 
                 for (var i = 0; i <= n0toS0; i++)
                 {
-                    sol[i] = calculator.GetK() - (calculator.Geta() + i * calculator.GetH());
+                    sol[i] = new Point(calculator.GetK() - (calculator.Geta() + i * calculator.GetH()), calculator.Geta() + i * calculator.GetH());
                 }
 
-                for (var j = 0; j < solution.Solution.Length; j++)
-                {
-                    sol[n0toS0 + j] = solution.Solution[j];
-                }
+                sol.AddRange(solution.Solution);
 
                 printer.PrintXY(
                     Path.Combine(parameters.WorkDir + "/numeric/", "numericSolution"),
-                    calculator.GetTau() * index,
+                    calculator.GetTau() * (calculator.GetM() - index),
                     calculator.GetH(),
-                    sol,
-                    index,
-                    "numeric_" + index);
+                    sol.ToArray(),
+                    calculator.GetM() - index,
+                    "numeric_" + (calculator.GetM() - index),
+                    "here the first point of numeric V(S,t)",
+                    n0toS0);
             }
+        }
+
+        [Test]
+        public void AmericanOptionSolutionsDrawing()
+        {
+            var parameters = this.GetParameters(true, this.GetWorkingDir() + "AO/");
+            var calculator = new AmericanOptionCalculator(parameters, true, false);
+            double[] S0t = calculator.Solve();
+            List<SolutionData> numericSolutions = calculator.GetNumericSolutions();
+            ClearData(parameters);
 
             PrintParameters(calculator);
+            ClearData(parameters);
 
-
-            List<SolutionData> exactSolutions = calculator.GetExactSolutions2(parameters.Smoothness);
-
-            // checks solutions from the 0 to T level
-            for (var i = exactSolutions.Count - 1; i >= 0; i--)
+            List<SolutionData> exactSolutions = calculator.GetExactSolutions2(S0t);
+            var printer = calculator.GetTecplotPrinter();
+            for (var index = 0; index < exactSolutions.Count; index++)
+                //for (var index = 0; index < 2; index++)
             {
-                var exactSolution = exactSolutions[i];
+                var exactSolution = exactSolutions[index];
+                calculator.UpdateH(exactSolution.S0);
 
                 printer.PrintXY(
                     Path.Combine(parameters.WorkDir + "/exact/", "exactSolution"),
-                    calculator.GetTau() * i,
+                    calculator.GetTau() * (calculator.GetM() - index),
                     calculator.GetH(),
                     exactSolution.Solution,
-                    i,
-                    "exact_" + i);
+                    calculator.GetM() - index,
+                    "exact_" + (calculator.GetM() - index),
+                    "here the first point of exact V(S,t)",
+                    exactSolution.StartPosOfS0);
+            }
+
+            for (var index = 0; index < numericSolutions.Count; index++)
+                //for (var index = 0; index < 2; index++)
+            {
+                var solution = numericSolutions[index];
+                calculator.UpdateH(solution.S0);
+
+                var sol = new List<Point>();
+                var k = 0;
+                while (k * calculator.GetH() < solution.S0)
+                {
+                    var point = new Point(k * calculator.GetH(), calculator.GetK() - k * calculator.GetH());
+                    sol.Add(point);
+                    k++;
+                }
+
+                sol.AddRange(solution.Solution);
+
+                printer.PrintXY(
+                    Path.Combine(parameters.WorkDir + "/numeric/", "numericSolution"),
+                    calculator.GetTau() * (calculator.GetM() - index),
+                    calculator.GetH(),
+                    sol.ToArray(),
+                    calculator.GetM() - index,
+                    "numeric_" + (calculator.GetM() - index),
+                    "here the first point of numeric V(S,t)",
+                    k);
             }
         }
 
@@ -486,9 +495,9 @@ namespace UnitTests
 
         private static void PrintTable(Dictionary<string, List<double>> table)
         {
-            foreach (KeyValuePair<string, List<double>> pair in table)
+            foreach (var value in
+                table.Select(pair => pair.Value.Aggregate(pair.Key, (current, t) => current + t.ToString("0.0000000") + new string(' ', t > 10d ? 10 : 11))))
             {
-                var value = pair.Value.Aggregate(pair.Key, (current, t) => current + t.ToString("0.0000000") + new string(' ', t > 10d ? 10 : 11));
                 Console.WriteLine(value);
             }
         }
@@ -507,6 +516,20 @@ namespace UnitTests
 
             Console.WriteLine();
             Console.WriteLine(new string('=', whitespaceNumber));
+        }
+
+        private void ConvexityCheck(IReadOnlyList<double> S0t)
+        {
+            for (var i = S0t.Count - 1; i >= 1; i--)
+            {
+                Assert.IsTrue(S0t[i] > S0t[i - 1]);
+            }
+
+            Console.WriteLine("Numeric S0 (first 10):");
+            for (var i = S0t.Count - 1; i >= S0t.Count - 10; i--)
+            {
+                Console.WriteLine("k = " + (i + 1) + " -> " + S0t[i]);
+            }
         }
 
         private string CreateOutputFolder(double Ki, int n, string subfolder)

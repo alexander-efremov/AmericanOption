@@ -10,18 +10,13 @@ namespace UnitTests
     {
         internal static double GetL1Error(AmericanOptionCalculatorBase cal, double[] exact, double[] calculated)
         {
-            var err = Utils.GetError(exact, calculated);
+            IEnumerable<double> err = Utils.GetError(exact, calculated);
             return Utils.GetL1(cal.GetH(), err);
         }
 
         internal static double GetL1Solution(AmericanOptionCalculatorBase cal, IEnumerable<double> calculatedV)
         {
             return Utils.GetL1(cal.GetH(), calculatedV);
-        }
-
-        [SetUp]
-        protected void SetUp()
-        {
         }
 
         protected virtual void PrintParameters(AmericanOptionCalculatorBase calculator)
@@ -33,6 +28,11 @@ namespace UnitTests
             Console.WriteLine("tau = " + calculator.GetTau());
             Console.WriteLine("sigma_sq = " + calculator.GetSquaredSigma());
             Console.WriteLine("K = " + calculator.GetK());
+        }
+
+        [SetUp]
+        protected void SetUp()
+        {
         }
     }
 }

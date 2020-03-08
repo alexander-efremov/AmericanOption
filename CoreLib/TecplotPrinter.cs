@@ -1,5 +1,6 @@
 namespace CoreLib
 {
+    using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.IO;
 
@@ -34,6 +35,7 @@ namespace CoreLib
             }
         }
 
+        [SuppressMessage("ReSharper", "UnusedMember.Global")]
         public void PrintXY(string filename, double t, double h, double[] data, int id, string mapName)
         {
             var name = string.Format(
@@ -63,6 +65,116 @@ namespace CoreLib
                     }
 
                     writer.WriteLine($"{(i * h).ToString("e8", CultureInfo.InvariantCulture)} {val.ToString("e8", CultureInfo.InvariantCulture)}");
+                }
+            }
+        }
+
+        [SuppressMessage("ReSharper", "UnusedMember.Global")]
+        public void PrintXY(string filename, double t, double h, double[] data, int id, string mapName, string comment, int commentIndex)
+        {
+            var name = string.Format(
+                "{0}_id_{7}_t={3}_nx={1}_hx={2}_tau={4}_a={5}_c={6}.dat",
+                filename,
+                data.Length,
+                h,
+                t,
+                this.tau,
+                this.a,
+                this.b,
+                id);
+            using (var writer = new StreamWriter(name, false))
+            {
+                writer.WriteLine(
+                    "TITLE = '{1}'\nVARIABLES = 'S' {0}\nZONE T='{1}'",
+                    "V",
+                    mapName);
+                writer.WriteLine("I={0} K={1} ZONETYPE=Ordered", data.Length, 1);
+                writer.WriteLine("DATAPACKING=POINT\nDT=(DOUBLE DOUBLE)");
+                for (var i = 0; i < data.Length; i++)
+                {
+                    var val = data[i];
+                    if (double.IsInfinity(val) || val < 0d)
+                    {
+                        val = 0d;
+                    }
+
+                    if (i == commentIndex)
+                    {
+                        writer.WriteLine($"#{comment}");
+                    }
+
+                    writer.WriteLine($"{(i * h).ToString("e8", CultureInfo.InvariantCulture)} {val.ToString("e8", CultureInfo.InvariantCulture)}");
+                }
+            }
+        }
+
+        public void PrintXY(string filename, double t, double h, Point[] data, int id, string mapName)
+        {
+            var name = string.Format(
+                "{0}_id_{7}_t={3}_nx={1}_hx={2}_tau={4}_a={5}_c={6}.dat",
+                filename,
+                data.Length,
+                h,
+                t,
+                this.tau,
+                this.a,
+                this.b,
+                id);
+            using (var writer = new StreamWriter(name, false))
+            {
+                writer.WriteLine(
+                    "TITLE = '{1}'\nVARIABLES = 'S' {0}\nZONE T='{1}'",
+                    "V",
+                    mapName);
+                writer.WriteLine("I={0} K={1} ZONETYPE=Ordered", data.Length, 1);
+                writer.WriteLine("DATAPACKING=POINT\nDT=(DOUBLE DOUBLE)");
+                for (var i = 0; i < data.Length; i++)
+                {
+                    var val = data[i].VS;
+                    if (double.IsInfinity(val) || val < 0d)
+                    {
+                        val = 0d;
+                    }
+
+                    writer.WriteLine($"{data[i].S.ToString("e8", CultureInfo.InvariantCulture)} {val.ToString("e8", CultureInfo.InvariantCulture)}");
+                }
+            }
+        }
+
+        public void PrintXY(string filename, double t, double h, Point[] data, int id, string mapName, string comment, int commentIndex)
+        {
+            var name = string.Format(
+                "{0}_id_{7}_t={3}_nx={1}_hx={2}_tau={4}_a={5}_c={6}.dat",
+                filename,
+                data.Length,
+                h,
+                t,
+                this.tau,
+                this.a,
+                this.b,
+                id);
+            using (var writer = new StreamWriter(name, false))
+            {
+                writer.WriteLine(
+                    "TITLE = '{1}'\nVARIABLES = 'S' {0}\nZONE T='{1}'",
+                    "V",
+                    mapName);
+                writer.WriteLine("I={0} K={1} ZONETYPE=Ordered", data.Length, 1);
+                writer.WriteLine("DATAPACKING=POINT\nDT=(DOUBLE DOUBLE)");
+                for (var i = 0; i < data.Length; i++)
+                {
+                    var val = data[i].VS;
+                    if (double.IsInfinity(val) || val < 0d)
+                    {
+                        val = 0d;
+                    }
+
+                    if (i == commentIndex)
+                    {
+                        writer.WriteLine($"#{comment}");
+                    }
+
+                    writer.WriteLine($"{data[i].S.ToString("e8", CultureInfo.InvariantCulture)} {val.ToString("e8", CultureInfo.InvariantCulture)}");
                 }
             }
         }
