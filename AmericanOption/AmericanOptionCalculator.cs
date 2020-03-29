@@ -14,6 +14,7 @@
     public class AmericanOptionCalculator : AmericanOptionCalculatorBase
     {
         private readonly bool allowOutputConsole;
+
         private readonly bool allowOutputFile;
 
         private readonly int MValue;
@@ -77,10 +78,10 @@
             {
                 new SolutionData(S0t, this.GetM())
                 {
-                    Solution = this.GetVSTPoints() // V(S, T) = (K - S)+
+                    Solution = this.GetVonT() // V(S, T) = (K - S)+
                 }
             };
-            
+
             for (var k = this.GetM() - 1; k >= 0; k--)
             {
                 Point[] solution = this.GetExactSolution(k * this.GetTau(), S0t[k]);
@@ -143,8 +144,25 @@
         {
             // solutions were filled in reversed order from the M to 0
             // then here we reverse it
-            List<SolutionData> list = this.solutions.ToList();
-            return list;
+            List<SolutionData> list1 = this.solutions.ToList();
+
+            foreach (var data in list1)
+            {
+                var list = new List<Point>();
+                var superH = this.GetSuperH();
+                int j = 0;
+                while (0d + j * superH < data.S0)
+                {
+                    var S = 0d + j * superH;
+                    if (S>data.S0) break;
+                    list.Add(new Point(S, this.GetK()-S));
+                    j++;
+                }
+                list.AddRange(data.Solution);
+                data.Solution = list.ToArray();
+            }
+            
+            return list1;
         }
 
         public double GetT()
@@ -195,7 +213,7 @@
                 double S0Diff;
                 do
                 {
-                    this.UpdateH(S0Current);
+                    // this.UpdateH(S0Current);
                     
                     // calculate new V(S, t_k)
                     VCurrent = this.CalculateV(S0Current, VNext, this.GetTau(), k, out double[] rp);
@@ -454,59 +472,89 @@
 
         private Point[] GetExactSolution(double t, double S0)
         {
+            // this.UpdateH(S0);
+            
             var V = new Point[this.GetN1()];
             var r = this.GetR();
             var K = this.GetK();
             var T = this.GetT();
-            var sigma_sq = this.GetSquaredSigma();
-            this.UpdateH(S0);
-            for (var i = 0; i < V.Length; i++)
-            {
-                // the first version (based on t*(exact_soltion_perp_am_option)) that is not working
-                // because it is not time-dependent
-                // var si = S0 + i * this.GetH();
-                // var p1 = this.GetSquaredSigma() / (2d * this.GetR());
-                //
-                // var arg = this.GetK() / (1 + this.GetSquaredSigma() / (2d * this.GetR()));
-                // var pow = (2d * this.GetR() + this.GetSquaredSigma()) / this.GetSquaredSigma();
-                // var p2 = Math.Pow(arg, pow);
-                // var arg2 = si;
-                // var pow2 = -2d * this.GetR() / this.GetSquaredSigma();
-                // var p3 = Math.Pow(arg2, pow2);
-                //
-                // var v = p1 * p2 * p3;
-                // V[i] = tk * v;
-                
-                // the second version
-                // the second version (check validation-equation-am_option.nb and validation-equation-am_option.docx)
-                // missed
-                var S = S0 + i * this.GetH();
+            var sigma = this.GetSquaredSigma();
 
+            var list = new List<Point>();
+            var superH = this.GetSuperH();
+            int j = 0;
+            while (0d + j * superH < S0)
+            {
+                var S = 0d + j * superH;
+                if (S>S0) break;
+                list.Add(new Point(S, this.GetK()-S));
+                j++;
+            }
+            
+            for (int i = 0; i < this.GetN1() ; i++)
+            {
+                var S = S0 + i * this.GetH();
                 // Vi
                 var VS = (T - t)
-                         * (sigma_sq / (2d * r))
-                         * Math.Pow(K / (1d + sigma_sq / (2d * r)), (2d * r + sigma_sq) / sigma_sq)
-                         * Math.Pow(S - this.Get_a0(T, K, this.GetSmoothness()) * t, -2d * r / sigma_sq);
-                         // * Math.Pow(S - S0 + (K - S0) * ((2d * r) / (sigma_sq)), (-2d * r) / sigma_sq);
-                
-                // the third version 
-                // var S = S0 + i * this.GetH();
-                //
-                // // Vi
-                // var Vi = (T - t)
-                //          * (sigma_sq / (2d * r))
-                //          * Math.Pow(K / (1d + (sigma_sq / (2d * r))), (2d * r + sigma_sq) / sigma_sq)
-                //          * Math.Pow(S - S0 + (K - S0) * ((2d * r) / sigma_sq), (-2d * r) / sigma_sq);
+                         * (sigma / (2d * r))
+                         * Math.Pow(K / (1d + sigma / (2d * r)), (2d * r + sigma) / sigma)
+                         * Math.Pow(S - this.Get_a0(T, K, this.GetSmoothness()) * t, -2d * r / sigma);
 
                 V[i] = new Point(S, VS);
             }
 
-            return V;
+            foreach (var point in V)
+            {
+                list.Add(point);
+            }
+
+            // for (int i = 0; i < this.GetN1() ; i++)
+            // {
+            //     // the first version (based on t*(exact_soltion_perp_am_option)) that is not working
+            //     // because it is not time-dependent
+            //     // var si = S0 + i * this.GetH();
+            //     // var p1 = this.GetSquaredSigma() / (2d * this.GetR());
+            //     //
+            //     // var arg = this.GetK() / (1 + this.GetSquaredSigma() / (2d * this.GetR()));
+            //     // var pow = (2d * this.GetR() + this.GetSquaredSigma()) / this.GetSquaredSigma();
+            //     // var p2 = Math.Pow(arg, pow);
+            //     // var arg2 = si;
+            //     // var pow2 = -2d * this.GetR() / this.GetSquaredSigma();
+            //     // var p3 = Math.Pow(arg2, pow2);
+            //     //
+            //     // var v = p1 * p2 * p3;
+            //     // V[i] = tk * v;
+            //     
+            //     // the second version
+            //     // the second version (check validation-equation-am_option.nb and validation-equation-am_option.docx)
+            //     // missed
+            //     var S = S0 + i * this.GetH();
+            //
+            //     // Vi
+            //     var VS = (T - t)
+            //              * (sigma / (2d * r))
+            //              * Math.Pow(K / (1d + sigma / (2d * r)), (2d * r + sigma) / sigma)
+            //              * Math.Pow(S - this.Get_a0(T, K, this.GetSmoothness()) * t, -2d * r / sigma);
+            //              // * Math.Pow(S - S0 + (K - S0) * ((2d * r) / (sigma_sq)), (-2d * r) / sigma_sq);
+            //     
+            //     // the third version 
+            //     // var S = S0 + i * this.GetH();
+            //     //
+            //     // // Vi
+            //     // var Vi = (T - t)
+            //     //          * (sigma_sq / (2d * r))
+            //     //          * Math.Pow(K / (1d + (sigma_sq / (2d * r))), (2d * r + sigma_sq) / sigma_sq)
+            //     //          * Math.Pow(S - S0 + (K - S0) * ((2d * r) / sigma_sq), (-2d * r) / sigma_sq);
+            //
+            //     V[j + i] = new Point(S, VS);
+            // }
+
+            return list.ToArray();
         }
 
         private Point[] GetExactSolution2(double t, double s0, out int startPosOfS0)
         {
-            this.UpdateH(s0);
+            // this.UpdateH(s0);
 
             var h = this.GetH();
             var V = new List<Point>();
@@ -746,7 +794,7 @@
 
         private double[] GetVST()
         {
-            this.UpdateH(this.GetK());
+            // this.UpdateH(this.GetK());
             var arr = new double[this.GetN1()];
             for (var i = 0; i < arr.Length; ++i)
             {
@@ -764,34 +812,50 @@
             return arr;
         }
 
-        private Point[] GetVSTPoints()
+        private Point[] GetVonT()
         {
-            this.UpdateH(this.GetK());
-            var arr = new Point[this.GetN1()];
-            for (var i = 0; i < arr.Length; ++i)
+            var superH = this.GetSuperH();
+            
+            var list = new List<Point>();
+
+            var s = 0d;
+            int i = 0;
+            while (s < this.GetK())
             {
-                var S = this.GetK() + i * this.GetH();
-                var p = new Point();
-                if (S <= this.GetK())
+                s = 0d + i * superH;
+                if (s > this.GetK())
                 {
-                    p = new Point(S, this.GetK() - S);
-                }
-                else
-                {
-                    p = new Point(0d, 0d);
+                    break;
                 }
 
-                arr[i] = p;
+                list.Add(new Point(s, this.GetK()-s));
+                i++;
             }
 
-            return arr;
+            for (int j = 0; j < this.GetN1(); j++)
+            {
+                s = this.GetK() + j * superH;
+                if (s > this.Getb())
+                {
+                    break;
+                }
+                
+                list.Add(new Point(s, 0));
+            }
+
+            return list.ToArray();
+        }
+
+        private double GetSuperH()
+        {
+            return this.GetH() / 1;
         }
 
         private void PrintData(double s0Current, TecplotPrinter tecplotPrinter, double[] rp, int iter, int k, double S0Next, IReadOnlyList<double> Vk)
         {
-                this.PrintRpToTecplot(tecplotPrinter, rp, s0Current);
-                this.PrintStatistics(iter, k, this.GetH(), S0Next, s0Current);
-                this.PrintValuesToConsole(iter, this.GetH(), S0Next, Vk, s0Current);
+            this.PrintRpToTecplot(tecplotPrinter, rp, s0Current);
+            this.PrintStatistics(iter, k, this.GetH(), S0Next, s0Current);
+            this.PrintValuesToConsole(iter, this.GetH(), S0Next, Vk, s0Current);
         }
 
         private void PrintHeader(IReadOnlyList<double> St)
@@ -864,26 +928,5 @@
         }
     }
 
-    public class SolutionData
-    {
-        public SolutionData(IReadOnlyList<double> S0arr, int k)
-        {
-            this.k = k;
-            this.S0 = S0arr[k];
-        }
-
-        public SolutionData(double S0, int k)
-        {
-            this.k = k;
-            this.S0 = S0;
-        }
-
-        public double k { get; private set; }
-
-        public double S0 { get; private set; }
-
-        public Point[] Solution { get; set; }
-
-        public int StartPosOfS0 { get;  set; }
-    }
+    
 }

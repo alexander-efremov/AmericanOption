@@ -70,7 +70,7 @@ namespace PerpetualAmericanOptions
             while (Math.Abs(this.GetExactS0() - S0) > this.GetS0Eps())
             {
                 iter++;
-                this.UpdateH(S0);
+                this.UpdateH1(S0);
                 Console.WriteLine("S0 = " + S0);
                 Console.WriteLine("h = " + this.GetH());
                 double[] b_t = GetB(this.GetN1(), S0, this.GetH(), this.GetSquaredSigma(), this.GetTau());

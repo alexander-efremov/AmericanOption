@@ -68,25 +68,25 @@ namespace UnitTests
                 }
             }
 
-            Console.WriteLine();
-            Console.WriteLine("Print Errors");
-            for (var index = 0; index < numericSolutions.Count; index++)
-            {
-                var exactSolution = exactSolutions[index];
-                var numericSolution = numericSolutions[index];
-                Point[] error = Utils.GetAbsError(exactSolution.Solution, numericSolution.Solution);
-                var sb = new StringBuilder();
-                foreach (var d in error.Take(5))
-                {
-                    sb.Append(d.VS.ToString("e8", CultureInfo.InvariantCulture) + " ");
-                }
-
-                Console.WriteLine(numericSolution.k + " " + numericSolution.S0.ToString("e8", CultureInfo.InvariantCulture) + " " + sb);
-                if (index > 10)
-                {
-                    break;
-                }
-            }
+            // Console.WriteLine();
+            // Console.WriteLine("Print Errors");
+            // for (var index = 0; index < numericSolutions.Count; index++)
+            // {
+            //     var exactSolution = exactSolutions[index];
+            //     var numericSolution = numericSolutions[index];
+            //     Point[] error = Utils.GetAbsError(exactSolution.Solution, numericSolution.Solution);
+            //     var sb = new StringBuilder();
+            //     foreach (var d in error.Take(5))
+            //     {
+            //         sb.Append(d.VS.ToString("e8", CultureInfo.InvariantCulture) + " ");
+            //     }
+            //
+            //     Console.WriteLine(numericSolution.k + " " + numericSolution.S0.ToString("e8", CultureInfo.InvariantCulture) + " " + sb);
+            //     if (index > 10)
+            //     {
+            //         break;
+            //     }
+            // }
 
             ClearData(parameters);
 
@@ -97,7 +97,7 @@ namespace UnitTests
             {
                 var exactSolution = exactSolutions[i];
                 var numericSolution = numericSolutions[i];
-                Point[] error = Utils.GetAbsError(exactSolution.Solution, numericSolution.Solution);
+                // Point[] error = Utils.GetAbsError(exactSolution.Solution, numericSolution.Solution);
 
                 printer.PrintXY(
                     Path.Combine(parameters.WorkDir + "/exact/", "exactSolution"),
@@ -113,18 +113,33 @@ namespace UnitTests
                     numericSolution.Solution,
                     calculator.GetM() - i,
                     "numeric_" + (calculator.GetM() - i));
-                printer.PrintXY(
-                    Path.Combine(parameters.WorkDir + "/error/", "error"),
-                    calculator.GetTau() * (calculator.GetM() - i),
-                    calculator.GetH(),
-                    error,
-                    calculator.GetM() - i,
-                    "error_" + (calculator.GetM() - i));
-                if (i > 2)
-                {
-                    break;
-                }
+                // printer.PrintXY(
+                //     Path.Combine(parameters.WorkDir + "/error/", "error"),
+                //     calculator.GetTau() * (calculator.GetM() - i),
+                //     calculator.GetH(),
+                //     error,
+                //     calculator.GetM() - i,
+                //     "error_" + (calculator.GetM() - i));
+                // if (i > 2)
+                // {
+                //     break;
+                // }
             }
+            
+            printer.PrintXYZ(
+                Path.Combine(parameters.WorkDir + "/exact/", "exactSolution3d"),
+                calculator.GetH(),
+                calculator.GetTau(),
+                exactSolutions,
+                0,
+                "exact");
+            printer.PrintXYZ(
+                Path.Combine(parameters.WorkDir + "/numeric/", "numericSolution3d"),
+                calculator.GetH(),
+                calculator.GetTau(),
+                numericSolutions,
+                0,
+                "numeric");
 
             // checks solutions from the T to 0 time
             for (var i = 0; i < numericSolutions.Count; i++)
@@ -181,7 +196,7 @@ namespace UnitTests
             for (var index = 0; index < numericSolutions.Count; index++)
             {
                 var solution = numericSolutions[index];
-                calculator.UpdateH(solution.S0);
+                // calculator.UpdateH(solution.S0);
                 var n0toS0 = (int)(Math.Floor(solution.S0 - calculator.Geta()) / calculator.GetH());
                 var sol = new List<Point>();
 
@@ -222,7 +237,7 @@ namespace UnitTests
                 //for (var index = 0; index < 2; index++)
             {
                 var exactSolution = exactSolutions[index];
-                calculator.UpdateH(exactSolution.S0);
+                // calculator.UpdateH(exactSolution.S0);
 
                 printer.PrintXY(
                     Path.Combine(parameters.WorkDir + "/exact/", "exactSolution"),
@@ -239,7 +254,7 @@ namespace UnitTests
                 //for (var index = 0; index < 2; index++)
             {
                 var solution = numericSolutions[index];
-                calculator.UpdateH(solution.S0);
+                // calculator.UpdateH(solution.S0);
 
                 var sol = new List<Point>();
                 var k = 0;
@@ -279,6 +294,7 @@ namespace UnitTests
             const double K = startK;
             const int M = 20;
             const double S0eps = 1e-5;
+            const double h = b/(2d*startN);
             const double T = 1d;
             const double tau = (T - 0d) / M;
             this.PrintParamsForSeries(r, sigmaSq, K, M, tau);
@@ -293,7 +309,7 @@ namespace UnitTests
                 {
                     var n = (int)Math.Pow(2, i) * startN;
                     var folderPath = this.CreateOutputFolder(Ki, n, string.Empty);
-                    var parameters = this.GetSeriesParameters(n, Ki, M, tau, a, b, r, sigmaSq, S0eps, 1000d, folderPath);
+                    var parameters = this.GetSeriesParameters(n, Ki, M, tau, a, b, r, sigmaSq, S0eps, h, 1000d, folderPath);
                     var calculator = new AmericanOptionCalculator(parameters, false, false);
                     double[] S0Arr = calculator.Solve();
 
@@ -335,6 +351,7 @@ namespace UnitTests
             const double sigmaSq = 0.2d;
             const double K = startK;
             const double S0eps = 1e-5;
+            const double h = b/(2*startN);
             const double T = 1d;
             this.PrintParamsForSeries2(r, sigmaSq, K);
             PrintTableHeader(Nsteps, startN);
@@ -359,7 +376,7 @@ namespace UnitTests
                         folderPath = CreateOutputFolder(K, n, "convergence");
                     }
                 */
-                var parameters = this.GetSeriesParameters(n, K, M, tau, a, b, r, sigmaSq, S0eps, 1000d, folderPath);
+                var parameters = this.GetSeriesParameters(n, K, M, tau, a, b, r, sigmaSq, S0eps, h, 1000d, folderPath);
                 var calculator = new AmericanOptionCalculator(parameters, false, false);
                 S0ArrGold = calculator.Solve();
             }
@@ -381,7 +398,7 @@ namespace UnitTests
                         folderPath = CreateOutputFolder(K, n, "convergence");
                     }
                 */
-                var parameters = this.GetSeriesParameters(n, K, M, tau, a, b, r, sigmaSq, S0eps, 1000d, folderPath);
+                var parameters = this.GetSeriesParameters(n, K, M, tau, a, b, r, sigmaSq, S0eps, h, 1000d, folderPath);
                 var calculator = new AmericanOptionCalculator(parameters, false, false);
                 double[] S0Arr = calculator.Solve();
                 dictionary[n] = this.GetErrorLInf(S0ArrGold, S0Arr);
@@ -561,16 +578,17 @@ namespace UnitTests
         private AmericanOptionParameters GetParameters(bool saveSolutions, string workPath)
         {
             const double a = 0d;
-            const double b = 8d;
+            const double b = 10d;
             const double r = 0.1d;
-            const int n = 300;
+            const int n = 1200;
             const double tau = 1e-5d;
             const double sigmaSq = 0.2d;
-            const double eps = 1e-5d;
+            const double S0Eps = 1e-5d;
+            const double h = b / (n * 2d);
             const double K = 5d;
             const int M = 365;
             const double smoothness = 1000d;
-            return new AmericanOptionParameters(a, b, n, r, tau, sigmaSq, K, eps, M, workPath, saveSolutions, smoothness);
+            return new AmericanOptionParameters(a, b, n, r, tau, sigmaSq, K, S0Eps, h, M, workPath, saveSolutions, smoothness);
         }
 
         private AmericanOptionParameters GetSeriesParameters(
@@ -583,10 +601,11 @@ namespace UnitTests
             double r,
             double sigma,
             double S0eps,
+            double h,
             double smoothness,
             string workDir)
         {
-            return new AmericanOptionParameters(a, b, n, r, tau, sigma, K, S0eps, M, workDir, false, smoothness);
+            return new AmericanOptionParameters(a, b, n, r, tau, sigma, K, S0eps, h, M, workDir, false, smoothness);
         }
 
         private string GetTrashFolder()

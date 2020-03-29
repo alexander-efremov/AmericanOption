@@ -1,5 +1,6 @@
 namespace CoreLib
 {
+    using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.IO;
@@ -137,6 +138,47 @@ namespace CoreLib
                     }
 
                     writer.WriteLine($"{data[i].S.ToString("e8", CultureInfo.InvariantCulture)} {val.ToString("e8", CultureInfo.InvariantCulture)}");
+                }
+            }
+        }
+        
+        public void PrintXYZ(string filename, double h, double tau, List<SolutionData> data, int id, string mapName)
+        {
+            var name = string.Format(
+                "{0}_t={3}_nx={1}_hx={2}_tau={4}_a={5}_c={6}.dat",
+                filename,
+                data[0].Solution.Length,
+                h,
+                this.tau,
+                this.a,
+                this.b,
+                id);
+            using (var writer = new StreamWriter(name, false))
+            {
+                // each time layer is a zone
+                writer.WriteLine(
+                    "TITLE = '{1}'\nVARIABLES = 'S' '{0}' '{1}'\n",
+                    "t",
+                    "V");
+                foreach (SolutionData sol in data)
+                {
+                    // each time layer is a zone
+                    writer.WriteLine(
+                        "ZONE T='{0}'",
+                        mapName + sol.k);
+                    writer.WriteLine("I={0} J={1} K={2} ZONETYPE=Ordered", sol.Solution.Length, 1, 1);
+                    writer.WriteLine("DATAPACKING=POINT\nDT=(DOUBLE DOUBLE DOUBLE)");
+                    
+                    for (var i = 0; i < sol.Solution.Length; i++)
+                    {
+                        var val = sol.Solution[i].VS;
+                        if (double.IsInfinity(val) || val < 0d)
+                        {
+                            val = 0d;
+                        }
+
+                        writer.WriteLine($"{sol.Solution[i].S.ToString("e8", CultureInfo.InvariantCulture)} {(sol.k * tau).ToString("e8", CultureInfo.InvariantCulture)} {val.ToString("e8", CultureInfo.InvariantCulture)}");
+                    }
                 }
             }
         }

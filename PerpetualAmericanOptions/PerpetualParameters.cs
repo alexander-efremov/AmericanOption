@@ -13,8 +13,9 @@ namespace PerpetualAmericanOptions
             double sigmaSq,
             double k,
             double S0Eps,
+            double h,
             string workDir)
-            : base(a, b, n, r, tau, sigmaSq, k, S0Eps, workDir)
+            : base(a, b, n, r, tau, sigmaSq, k, S0Eps, h, workDir)
         {
         }
     }

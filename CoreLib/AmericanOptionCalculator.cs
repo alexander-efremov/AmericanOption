@@ -26,7 +26,7 @@ namespace CoreLib
             this.n1 = this.n + 1;
             this.r = parameters.R;
             this.K = parameters.K;
-            this.h = this.b / this.n;
+            this.h = parameters.B / (parameters.N * 2d);
             this.S0Eps = parameters.S0Eps;
             this.workDir = parameters.WorkDir;
 
@@ -92,7 +92,7 @@ namespace CoreLib
             return this.tau;
         }
 
-        public void UpdateH(double S0)
+        public void UpdateH1(double S0)
         {
             if (S0 < 0d)
             {

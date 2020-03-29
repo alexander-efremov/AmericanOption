@@ -11,6 +11,7 @@ namespace CoreLib
             double sigmaSq,
             double k,
             double s0eps,
+            double h,
             string workDir)
         {
             this.A = a;
