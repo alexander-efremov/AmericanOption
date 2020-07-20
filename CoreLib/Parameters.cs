@@ -15,7 +15,7 @@ namespace CoreLib
             double sigmaSq,
             double k,
             double s0eps,
-            double h,
+            // double h,
             string workDir)
         {
             if (alpha <= 0d)

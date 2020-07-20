@@ -1,5 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30309.148
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreLib", "CoreLib\CoreLib.csproj", "{D141CEE6-5426-4167-A944-B80367A0B4A1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PerpetualAmericanOptions", "PerpetualAmericanOptions\PerpetualAmericanOptions.csproj", "{2DB8C15A-BFC7-48BC-86C7-26D6EB13DA17}"
@@ -7,6 +10,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmericanOption", "AmericanOption\AmericanOption.csproj", "{9EAF1809-118B-4049-942A-5F1E9A54B742}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{2CDCE620-9946-493F-A801-EEAA748598B7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmericanOptionAlbena", "AmericanOptionAlbena\AmericanOptionAlbena.csproj", "{B3B171CD-0D38-4E52-BE01-029AB8104C4A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -30,5 +35,15 @@ Global
 		{2CDCE620-9946-493F-A801-EEAA748598B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2CDCE620-9946-493F-A801-EEAA748598B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2CDCE620-9946-493F-A801-EEAA748598B7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B3B171CD-0D38-4E52-BE01-029AB8104C4A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3B171CD-0D38-4E52-BE01-029AB8104C4A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3B171CD-0D38-4E52-BE01-029AB8104C4A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3B171CD-0D38-4E52-BE01-029AB8104C4A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9C710BB9-0933-4A48-B928-AC3AE071AC63}
 	EndGlobalSection
 EndGlobal

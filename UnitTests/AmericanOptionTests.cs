@@ -295,7 +295,7 @@ namespace UnitTests
             const double sigmaSq = 0.2d;
             const double S0Eps = 1e-5d;
             const double K = startK;
-            const double h = (b - K) / startN;
+            //const double h = (b - K) / startN;
             const int startM = 365;
             const double tauStart = 1e-6d;
             const double smoothness = 1000d;
@@ -306,7 +306,7 @@ namespace UnitTests
 
             var table = new Dictionary<string, List<double>>();
 
-            List<double[]> list = new List<double[]>();
+            //List<double[]> list = new List<double[]>();
             for (var i = 0; i < Nsteps; i++)
             {
                 var n = (int)Math.Pow(2, i) * startN;
@@ -320,12 +320,12 @@ namespace UnitTests
                 var M = (int)(T/tau);
 
                 var folderPath = this.CreateOutputFolder(M, n, string.Empty);
-                var parameters = this.GetSeriesParameters(alpha, beta, n, K, M, tau, a, b, r, sigmaSq, S0Eps, h, smoothness, folderPath);
+                var parameters = this.GetSeriesParameters(alpha, beta, n, K, M, tau, a, b, r, sigmaSq, S0Eps, /*h,*/ smoothness, folderPath);
                 PrintParameters(parameters);
-                var calculator = new AmericanOptionCalculator(parameters, false, false);
-                double[] S0Arr = calculator.Solve();
+                //var calculator = new AmericanOptionCalculator(parameters, false, false);
+                //double[] S0Arr = calculator.Solve();
                 
-                 list.Add(S0Arr);
+                 //list.Add(S0Arr);
             }
 
             PrintTable(table);
@@ -348,7 +348,7 @@ namespace UnitTests
             const double sigmaSq = 0.2d;
             const double K = startK;
             const double S0eps = 1e-5;
-            const double h = b / (2 * startN);
+            //const double h = b / (2 * startN);
             const double T = 1d;
             this.PrintParamsForSeries2(r, sigmaSq, K);
             PrintTableHeader(Nsteps, startN);
@@ -373,7 +373,7 @@ namespace UnitTests
                         folderPath = CreateOutputFolder(K, n, "convergence");
                     }
                 */
-                var parameters = this.GetSeriesParameters(alpha, beta, n, K, M, tau, a, b, r, sigmaSq, S0eps, h, 1000d, folderPath);
+                var parameters = this.GetSeriesParameters(alpha, beta, n, K, M, tau, a, b, r, sigmaSq, S0eps, /*h,*/ 1000d, folderPath);
                 var calculator = new AmericanOptionCalculator(parameters, false, false);
                 S0ArrGold = calculator.Solve();
             }
@@ -395,7 +395,7 @@ namespace UnitTests
                         folderPath = CreateOutputFolder(K, n, "convergence");
                     }
                 */
-                var parameters = this.GetSeriesParameters(alpha, beta, n, K, M, tau, a, b, r, sigmaSq, S0eps, h, 1000d, folderPath);
+                var parameters = this.GetSeriesParameters(alpha, beta, n, K, M, tau, a, b, r, sigmaSq, S0eps, /*h,*/ 1000d, folderPath);
                 var calculator = new AmericanOptionCalculator(parameters, false, false);
                 double[] S0Arr = calculator.Solve();
                 dictionary[n] = this.GetErrorLInf(S0ArrGold, S0Arr);
@@ -440,7 +440,7 @@ namespace UnitTests
             const double sigmaSq = 0.2d;
             const double S0Eps = 1e-5d;
             const double K = startK;
-            const double h = (b - K) / startN;
+            //const double h = (b - K) / startN;
             const int startM = 365;
             const double tauStart = 1e-6d;
             const double smoothness = 1000d;
@@ -453,11 +453,8 @@ namespace UnitTests
                  var n = (int)Math.Pow(2, (Nsteps-1)) * startN;
                  double tau = tauStart  ;
                  var d = (2 * ((Nsteps-1) + 1));
-                 if (d > 0)
-                 {
-                     tau = tau / d;
-                 }
-               
+                 tau = tau / d;
+
                  var M = (int)(T/tau);
                  var folderPath = this.GetTrashFolder();
 
@@ -467,7 +464,7 @@ namespace UnitTests
                         folderPath = CreateOutputFolder(K, n, "convergence");
                     }
                 */
-                var parameters = this.GetSeriesParameters(alpha, beta, n, K, M, tau, a, b, r, sigmaSq, S0Eps, h, smoothness, folderPath);
+                var parameters = this.GetSeriesParameters(alpha, beta, n, K, M, tau, a, b, r, sigmaSq, S0Eps, /*h,*/ smoothness, folderPath);
                 PrintParameters(parameters);
                 var calculator = new AmericanOptionCalculator(parameters, false, false);
                 S0ArrGold = calculator.Solve();
@@ -497,7 +494,7 @@ namespace UnitTests
                         folderPath = CreateOutputFolder(K, n, "convergence");
                     }
                 */
-                var parameters = this.GetSeriesParameters(alpha, beta, n, K, M, tau, a, b, r, sigmaSq, S0Eps, h, smoothness, folderPath);
+                var parameters = this.GetSeriesParameters(alpha, beta, n, K, M, tau, a, b, r, sigmaSq, S0Eps, /*h,*/ smoothness, folderPath);
                 PrintParameters(parameters);
                 var calculator = new AmericanOptionCalculator(parameters, false, false);
                 double[] S0Arr = calculator.Solve();
@@ -712,10 +709,10 @@ namespace UnitTests
             const double sigmaSq = 0.2d;
             const double S0Eps = 1e-5d;
             const double K = 5d;
-            const double h = (b - K) / n;
+            //const double h = (b - K) / n;
             const int M = 365;
             const double smoothness = 1000d;
-            return new AmericanOptionParameters(alpha, beta, a, b, n, r, tau, sigmaSq, K, S0Eps, h, M, workPath, saveSolutions, smoothness);
+            return new AmericanOptionParameters(alpha, beta, a, b, n, r, tau, sigmaSq, K, S0Eps, /*h,*/ M, workPath, saveSolutions, smoothness);
         }
 
         private AmericanOptionParameters GetSeriesParameters(
@@ -730,11 +727,11 @@ namespace UnitTests
             double r,
             double sigma,
             double S0eps,
-            double h,
+            //double h,
             double smoothness,
             string workDir)
         {
-            return new AmericanOptionParameters(alpha, beta, a, b, n, r, tau, sigma, K, S0eps, h, M, workDir, false, smoothness);
+            return new AmericanOptionParameters(alpha, beta, a, b, n, r, tau, sigma, K, S0eps, /*h,*/ M, workDir, false, smoothness);
         }
 
         private string GetTrashFolder()

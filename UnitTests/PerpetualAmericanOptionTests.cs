@@ -101,8 +101,8 @@ namespace UnitTests
             const double r = 0.08d;
             const double K = 0.5d;
             const double S0Eps = 10e-4;
-            double h = b/n;
-            return new PerpetualParameters(alpha, beta, a, b, n, r, tau, sigmaSq, K, S0Eps, h, this.GetWorkingDir());
+            //double h = b/n;
+            return new PerpetualParameters(alpha, beta, a, b, n, r, tau, sigmaSq, K, S0Eps, /*h,*/ this.GetWorkingDir());
         }
 
         private string GetWorkingDir()

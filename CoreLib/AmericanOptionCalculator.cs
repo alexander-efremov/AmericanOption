@@ -107,7 +107,7 @@ namespace CoreLib
         {
             // beta = beta_s - m*h^2
             return this.beta  ;
-            return this.beta - m * (this.h * this.h);
+            //return this.beta - m * (this.h * this.h);
         }
 
         public void UpdateH1(double S0)
