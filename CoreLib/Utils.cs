@@ -26,8 +26,16 @@ namespace CoreLib.Utils
 
             for (var i = 0; i < exact.Length; ++i)
             {
-                var p = new Point(Math.Abs(exact[i].S - num[i].S), Math.Abs(exact[i].VS - num[i].VS));
-                err[i] = p;
+                try
+                {
+                    var p = new Point(Math.Abs(exact[i].S - num[i].S), Math.Abs(exact[i].VS - num[i].VS));
+                    err[i] = p;
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    throw;
+                }
             }
 
             return err;

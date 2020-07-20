@@ -5,6 +5,8 @@ namespace AmericanOption
     public class AmericanOptionParameters : Parameters
     {
         public AmericanOptionParameters(
+            double alpha,
+            double beta, 
             double a,
             double b,
             int n,
@@ -18,7 +20,7 @@ namespace AmericanOption
             string workDir,
             bool saveVSolutions,
             double smoothness)
-            : base(a, b, n, r, tau, sigma_sq, k, S0Eps, h, workDir)
+            : base(alpha, beta, a, b, n, r, tau, sigma_sq, k, S0Eps, h, workDir)
         {
             this.M = M;
             this.Smoothness = smoothness;

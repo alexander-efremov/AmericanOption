@@ -1,6 +1,5 @@
 ﻿namespace CoreLib
 {
-    using System;
     using System.Diagnostics;
 
     [DebuggerDisplay("{ToString()}")]
@@ -20,7 +19,7 @@
         /// <returns>The fully qualified type name.</returns>
         public override string ToString()
         {
-            return string.Format("({0:e2}, {1:e2})", S, VS);
+            return string.Format("({0:e2}, {1:e2})", this.S, this.VS);
         }
     }
 }

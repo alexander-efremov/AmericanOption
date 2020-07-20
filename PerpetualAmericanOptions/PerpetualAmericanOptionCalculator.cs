@@ -62,7 +62,7 @@ namespace PerpetualAmericanOptions
 
         public Tuple<double[], double> Solve()
         {
-            var tecplotPrinter = new TecplotPrinterSpecial(0d, this.GetRightBoundary(), this.GetTau());
+            var tecplotPrinter = base.GetTecplotPrinter();
 
             double[] V = new double[this.GetN()];
             var S0 = this.GetK();
@@ -81,13 +81,13 @@ namespace PerpetualAmericanOptions
 
                 // var printer = new ThomasArrayPrinter();
                 // printer.PrintThomasArrays(b_t, c_t, d_t);
-                tecplotPrinter.PrintXY(this.GetWorkDir() + "perpetual-rp", 0d, this.GetH(), rp, S0);
+                tecplotPrinter.PrintXY(this.GetWorkDir() + "perpetual-rp", 0d, 0, this.GetH(), rp, S0);
 
                 S0 = this.GetK() - V[0];
             }
 
             Console.WriteLine("Iteration count = " + iter);
-            tecplotPrinter.PrintXY(this.GetWorkDir() + "v", 0d, this.GetH(), V, S0);
+            tecplotPrinter.PrintXY(this.GetWorkDir() + "v", 0d, 0, this.GetH(), V, S0);
             double[] KS = this.GetVKS();
             TecplotPrinterSpecial.PrintXYSpecial(this.GetTau(), 0d, this.GetRightBoundary(), this.GetWorkDir() + "ks_v", 0d, this.GetH(), this.GetH(), KS, V, S0);
 

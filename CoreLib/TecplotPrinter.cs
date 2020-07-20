@@ -9,18 +9,16 @@ namespace CoreLib
     {
         private readonly double a;
         private readonly double b;
-        private readonly double tau;
-
-        public TecplotPrinter(double a, double b, double tau)
+        public TecplotPrinter(double a, double b)
         {
             this.a = a;
             this.b = b;
-            this.tau = tau;
         }
 
-        public void PrintXY(string filename, double t, double h, double[] data, double start = 0d)
+        public void PrintXY(string filename, double tau, int k, double h, double[] data, double start = 0d)
         {
-            var name = string.Format("{0}_t={3}_nx={1}_hx={2}_tau={4}_a={5}_c={6}.dat", filename, data.Length, h, t, this.tau, this.a, this.b);
+            var t = tau * k;
+            var name = string.Format("{0}_t={3}_nx={1}_hx={2}_a={4}_c={5}.dat", filename, data.Length, h, t, this.a, this.b);
             using (var writer = new StreamWriter(name, false))
             {
                 writer.WriteLine(
@@ -40,12 +38,11 @@ namespace CoreLib
         public void PrintXY(string filename, double t, double h, double[] data, int id, string mapName)
         {
             var name = string.Format(
-                "{0}_id_{7}_t={3}_nx={1}_hx={2}_tau={4}_a={5}_c={6}.dat",
+                "{0}_id_{6}_t={3}_nx={1}_hx={2}_a={4}_c={5}.dat",
                 filename,
                 data.Length,
                 h,
                 t,
-                this.tau,
                 this.a,
                 this.b,
                 id);
@@ -74,12 +71,11 @@ namespace CoreLib
         public void PrintXY(string filename, double t, double h, double[] data, int id, string mapName, string comment, int commentIndex)
         {
             var name = string.Format(
-                "{0}_id_{7}_t={3}_nx={1}_hx={2}_tau={4}_a={5}_c={6}.dat",
+                "{0}_id_{6}_t={3}_nx={1}_hx={2}_a={4}_c={5}.dat",
                 filename,
                 data.Length,
                 h,
                 t,
-                this.tau,
                 this.a,
                 this.b,
                 id);
@@ -112,12 +108,11 @@ namespace CoreLib
         public void PrintXY(string filename, double t, double h, Point[] data, int id, string mapName)
         {
             var name = string.Format(
-                "{0}_id_{7}_t={3}_nx={1}_hx={2}_tau={4}_a={5}_c={6}.dat",
+                "{0}_id_{6}_t={3}_nx={1}_hx={2}_a={4}_c={5}.dat",
                 filename,
                 data.Length,
                 h,
                 t,
-                this.tau,
                 this.a,
                 this.b,
                 id);
@@ -145,11 +140,10 @@ namespace CoreLib
         public void PrintXYZ(string filename, double h, double tau, List<SolutionData> data, int id, string mapName)
         {
             var name = string.Format(
-                "{0}_t={3}_nx={1}_hx={2}_tau={4}_a={5}_c={6}.dat",
+                "{0}_t={3}_nx={1}_hx={2}_a={4}_c={5}.dat",
                 filename,
                 data[0].Solution.Length,
                 h,
-                this.tau,
                 this.a,
                 this.b,
                 id);
@@ -186,12 +180,11 @@ namespace CoreLib
         public void PrintXY(string filename, double t, double h, Point[] data, int id, string mapName, string comment, int commentIndex)
         {
             var name = string.Format(
-                "{0}_id_{7}_t={3}_nx={1}_hx={2}_tau={4}_a={5}_c={6}.dat",
+                "{0}_id_{6}_t={3}_nx={1}_hx={2}_a={4}_c={5}.dat",
                 filename,
                 data.Length,
                 h,
                 t,
-                this.tau,
                 this.a,
                 this.b,
                 id);
@@ -223,7 +216,7 @@ namespace CoreLib
 
         public void PrintXY(string filename, double t, double h, double[] exact, double[] numeric, double S0)
         {
-            var name = string.Format("{0}_nx={1}_hx={2}_t={3}_tau={4}_a={5}_c={6}.dat", filename, exact.Length, h, t, this.tau, this.a, this.b);
+            var name = string.Format("{0}_nx={1}_hx={2}_t={3}_a={4}_c={5}.dat", filename, exact.Length, h, t, this.a, this.b);
             using (var writer = new StreamWriter(name, false))
             {
                 writer.WriteLine("TITLE = 'DEM DATA'\nVARIABLES = 'x' {0}", "u");

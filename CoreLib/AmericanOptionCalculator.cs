@@ -4,7 +4,9 @@ namespace CoreLib
 
     public abstract class AmericanOptionCalculatorBase
     {
+        private readonly double alpha;
         private readonly double a;
+        private readonly double beta;
         private readonly double b;
         private readonly double K;
         private readonly int n;
@@ -18,6 +20,8 @@ namespace CoreLib
 
         protected AmericanOptionCalculatorBase(Parameters parameters)
         {
+            this.alpha = parameters.Alpha;
+            this.beta = parameters.Beta;
             this.a = parameters.A;
             this.b = parameters.B;
             this.sigmaSq = parameters.SigmaSq;
@@ -26,7 +30,7 @@ namespace CoreLib
             this.n1 = this.n + 1;
             this.r = parameters.R;
             this.K = parameters.K;
-            this.h = parameters.B / (parameters.N * 2d);
+            this.h = parameters.B / parameters.N;
             this.S0Eps = parameters.S0Eps;
             this.workDir = parameters.WorkDir;
 
@@ -91,6 +95,20 @@ namespace CoreLib
         {
             return this.tau;
         }
+        
+        public double GetAlpha(int i, int m)
+        {
+            // alpha = alpha / m
+            //return this.alpha;
+            return this.alpha / (i  + m + 1);
+        }
+        
+        public double GetBeta(int m)
+        {
+            // beta = beta_s - m*h^2
+            return this.beta  ;
+            return this.beta - m * (this.h * this.h);
+        }
 
         public void UpdateH1(double S0)
         {
@@ -138,6 +156,11 @@ namespace CoreLib
             {
                 throw new ArgumentException("K");
             }
+        }
+        
+        public TecplotPrinterSpecial GetTecplotPrinter()
+        {
+            return new TecplotPrinterSpecial(0d, this.GetRightBoundary());
         }
     }
 }

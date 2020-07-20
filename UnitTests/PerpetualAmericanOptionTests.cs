@@ -45,8 +45,7 @@ namespace UnitTests
             var h = (calculator.GetRightBoundary() - calculator.GetExactS0()) / calculator.GetN();
             var printer = new TecplotPrinter(
                 0d,
-                calculator.GetRightBoundary(),
-                calculator.GetTau());
+                calculator.GetRightBoundary());
             printer.PrintXY(this.GetWorkingDir() + "exact", 0d, h, VS0, V, 0d);
         }
 
@@ -86,13 +85,14 @@ namespace UnitTests
             double[] exactS0 = calculator.GetVKS();
             var printer = new TecplotPrinter(
                 0d,
-                calculator.GetRightBoundary(),
-                calculator.GetTau());
-            printer.PrintXY(this.GetWorkingDir() + "VKS", 0d, h, exactS0);
+                calculator.GetRightBoundary());
+            printer.PrintXY(this.GetWorkingDir() + "VKS", 0d, 0, h, exactS0);
         }
 
         private PerpetualParameters GetParameters()
         {
+            const double alpha = 1d;
+            const double beta = 1d;
             const double a = 0d;
             const double b = 2d;
             const double sigmaSq = 0.1d;
@@ -102,7 +102,7 @@ namespace UnitTests
             const double K = 0.5d;
             const double S0Eps = 10e-4;
             double h = b/n;
-            return new PerpetualParameters(a, b, n, r, tau, sigmaSq, K, S0Eps, h, this.GetWorkingDir());
+            return new PerpetualParameters(alpha, beta, a, b, n, r, tau, sigmaSq, K, S0Eps, h, this.GetWorkingDir());
         }
 
         private string GetWorkingDir()

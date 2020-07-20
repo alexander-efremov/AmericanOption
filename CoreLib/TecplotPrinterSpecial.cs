@@ -4,7 +4,7 @@ namespace CoreLib
 
     public class TecplotPrinterSpecial : TecplotPrinter
     {
-        public TecplotPrinterSpecial(double a, double b, double tau) : base(a, b, tau)
+        public TecplotPrinterSpecial(double a, double b) : base(a, b)
         {
         }
 

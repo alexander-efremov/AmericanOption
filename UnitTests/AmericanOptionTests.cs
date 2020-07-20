@@ -125,7 +125,7 @@ namespace UnitTests
                 //     break;
                 // }
             }
-            
+
             printer.PrintXYZ(
                 Path.Combine(parameters.WorkDir + "/exact/", "exactSolution3d"),
                 calculator.GetH(),
@@ -141,43 +141,43 @@ namespace UnitTests
                 0,
                 "numeric");
 
-            // checks solutions from the T to 0 time
-            for (var i = 0; i < numericSolutions.Count; i++)
-            {
-                var exactSolution = exactSolutions[i];
-                var numericSolution = numericSolutions[i];
-                Point[] error = Utils.GetAbsError(exactSolution.Solution, numericSolution.Solution);
-
-                Assert.AreEqual(exactSolution.Solution.Length, numericSolution.Solution.Length);
-
-                for (var j = 0; j < exactSolution.Solution.Length; j++)
-                {
-                    try
-                    {
-                        Assert.AreEqual(
-                            exactSolution.k,
-                            numericSolution.k,
-                            "k is wrong");
-                        Assert.AreEqual(
-                            exactSolution.S0,
-                            numericSolution.S0,
-                            "S0 is wrong");
-                        Assert.AreEqual(
-                            exactSolution.Solution[j],
-                            numericSolution.Solution[j],
-                            // 10e-6,
-                            "ex: " + exactSolution.Solution[j].VS.ToString("e8", CultureInfo.InvariantCulture)
-                                   + " num: " + numericSolution.Solution[j].VS.ToString("e8", CultureInfo.CurrentCulture)
-                                   + " err: " + error[j].VS.ToString("e8", CultureInfo.CurrentCulture)
-                                   + " rel: " + numericSolution.Solution[j].VS / exactSolution.Solution[j].VS);
-                    }
-                    catch (Exception)
-                    {
-                        Console.WriteLine("i = " + i + " j = " + j);
-                        throw;
-                    }
-                }
-            }
+            // // checks solutions from the T to 0 time
+            // for (var i = 0; i < numericSolutions.Count; i++)
+            // {
+            //     var exactSolution = exactSolutions[i];
+            //     var numericSolution = numericSolutions[i];
+            //     Point[] error = Utils.GetAbsError(exactSolution.Solution, numericSolution.Solution);
+            //
+            //     Assert.AreEqual(exactSolution.Solution.Length, numericSolution.Solution.Length);
+            //
+            //     for (var j = 0; j < exactSolution.Solution.Length; j++)
+            //     {
+            //         try
+            //         {
+            //             Assert.AreEqual(
+            //                 exactSolution.k,
+            //                 numericSolution.k,
+            //                 "k is wrong");
+            //             Assert.AreEqual(
+            //                 exactSolution.S0,
+            //                 numericSolution.S0,
+            //                 "S0 is wrong");
+            //             Assert.AreEqual(
+            //                 exactSolution.Solution[j],
+            //                 numericSolution.Solution[j],
+            //                 // 10e-6,
+            //                 "ex: " + exactSolution.Solution[j].VS.ToString("e8", CultureInfo.InvariantCulture)
+            //                        + " num: " + numericSolution.Solution[j].VS.ToString("e8", CultureInfo.CurrentCulture)
+            //                        + " err: " + error[j].VS.ToString("e8", CultureInfo.CurrentCulture)
+            //                        + " rel: " + numericSolution.Solution[j].VS / exactSolution.Solution[j].VS);
+            //         }
+            //         catch (Exception)
+            //         {
+            //             Console.WriteLine("i = " + i + " j = " + j);
+            //             throw;
+            //         }
+            //     }
+            // }
 
             this.Print(Path.Combine(parameters.WorkDir, "s0"), S0t, calculator.GetTau());
         }
@@ -282,55 +282,50 @@ namespace UnitTests
         [Test]
         public void TestSeries()
         {
-            const int startN = 150;
-            const int Ksteps = 3;
-            const int Nsteps = 6;
-            const int tls = 3;
+            const int startN = 4800;
+            const int Nsteps = 5;
             const double startK = 5d;
+
             const double a = 0d;
-            const double b = 50d;
+            const double b = 10d;
+            const double alpha = 1d;
+            const double beta = 1d;
             const double r = 0.1d;
+
             const double sigmaSq = 0.2d;
+            const double S0Eps = 1e-5d;
             const double K = startK;
-            const int M = 20;
-            const double S0eps = 1e-5;
-            const double h = b/(2d*startN);
-            const double T = 1d;
-            const double tau = (T - 0d) / M;
-            this.PrintParamsForSeries(r, sigmaSq, K, M, tau);
+            const double h = (b - K) / startN;
+            const int startM = 365;
+            const double tauStart = 1e-6d;
+            const double smoothness = 1000d;
+            var T = startM * tauStart;
+            
+            this.PrintParamsForSeries(r, sigmaSq, K, startM, tauStart);
             PrintTableHeader(Nsteps, startN);
 
             var table = new Dictionary<string, List<double>>();
 
-            for (double ki = 1; ki <= Ksteps; ki++)
+            List<double[]> list = new List<double[]>();
+            for (var i = 0; i < Nsteps; i++)
             {
-                var Ki = K * ki;
-                for (var i = 0; i < Nsteps; i++)
+                var n = (int)Math.Pow(2, i) * startN;
+                double tau = tauStart  ;
+                var d = (2 * (i + 1));
+                if (d > 0)
                 {
-                    var n = (int)Math.Pow(2, i) * startN;
-                    var folderPath = this.CreateOutputFolder(Ki, n, string.Empty);
-                    var parameters = this.GetSeriesParameters(n, Ki, M, tau, a, b, r, sigmaSq, S0eps, h, 1000d, folderPath);
-                    var calculator = new AmericanOptionCalculator(parameters, false, false);
-                    double[] S0Arr = calculator.Solve();
-
-                    for (var tl = tls; tl >= 1; tl--)
-                    {
-                        var time = tau * (5d * tl);
-                        var timeIndex = (int)(time / tau);
-                        var value = S0Arr[timeIndex];
-                        var s1 = value;
-                        var format = Ki + new string(' ', Ki > 5 ? 9 : 10) + time.ToString("0.00") +
-                                     new string(' ', 10);
-                        if (table.ContainsKey(format))
-                        {
-                            table[format].Add(s1);
-                        }
-                        else
-                        {
-                            table[format] = new List<double> {s1};
-                        }
-                    }
+                    tau = tau / d;
                 }
+               
+                var M = (int)(T/tau);
+
+                var folderPath = this.CreateOutputFolder(M, n, string.Empty);
+                var parameters = this.GetSeriesParameters(alpha, beta, n, K, M, tau, a, b, r, sigmaSq, S0Eps, h, smoothness, folderPath);
+                PrintParameters(parameters);
+                var calculator = new AmericanOptionCalculator(parameters, false, false);
+                double[] S0Arr = calculator.Solve();
+                
+                 list.Add(S0Arr);
             }
 
             PrintTable(table);
@@ -347,11 +342,13 @@ namespace UnitTests
             const double startK = 5d;
             const double a = 0d;
             const double b = 50d;
+            const double alpha = 1d;
+            const double beta = 1d;
             const double r = 0.1d;
             const double sigmaSq = 0.2d;
             const double K = startK;
             const double S0eps = 1e-5;
-            const double h = b/(2*startN);
+            const double h = b / (2 * startN);
             const double T = 1d;
             this.PrintParamsForSeries2(r, sigmaSq, K);
             PrintTableHeader(Nsteps, startN);
@@ -376,7 +373,7 @@ namespace UnitTests
                         folderPath = CreateOutputFolder(K, n, "convergence");
                     }
                 */
-                var parameters = this.GetSeriesParameters(n, K, M, tau, a, b, r, sigmaSq, S0eps, h, 1000d, folderPath);
+                var parameters = this.GetSeriesParameters(alpha, beta, n, K, M, tau, a, b, r, sigmaSq, S0eps, h, 1000d, folderPath);
                 var calculator = new AmericanOptionCalculator(parameters, false, false);
                 S0ArrGold = calculator.Solve();
             }
@@ -398,7 +395,7 @@ namespace UnitTests
                         folderPath = CreateOutputFolder(K, n, "convergence");
                     }
                 */
-                var parameters = this.GetSeriesParameters(n, K, M, tau, a, b, r, sigmaSq, S0eps, h, 1000d, folderPath);
+                var parameters = this.GetSeriesParameters(alpha, beta, n, K, M, tau, a, b, r, sigmaSq, S0eps, h, 1000d, folderPath);
                 var calculator = new AmericanOptionCalculator(parameters, false, false);
                 double[] S0Arr = calculator.Solve();
                 dictionary[n] = this.GetErrorLInf(S0ArrGold, S0Arr);
@@ -407,6 +404,108 @@ namespace UnitTests
 
             watch.Stop();
             Console.WriteLine("Elapsed = " + watch.Elapsed.TotalSeconds + " s.");
+            var list = new List<double>();
+            foreach (KeyValuePair<int, double> pair in dictionary)
+            {
+                list.Add(pair.Value);
+                Console.WriteLine(pair.Key + " " + pair.Value);
+            }
+
+            Console.WriteLine();
+            Console.WriteLine("Log2");
+            for (var i = 1; i < list.Count; i++)
+            {
+                var value = list[i - 1] / list[i];
+                Console.WriteLine(value + " " + Math.Log(value, 2));
+            }
+
+            // PrintTable(table);
+            // Console.WriteLine();
+            // PrintCsv(table);
+        }
+        
+        [Test]
+        public void TestSeriesConvergence2()
+        {
+            const int startN = 4800;
+            const int Nsteps = 5;
+            const double startK = 5d;
+
+            const double a = 0d;
+            const double b = 10d;
+            const double alpha = 1d;
+            const double beta = 1d;
+            const double r = 0.1d;
+
+            const double sigmaSq = 0.2d;
+            const double S0Eps = 1e-5d;
+            const double K = startK;
+            const double h = (b - K) / startN;
+            const int startM = 365;
+            const double tauStart = 1e-6d;
+            const double smoothness = 1000d;
+            this.PrintParamsForSeries2(r, sigmaSq, K);
+            PrintTableHeader(Nsteps, startN);
+            var T = startM * tauStart;
+            double[] S0ArrGold;
+            Console.WriteLine("Started Nsteps - 1");
+            {
+                 var n = (int)Math.Pow(2, (Nsteps-1)) * startN;
+                 double tau = tauStart  ;
+                 var d = (2 * ((Nsteps-1) + 1));
+                 if (d > 0)
+                 {
+                     tau = tau / d;
+                 }
+               
+                 var M = (int)(T/tau);
+                 var folderPath = this.GetTrashFolder();
+
+                /*
+                    if (allowOutputFile)
+                    {
+                        folderPath = CreateOutputFolder(K, n, "convergence");
+                    }
+                */
+                var parameters = this.GetSeriesParameters(alpha, beta, n, K, M, tau, a, b, r, sigmaSq, S0Eps, h, smoothness, folderPath);
+                PrintParameters(parameters);
+                var calculator = new AmericanOptionCalculator(parameters, false, false);
+                S0ArrGold = calculator.Solve();
+            }
+
+            Console.WriteLine("Finished Nsteps - 1");
+            
+            var dictionary = new Dictionary<int, double>();
+            Console.WriteLine("Started from 0 to Nsteps - 1");
+            for (var i = 0; i < Nsteps - 1; i++)
+            {
+                var n = (int)Math.Pow(2, i) * startN;
+                double tau = tauStart  ;
+                var d = (2 * (i + 1));
+                if (d > 0)
+                {
+                    tau = tau / d;
+                }
+               
+                var M = (int)(T/tau);
+                 
+                var folderPath = this.GetTrashFolder();
+
+                /*
+                    if (allowOutputFile)
+                    {
+                        folderPath = CreateOutputFolder(K, n, "convergence");
+                    }
+                */
+                var parameters = this.GetSeriesParameters(alpha, beta, n, K, M, tau, a, b, r, sigmaSq, S0Eps, h, smoothness, folderPath);
+                PrintParameters(parameters);
+                var calculator = new AmericanOptionCalculator(parameters, false, false);
+                double[] S0Arr = calculator.Solve();
+                dictionary[n] = this.GetErrorLInf(S0ArrGold, S0Arr);
+                Console.WriteLine("Finished step = " + i);
+            }
+
+             
             var list = new List<double>();
             foreach (KeyValuePair<int, double> pair in dictionary)
             {
@@ -506,7 +605,25 @@ namespace UnitTests
             Console.WriteLine("K = " + calculator.GetK());
             Console.WriteLine("M = " + calculator.GetM());
             Console.WriteLine("T = " + calculator.GetT());
+            Console.WriteLine("h = " + calculator.GetH());
             Console.WriteLine("S0 Eps = " + calculator.GetS0Eps());
+            Console.WriteLine();
+        }
+
+        private static void PrintParameters(AmericanOptionParameters calculator)
+        {
+            Console.WriteLine("a = " + calculator.A);
+            Console.WriteLine("b = " + calculator.B);
+            Console.WriteLine("r = " + calculator.R);
+            Console.WriteLine("N = " + calculator.N);
+            Console.WriteLine("N_1 = " + calculator.N1);
+            Console.WriteLine("tau = " + calculator.Tau);
+            Console.WriteLine("sigma_sq = " + calculator.SigmaSq);
+            Console.WriteLine("K = " + calculator.K);
+            Console.WriteLine("M = " + calculator.M);
+            Console.WriteLine("T = " + calculator.T);
+            //Console.WriteLine("h = " + calculator.h);
+            Console.WriteLine("S0 Eps = " + calculator.S0Eps);
             Console.WriteLine();
         }
 
@@ -567,8 +684,16 @@ namespace UnitTests
             var error = new double[gold.Count];
             for (int i = 0, k = 0; i < gold.Count; i += stride, k++)
             {
-                nSol[i] = sol[k];
-                error[i] = Math.Abs(gold[i] - nSol[i]);
+                try
+                {
+                    nSol[i] = sol[k];
+                    error[i] = Math.Abs(gold[i] - nSol[i]);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    throw;
+                }
             }
 
             // var error = Utils.GetAbsError(gold, nSol);
@@ -579,19 +704,23 @@ namespace UnitTests
         {
             const double a = 0d;
             const double b = 10d;
+            const double alpha = 1d;
+            const double beta = 1d;
             const double r = 0.1d;
             const int n = 1200;
             const double tau = 1e-5d;
             const double sigmaSq = 0.2d;
             const double S0Eps = 1e-5d;
-            const double h = b / (n * 2d);
             const double K = 5d;
+            const double h = (b - K) / n;
             const int M = 365;
             const double smoothness = 1000d;
-            return new AmericanOptionParameters(a, b, n, r, tau, sigmaSq, K, S0Eps, h, M, workPath, saveSolutions, smoothness);
+            return new AmericanOptionParameters(alpha, beta, a, b, n, r, tau, sigmaSq, K, S0Eps, h, M, workPath, saveSolutions, smoothness);
         }
 
         private AmericanOptionParameters GetSeriesParameters(
+            double alpha,
+            double beta,
             int n,
             double K,
             int M,
@@ -605,7 +734,7 @@ namespace UnitTests
             double smoothness,
             string workDir)
         {
-            return new AmericanOptionParameters(a, b, n, r, tau, sigma, K, S0eps, h, M, workDir, false, smoothness);
+            return new AmericanOptionParameters(alpha, beta, a, b, n, r, tau, sigma, K, S0eps, h, M, workDir, false, smoothness);
         }
 
         private string GetTrashFolder()

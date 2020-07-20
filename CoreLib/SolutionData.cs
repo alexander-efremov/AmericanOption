@@ -16,7 +16,7 @@
             this.S0 = S0;
         }
 
-        public double k { get; private set; }
+        public int k { get; private set; }
 
         public double S0 { get; private set; }
 

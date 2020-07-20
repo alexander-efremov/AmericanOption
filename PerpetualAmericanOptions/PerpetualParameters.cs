@@ -5,6 +5,8 @@ namespace PerpetualAmericanOptions
     public class PerpetualParameters : Parameters
     {
         public PerpetualParameters(
+            double alpha,
+            double beta,
             double a,
             double b,
             int n,
@@ -15,7 +17,7 @@ namespace PerpetualAmericanOptions
             double S0Eps,
             double h,
             string workDir)
-            : base(a, b, n, r, tau, sigmaSq, k, S0Eps, h, workDir)
+            : base(alpha, beta, a, b, n, r, tau, sigmaSq, k, S0Eps, h, workDir)
         {
         }
     }
