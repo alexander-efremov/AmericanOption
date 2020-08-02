@@ -27,7 +27,6 @@ namespace UnitTests
             double[] S0t = calculator.Solve();
             this.ConvexityCheck(S0t);
             List<SolutionData> numericSolutions = calculator.GetNumericSolutions();
-
             List<SolutionData> exactSolutions = calculator.GetExactSolutions(S0t);
 
             Assert.AreEqual(exactSolutions.Count, numericSolutions.Count);
@@ -68,26 +67,6 @@ namespace UnitTests
                 }
             }
 
-            // Console.WriteLine();
-            // Console.WriteLine("Print Errors");
-            // for (var index = 0; index < numericSolutions.Count; index++)
-            // {
-            //     var exactSolution = exactSolutions[index];
-            //     var numericSolution = numericSolutions[index];
-            //     Point[] error = Utils.GetAbsError(exactSolution.Solution, numericSolution.Solution);
-            //     var sb = new StringBuilder();
-            //     foreach (var d in error.Take(5))
-            //     {
-            //         sb.Append(d.VS.ToString("e8", CultureInfo.InvariantCulture) + " ");
-            //     }
-            //
-            //     Console.WriteLine(numericSolution.k + " " + numericSolution.S0.ToString("e8", CultureInfo.InvariantCulture) + " " + sb);
-            //     if (index > 10)
-            //     {
-            //         break;
-            //     }
-            // }
-
             ClearData(parameters);
 
             var printer = calculator.GetTecplotPrinter();
@@ -97,8 +76,6 @@ namespace UnitTests
             {
                 var exactSolution = exactSolutions[i];
                 var numericSolution = numericSolutions[i];
-                // Point[] error = Utils.GetAbsError(exactSolution.Solution, numericSolution.Solution);
-
                 printer.PrintXY(
                     Path.Combine(parameters.WorkDir + "/exact/", "exactSolution"),
                     calculator.GetTau() * (calculator.GetM() - i),
@@ -113,71 +90,7 @@ namespace UnitTests
                     numericSolution.Solution,
                     calculator.GetM() - i,
                     "numeric_" + (calculator.GetM() - i));
-                // printer.PrintXY(
-                //     Path.Combine(parameters.WorkDir + "/error/", "error"),
-                //     calculator.GetTau() * (calculator.GetM() - i),
-                //     calculator.GetH(),
-                //     error,
-                //     calculator.GetM() - i,
-                //     "error_" + (calculator.GetM() - i));
-                // if (i > 2)
-                // {
-                //     break;
-                // }
             }
-
-            printer.PrintXYZ(
-                Path.Combine(parameters.WorkDir + "/exact/", "exactSolution3d"),
-                calculator.GetH(),
-                calculator.GetTau(),
-                exactSolutions,
-                0,
-                "exact");
-            printer.PrintXYZ(
-                Path.Combine(parameters.WorkDir + "/numeric/", "numericSolution3d"),
-                calculator.GetH(),
-                calculator.GetTau(),
-                numericSolutions,
-                0,
-                "numeric");
-
-            // // checks solutions from the T to 0 time
-            // for (var i = 0; i < numericSolutions.Count; i++)
-            // {
-            //     var exactSolution = exactSolutions[i];
-            //     var numericSolution = numericSolutions[i];
-            //     Point[] error = Utils.GetAbsError(exactSolution.Solution, numericSolution.Solution);
-            //
-            //     Assert.AreEqual(exactSolution.Solution.Length, numericSolution.Solution.Length);
-            //
-            //     for (var j = 0; j < exactSolution.Solution.Length; j++)
-            //     {
-            //         try
-            //         {
-            //             Assert.AreEqual(
-            //                 exactSolution.k,
-            //                 numericSolution.k,
-            //                 "k is wrong");
-            //             Assert.AreEqual(
-            //                 exactSolution.S0,
-            //                 numericSolution.S0,
-            //                 "S0 is wrong");
-            //             Assert.AreEqual(
-            //                 exactSolution.Solution[j],
-            //                 numericSolution.Solution[j],
-            //                 // 10e-6,
-            //                 "ex: " + exactSolution.Solution[j].VS.ToString("e8", CultureInfo.InvariantCulture)
-            //                        + " num: " + numericSolution.Solution[j].VS.ToString("e8", CultureInfo.CurrentCulture)
-            //                        + " err: " + error[j].VS.ToString("e8", CultureInfo.CurrentCulture)
-            //                        + " rel: " + numericSolution.Solution[j].VS / exactSolution.Solution[j].VS);
-            //         }
-            //         catch (Exception)
-            //         {
-            //             Console.WriteLine("i = " + i + " j = " + j);
-            //             throw;
-            //         }
-            //     }
-            // }
 
             this.Print(Path.Combine(parameters.WorkDir, "s0"), S0t, calculator.GetTau());
         }

@@ -22,7 +22,7 @@ namespace CoreLib
             using (var writer = new StreamWriter(name, false))
             {
                 writer.WriteLine(
-                    "TITLE = 'DEM DATA | DEM DATA | DEM DATA | DEM DATA'\nVARIABLES = 'S' {0}\nZONE T='{1}'",
+                    "TITLE = 'DEM DATA | DEM DATA | DEM DATA | DEM DATA'\nVARIABLES = S {0}\nZONE T='{1}'",
                     "V",
                     "SubZone");
                 writer.WriteLine("I={0} K={1} ZONETYPE=Ordered", data.Length, 1);

@@ -146,17 +146,17 @@
         {
             // solutions were filled in reversed order from the M to 0
             // then here we reverse it
-            List<SolutionData> list1 = new List<SolutionData>();
+            List<SolutionData> list = new List<SolutionData>();
 
             foreach (var data in this.solutions)
             {
-                var ar = data.Solution.ToArray();
+                var array = data.Solution.ToArray();
                 var solutionData = new SolutionData(data.S0, data.k);
-                solutionData.Solution = ar;
-                list1.Add(solutionData);
+                solutionData.Solution = array;
+                list.Add(solutionData);
             }
             
-            return list1;
+            return list;
         }
 
         public double GetT()
