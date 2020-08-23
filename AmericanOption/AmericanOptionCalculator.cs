@@ -146,11 +146,11 @@
         {
             // solutions were filled in reversed order from the M to 0
             // then here we reverse it
-            List<SolutionData> list = new List<SolutionData>();
+            var list = new List<SolutionData>();
 
             foreach (var data in this.solutions)
             {
-                var array = data.Solution.ToArray();
+                Point[] array = data.Solution.ToArray();
                 var solutionData = new SolutionData(data.S0, data.k);
                 solutionData.Solution = array;
                 list.Add(solutionData);
@@ -181,7 +181,7 @@
             
             if (this.saveSolutions)
             {
-                this.SaveNumericSolution(VNext, this.GetM(), S0t[this.GetM()]);
+                 this.SaveNumericSolution(VNext, this.GetM(), S0t[this.GetM()]);
             }
 
             this.PrintHeader(S0t);
@@ -190,6 +190,7 @@
 
             for (var m = this.GetM() - 1; m >= 0; --m)
             {
+                var tau = this.GetTau();
                 if (this.allowOutputConsole)
                 {
                     Console.WriteLine("Time step = " + m);
@@ -210,7 +211,12 @@
                     var h = this.GetH();
                     
                     // calculate new V(S, t_k)
-                    VCurrent = this.CalculateV(S0Current, VNext, this.GetTau(), m, h, out double[] rp);
+                    VCurrent = this.CalculateV(S0Current, VNext, tau, m, h, out double[] rp);
+
+                    if (VCurrent[0] <= 0d)
+                    {
+                        throw new Exception("VCurrent[0] <= 0d");
+                    }
 
                     // calculate new S0(t)_i
                     var S0CurrentPrev = S0Current;
@@ -220,12 +226,14 @@
                     S0Diff = Math.Abs(this.GetK() - VCurrent[0] - S0Current);
                 } while (S0Diff > this.GetS0Eps());
 
+                // Console.WriteLine(m + " " + S0Current);
+
                 // TODO: why we get some negative values instead of zero?
                 RemoveNegativeValues(VCurrent);
                 
                 if (this.saveSolutions)
                 {
-                    this.SaveNumericSolution(VCurrent, m, S0Current);
+                     this.SaveNumericSolution(VCurrent, m, S0Current);
                 }
 
                 S0t[m] = S0Current;
@@ -274,7 +282,8 @@
             var r = this.GetR();
             var sigma = this.GetSquaredSigma();
 
-            var hph0 = Math.Pow(this.GetAlpha(0, m) * (0+1) * h, this.GetBeta(m)); // h_{i+1/2}
+            // var hph0 = Math.Pow(this.GetAlpha(0, m) * (0+1) * h, this.GetBeta(m)); // h_{i+1/2}
+            var hph0 = h;
             var hmh0 = hph0; // h_{i-1/2}
             var smh0 = S0 - 0.5d * hmh0; // s_{i-1/2}
             var sph0 = S0 + 0.5d * hph0; // s_{i+1/2}
@@ -293,9 +302,11 @@
             for (var i = 1; i < rp.Length - 1; ++i)
             {
                 //Console.WriteLine("i={0} beta={1} alpha={2} h={3}", i, GetBeta(m), GetAlpha(m), Math.Pow(GetAlpha(m) * i * h, GetBeta(m)));
-                var xi = S0 + Math.Pow(this.GetAlpha(i,m) * i * h, this.GetBeta(m));
-                var hmh = xi - (S0 + Math.Pow(this.GetAlpha(i,m) * (i - 1) * h, this.GetBeta(m))); // h_{i-1/2}
-                var hph = S0 + Math.Pow(this.GetAlpha(i,m) * (i + 1) * h, this.GetBeta(m)) - xi; // h_{i+1/2}
+                var xi = S0 + i * h;
+                // var hmh = xi - (S0 + Math.Pow(this.GetAlpha(i,m) * (i - 1) * h, this.GetBeta(m))); // h_{i-1/2}
+                // var hph = S0 + Math.Pow(this.GetAlpha(i,m) * (i + 1) * h, this.GetBeta(m)) - xi; // h_{i+1/2}
+                var hmh = h;
+                var hph = h;
                 var simh = xi - 0.5d * hmh; // s_{i-1/2}
                 var siph = xi + 0.5d * hph; // s_{i+1/2}
                 CheckHCorrectness(hph, tau, siph, r);
@@ -328,7 +339,6 @@
         private double[] CalculateV(double s0Old, IReadOnlyList<double> Vk1, double tau, int m, double h, out double[] rp)
         {
             rp = this.CalculateRightPart(s0Old, Vk1, h, tau, m);
-
             double[] b_t = this.GetB(this.GetN1(), s0Old, h, this.GetSquaredSigma(), tau);
             double[] c_t = this.GetC(this.GetN1(), s0Old, h, this.GetSquaredSigma(), tau, this.GetR());
             double[] d_t = this.GetD(this.GetN1(), s0Old, h, this.GetSquaredSigma(), tau);
@@ -394,7 +404,7 @@
                 var hmh = S0 + i * h - (S0 + (i - 1) * h); // h_{i - 1/2}
                 if (!((hmh * hmh) < (4d * tau * sigmaSq * si * si)))
                 {
-                    throw new ArgumentException("hmh is invalid");
+                    throw new ArgumentException("hmh is invalid: tau: " + tau + " sigmaSq: " + sigmaSq + " si: " + si + " si^2: " + si*si);
                 }
 
                 b[i] = hmh / (4d * tau) - (sigmaSq * si * si) / (2d * hmh);

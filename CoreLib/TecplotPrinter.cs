@@ -49,7 +49,7 @@ namespace CoreLib
             using (var writer = new StreamWriter(name, false))
             {
                 writer.WriteLine(
-                    "TITLE = '{1}'\nVARIABLES = 'S' {0}\nZONE T='{1}'",
+                    "TITLE = '{1}'\nVARIABLES = S {0}\nZONE T='{1}'",
                     "V",
                     mapName);
                 writer.WriteLine("I={0} K={1} ZONETYPE=Ordered", data.Length, 1);
@@ -82,7 +82,7 @@ namespace CoreLib
             using (var writer = new StreamWriter(name, false))
             {
                 writer.WriteLine(
-                    "TITLE = '{1}'\nVARIABLES = 'S' {0}\nZONE T='{1}'",
+                    "TITLE = '{1}'\nVARIABLES = S {0}\nZONE T='{1}'",
                     "V",
                     mapName);
                 writer.WriteLine("I={0} K={1} ZONETYPE=Ordered", data.Length, 1);
@@ -119,12 +119,18 @@ namespace CoreLib
             using (var writer = new StreamWriter(name, false))
             {
                 writer.WriteLine(
-                    "TITLE = '{1}'\nVARIABLES = 'S' {0}\nZONE T='{1}'",
+                    "TITLE = '{1}'\nVARIABLES = S {0}\nZONE T='{1}'",
                     "V",
                     mapName);
-                writer.WriteLine("I={0} K={1} ZONETYPE=Ordered", data.Length, 1);
-                writer.WriteLine("DATAPACKING=POINT\nDT=(DOUBLE DOUBLE)");
+                int xx = 0;
                 for (var i = 0; i < data.Length; i++)
+                {
+                    if (data[i].S>= this.b) break;
+                    xx++;
+                }
+                writer.WriteLine("I={0} K={1} ZONETYPE=Ordered", xx, 1);
+                writer.WriteLine("DATAPACKING=POINT\nDT=(DOUBLE DOUBLE)");
+                for (var i = 0; i < xx; i++)
                 {
                     var val = data[i].VS;
                     if (double.IsInfinity(val) || val < 0d)
@@ -132,7 +138,82 @@ namespace CoreLib
                         val = 0d;
                     }
 
-                    writer.WriteLine($"{data[i].S.ToString("e8", CultureInfo.InvariantCulture)} {val.ToString("e8", CultureInfo.InvariantCulture)}");
+                    var d = data[i].S;
+                    writer.WriteLine($"{d.ToString("e8", CultureInfo.InvariantCulture)} {val.ToString("e8", CultureInfo.InvariantCulture)}");
+                }
+            }
+        }
+
+        public void PrintXY(string filename, int k, string t, string h, double hd,double K, Point[] data, string mapName,string mapName2, bool printexct)
+        {
+            // var name = string.Format(
+            //     "{0}_t={3}_nx={1}_hx={2}_a={4}_c={5}.dat",
+            //     filename,
+            //     data.Length,
+            //     h,
+            //     t,
+            //     this.a,
+            //     this.b);
+            
+            var name = string.Format("{0}_k={1}.dat", filename, k);
+            using (var writer = new StreamWriter(name, false))
+            {
+                writer.WriteLine(
+                    "TITLE = '{1}'\nVARIABLES = S {0}\nZONE T='{2}'",
+                    "V",
+                    mapName2,
+                    mapName);
+                int xx = 0;
+                double s = 0;
+                if (printexct)
+                {
+                    while (s < data[0].S)
+                    {
+                        s += hd;
+                        xx++;
+                    }
+                }
+                
+                for (var i = 0; i < data.Length; i++)
+                {
+                    if (data[i].S >= this.b)
+                    {
+                        break;
+                    }
+                    xx++;
+                }
+                
+                writer.WriteLine("I={0} K={1} ZONETYPE=Ordered", xx, 1);
+                writer.WriteLine("DATAPACKING=POINT\nDT=(DOUBLE DOUBLE)");
+                
+                s = 0;
+                if (printexct)
+                {
+                    while (s < data[0].S)
+                    {
+                        var val = K - s;
+                        writer.WriteLine($"{s.ToString("e8", CultureInfo.InvariantCulture)} {val.ToString("e8", CultureInfo.InvariantCulture)}");
+                        s += hd;
+                    }
+                }
+
+                xx = 0;
+                for (var i = 0; i < data.Length; i++)
+                {
+                    if (data[i].S>= this.b) break;
+                    xx++;
+                }
+
+                for (var i = 0; i < xx; i++)
+                {
+                    var val = data[i].VS;
+                    if (double.IsInfinity(val) || val < 0d)
+                    {
+                        val = 0d;
+                    }
+
+                    var d = data[i].S;
+                    writer.WriteLine($"{d.ToString("e8", CultureInfo.InvariantCulture)} {val.ToString("e8", CultureInfo.InvariantCulture)}");
                 }
             }
         }
@@ -151,7 +232,7 @@ namespace CoreLib
             {
                 // each time layer is a zone
                 writer.WriteLine(
-                    "TITLE = '{1}'\nVARIABLES = 'S' '{0}' '{1}'\n",
+                    "TITLE = '{1}'\nVARIABLES = S '{0}' '{1}'\n",
                     "t",
                     "V");
                 foreach (SolutionData sol in data)
@@ -191,7 +272,7 @@ namespace CoreLib
             using (var writer = new StreamWriter(name, false))
             {
                 writer.WriteLine(
-                    "TITLE = '{1}'\nVARIABLES = 'S' {0}\nZONE T='{1}'",
+                    "TITLE = '{1}'\nVARIABLES = S {0}\nZONE T='{1}'",
                     "V",
                     mapName);
                 writer.WriteLine("I={0} K={1} ZONETYPE=Ordered", data.Length, 1);

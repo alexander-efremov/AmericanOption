@@ -17,79 +17,120 @@ namespace UnitTests
     public class AmericanOptionTests : UnitTestBase
     {
         [Test]
-        public void AmericanOption()
+        public void AmericanOption2()
         {
             var parameters = this.GetParameters(true, this.GetWorkingDir() + "AO/");
-            var calculator = new AmericanOptionCalculator(parameters, true, false);
+            var calculator = new AmericanOptionCalculator(parameters, false, false);
 
             PrintParameters(calculator);
 
             double[] S0t = calculator.Solve();
             this.ConvexityCheck(S0t);
             List<SolutionData> numericSolutions = calculator.GetNumericSolutions();
-            List<SolutionData> exactSolutions = calculator.GetExactSolutions(S0t);
+            // List<SolutionData> exactSolutions = calculator.GetExactSolutions(S0t);
 
-            Assert.AreEqual(exactSolutions.Count, numericSolutions.Count);
+            // Assert.AreEqual(exactSolutions.Count, numericSolutions.Count);
 
-            Console.WriteLine();
-            Console.WriteLine("Print Exact Sols");
-            for (var index = 0; index < exactSolutions.Count; index++)
-            {
-                var exactSolution = exactSolutions[index];
-                var sb = new StringBuilder();
-                foreach (var d in exactSolution.Solution.Take(5))
-                {
-                    sb.Append(d.VS.ToString("e8", CultureInfo.InvariantCulture) + " ");
-                }
+            // Console.WriteLine();
+            // Console.WriteLine("Print Exact Sols");
+            // for (var index = 0; index < exactSolutions.Count; index++)
+            // {
+            //     var exactSolution = exactSolutions[index];
+            //     var sb = new StringBuilder();
+            //     foreach (var d in exactSolution.Solution.Take(5))
+            //     {
+            //         sb.Append(d.VS.ToString("e8", CultureInfo.InvariantCulture) + " ");
+            //     }
+            //
+            //     Console.WriteLine(exactSolution.k + " " + exactSolution.S0.ToString("e8", CultureInfo.InvariantCulture) + " " + sb);
+            //     if (index > 10)
+            //     {
+            //         break;
+            //     }
+            // }
 
-                Console.WriteLine(exactSolution.k + " " + exactSolution.S0.ToString("e8", CultureInfo.InvariantCulture) + " " + sb);
-                if (index > 10)
-                {
-                    break;
-                }
-            }
-
-            Console.WriteLine();
-            Console.WriteLine("Print Numeric Sols");
-            for (var index = 0; index < numericSolutions.Count; index++)
-            {
-                var numericSolution = numericSolutions[index];
-                var sb = new StringBuilder();
-                foreach (var d in numericSolution.Solution.Take(5))
-                {
-                    sb.Append(d.VS.ToString("e8", CultureInfo.InvariantCulture) + " ");
-                }
-
-                Console.WriteLine(numericSolution.k + " " + numericSolution.S0.ToString("e8", CultureInfo.InvariantCulture) + " " + sb);
-                if (index > 10)
-                {
-                    break;
-                }
-            }
+            // Console.WriteLine();
+            // Console.WriteLine("Print Numeric Sols");
+            // for (var index = 0; index < numericSolutions.Count; index++)
+            // {
+            //     var numericSolution = numericSolutions[index];
+            //     var sb = new StringBuilder();
+            //     foreach (var d in numericSolution.Solution.Take(5))
+            //     {
+            //         sb.Append(d.VS.ToString("e8", CultureInfo.InvariantCulture) + " ");
+            //     }
+            //
+            //     Console.WriteLine(numericSolution.k + " " + numericSolution.S0.ToString("e8", CultureInfo.InvariantCulture) + " " + sb);
+            //     if (index > 10)
+            //     {
+            //         break;
+            //     }
+            // }
 
             ClearData(parameters);
 
-            var printer = calculator.GetTecplotPrinter();
+            // var printer = calculator.GetTecplotPrinter();
+            var printer = new TecplotPrinter(parameters.K, parameters.B);
 
             // checks solutions from the T to 0 time
+            // numeric sols [0] = T(M) where M=365, [1] T(M-1) where M-1=364
+            int k = 0;
+            //int t = numericSolutions.Count / 5;
+            int t = numericSolutions.Count;
             for (var i = 0; i < numericSolutions.Count; i++)
             {
-                var exactSolution = exactSolutions[i];
-                var numericSolution = numericSolutions[i];
-                printer.PrintXY(
-                    Path.Combine(parameters.WorkDir + "/exact/", "exactSolution"),
-                    calculator.GetTau() * (calculator.GetM() - i),
-                    calculator.GetH(),
-                    exactSolution.Solution,
-                    calculator.GetM() - i,
-                    "exact_" + (calculator.GetM() - i));
+                // if (i % t != 0)
+                // {
+                //     continue;
+                // }
+                
+                // if (i > 15)
+                // {
+                //     break;
+                // }
+
+                // if (i % 10 != 0)
+                // {
+                //     continue;
+                // }
+
+                // if (i > 292)
+                // {
+                //     Console.WriteLine(i);
+                //     Console.WriteLine(numericSolutions[i].Solution[0].S);
+                //     Console.WriteLine(numericSolutions[i].Solution[0].VS);
+                //     Console.WriteLine();
+                // }
+
+                // if (calculator.GetM() - i!=50 && (i % 73 != 0 || i == calculator.GetM() - i))
+                // {
+                //     continue;
+                // }
+
+                k++;
+                
+                string frame = "";
+                frame = "V(S,t) on t=";
+                if (i == 0)
+                {
+                    frame += "T";
+                }
+                else
+                {
+                    frame += k + "(T/5)";
+                }
+ 
                 printer.PrintXY(
                     Path.Combine(parameters.WorkDir + "/numeric/", "numericSolution"),
-                    calculator.GetTau() * (calculator.GetM() - i),
+                    k,
+                    (calculator.GetTau() * (calculator.GetM() - i)).ToString("F8"),
+                    calculator.GetH().ToString("F8"),
                     calculator.GetH(),
-                    numericSolution.Solution,
-                    calculator.GetM() - i,
-                    "numeric_" + (calculator.GetM() - i));
+                    calculator.GetK(),
+                    numericSolutions[i].Solution,
+                    "numeric_" +  (calculator.GetTau() * (calculator.GetM() - i)).ToString("F8"),
+                    frame,
+                    i == 0);
             }
 
             this.Print(Path.Combine(parameters.WorkDir, "s0"), S0t, calculator.GetTau());
@@ -613,19 +654,17 @@ namespace UnitTests
         private AmericanOptionParameters GetParameters(bool saveSolutions, string workPath)
         {
             const double a = 0d;
-            const double b = 10d;
+            const double b = 1d;
             const double alpha = 1d;
             const double beta = 1d;
-            const double r = 0.1d;
-            const int n = 1200;
-            const double tau = 1e-5d;
+            const double r = 0.2d;
+            const int n = 12000;
+            const double tau = 1e-3d;
             const double sigmaSq = 0.2d;
             const double S0Eps = 1e-5d;
-            const double K = 5d;
-            //const double h = (b - K) / n;
-            const int M = 365;
-            const double smoothness = 1000d;
-            return new AmericanOptionParameters(alpha, beta, a, b, n, r, tau, sigmaSq, K, S0Eps, /*h,*/ M, workPath, saveSolutions, smoothness);
+            const double K = 0.1d;
+            const int M = 3650;
+            return new AmericanOptionParameters(alpha, beta, a, b, n, r, tau, sigmaSq, K, S0Eps, /*h,*/ M, workPath, saveSolutions, 100d);
         }
 
         private AmericanOptionParameters GetSeriesParameters(

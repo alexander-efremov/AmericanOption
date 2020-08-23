@@ -96,21 +96,21 @@ namespace CoreLib
             return this.tau;
         }
         
-        public double GetAlpha(int i, int m)
-        {
-            // alpha = alpha / m
-            //return this.alpha;
-            return this.alpha / (i  + m + 1);
-        }
-        
-        public double GetBeta(int m)
-        {
-            // beta = beta_s - m*h^2
-            return this.beta  ;
-            //return this.beta - m * (this.h * this.h);
-        }
+        // public double GetAlpha(int i, int m)
+        // {
+        //     // alpha = alpha / m
+        //     //return this.alpha;
+        //     return this.alpha / (i  + m + 1);
+        // }
+        //
+        // public double GetBeta(int m)
+        // {
+        //     // beta = beta_s - m*h^2
+        //     return this.beta  ;
+        //     //return this.beta - m * (this.h * this.h);
+        // }
 
-        public void UpdateH1(double S0)
+        protected void UpdateH1(double S0)
         {
             if (S0 < 0d)
             {
