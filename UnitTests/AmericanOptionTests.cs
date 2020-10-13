@@ -75,8 +75,7 @@ namespace UnitTests
             // checks solutions from the T to 0 time
             // numeric sols [0] = T(M) where M=365, [1] T(M-1) where M-1=364
             int k = 0;
-            //int t = numericSolutions.Count / 5;
-            int t = numericSolutions.Count;
+            int t = numericSolutions.Count / 5;
             for (var i = 0; i < numericSolutions.Count; i++)
             {
                 // if (i % t != 0)
@@ -117,7 +116,7 @@ namespace UnitTests
                 }
                 else
                 {
-                    frame += k + "(T/5)";
+                    frame += (numericSolutions.Count - i) + "(T/" + numericSolutions.Count + ")";
                 }
  
                 printer.PrintXY(

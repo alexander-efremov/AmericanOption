@@ -206,10 +206,12 @@
                     Console.WriteLine("m = " + m);
                     Console.WriteLine("S0Current = " + S0Current);
                 }
+                
+                //var h = this.GetH();
+                var h = (this.Getb() - this.GetK()) / this.GetN();
+                
                 do
                 {
-                    var h = this.GetH();
-                    
                     // calculate new V(S, t_k)
                     VCurrent = this.CalculateV(S0Current, VNext, tau, m, h, out double[] rp);
 
