@@ -27,7 +27,7 @@ namespace AmericanOptionAlbena
             double r = 0.1d; // the risk-free rate
             double K = 10; // the strike price
             double K2 = K * K; // the squared strike price
-            double q = 0.1d; // the divident rate
+            double q = 0.1d; // the dividend rate
             double lambda = 1d; // the lambda in infinite element approximation
             double s0eps = 10e-3; // eps to refine s0
             double[] s0 = new double[M1]; // the s0 solution
