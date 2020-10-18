@@ -433,7 +433,7 @@
                     throw new ArgumentException("hmh is invalid");
                 }
 
-                c[i] = sigma_sq * si * si / (2d * hmh) + sigma_sq * si * si / (2d * hph) + (hmh + hph) * (1d / (4d * tau) + r / 2d);
+                c[i] = (sigma_sq * si * si) / (2d * hmh) + (sigma_sq * si * si) / (2d * hph) + (hmh + hph) * (1d / (4d * tau) + r / 2d);
             }
 
             // left boundary condition
@@ -494,7 +494,7 @@
             while (0d + j * superH < S0)
             {
                 var S = 0d + j * superH;
-                if (S>S0) break;
+                if (S > S0) break;
                 list.Add(new Point(S, this.GetK()-S));
                 j++;
             }
