@@ -74,5 +74,16 @@ namespace CoreLib.Utils
 
             Console.WriteLine();
         }
+        
+        public static void PrintAsMatrix(double[] arr, int n, int m, string header)
+        {
+            Console.WriteLine(header);
+            for (var i = 0; i < arr.Length; i++)
+            {
+                Console.Write(arr[i] + " ");
+            }
+
+            Console.WriteLine();
+        }
     }
 }

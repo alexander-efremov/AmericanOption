@@ -2,145 +2,109 @@
 namespace AmericanOptionAlbena
 {
     using System;
-    using System.Diagnostics.CodeAnalysis;
     using System.IO;
+    using CoreLib.Utils;
 
     public static class Program
     {
-        [SuppressMessage("Style", "IDE0059:Unnecessary assignment of a value", Justification = "<Pending>")]
-        [SuppressMessage("ReSharper", "UnusedVariable")]
         public static void Main()
         {
-            double a = 0d; // left bound
-            double b = 50d; // right bound
-            int N = 10; // the number of space intervals
-            int N1 = N + 1; // the number of points
-            double h = (b - a) / N; // the space step
-            double T0 = 0d; // the start time
-            double Tn = 1d; // the finish time
-            double T = (Tn - T0); // time interval
-            int M = 1000; // the number of time intervals
-            int M1 = M + 1; // the number of time points
-            double tau = T / M; // the time step
-            double sigma = 0.1d; // the sigma = volatility
-            double sigma2 = sigma * sigma; // the squared sigma
-            double r = 0.1d; // the risk-free rate
-            double K = 10; // the strike price
-            double K2 = K * K; // the squared strike price
-            double q = 0.1d; // the dividend rate
-            double lambda = 1d; // the lambda in infinite element approximation
-            double s0eps = 10e-3; // eps to refine s0
-            double[] s0 = new double[M1]; // the s0 solution
-            for (int i = 0; i < s0.Length; i++)
+            const double Tol = 10e-3; // eps to refine eta
+            const double eps = 10e-3; // eps to refine mu
+            const double lb = 0d; // left bound
+            const double rb = 50d; // right bound
+            const double T0 = 0d; // the start time
+            const double Tn = 1d; // the finish time
+            const double T = Tn - T0; // time interval
+            const int M = 1000; // the number of time intervals
+            const double tau = T / M; // the time step
+            const double sigma = 0.1d; // the sigma = volatility
+            const double sigma2 = sigma * sigma; // the squared sigma
+            const double r = 0.1d; // the risk-free rate
+            const double K = 10; // the strike price
+            const double q = 0.0d; // the dividend rate
+            const double b = -((2d * r) / sigma2);
+            var lambda = 1d; // the lambda in infinite element approximation
+            var s0eps = 10e-3; // eps to refine s0
+            var s0 = new double[M + 1]; // the s0 solution
+            var N = 800; // the number of space intervals
+            var N1 = N + 1; // the number of points
+            var h = (rb - lb) / N; // the space step
+            var u_curr = new double[N1]; // the current solution
+            var u_prev = new double[N1]; // the previous solution
+
+            // for j = 0
+            var s0_wave_j = 0d;
+            var s0_wave_j_minus_1 = 0d;
+            var s0_deriv_hat = 0d;
+            var s0_deriv_dash = 0d;
+            var s0_dash_j = 0d;
+            var s0_dash_j_minus_1 = 0d;
+            var eta_j_l_m2 = 0d;
+            var eta_j_l_m1 = 0d;
+            var eta_j_l = 0d;
+            var lambda_j = 0d;
+            var lambda_j_minus_1 = 0d;
+
+            for (var j = 1; j <= M; j++)
             {
-                s0[i] = 0d;
-            }
-            double[] u1 = new double[N1]; // the current solution
-            for (int i = 0; i < u1.Length; i++)
-            {
-                u1[i] = 0d;
-            }
+                var l = 0;
+                var mu_j_l_m2 = 0d;
+                var mu_j_l_m1 = 0d;
+                var mu_j_l = s0_deriv_hat;
 
-            double[] u0 = new double[N1]; // the previous solution
-
-            // lets start the calculations
-            // initial condition of u(x,0) <=> 0 
-            for (int i = 0; i < u0.Length; i++)
-            {
-                u0[i] = 0d;
-            }
-
-            // initial condition for s0(0) is 0
-            // as far as after 2 changes of variables 
-            // condition (S(T) = K, T) in (S,t)-coordinates
-            // was transformed into (0,0) in (x,t) coordinates
-            s0[0] = 0d;
-
-            // for each time step
-            for (int k = 1; k <= M; k++)
-            {
-                // save previous s0 from k-1
-                double s0p = s0[k - 1];
-
-                double s0c;
-                do
+                var iterCount = 0;
+                while (true)
                 {
-                    // calculate uc
-                    // calculate right part
-                    double[] f = new double[N1];
-                    double s_t_shtrih = 1d; //TODO!
-                    f[0] = 0d; // u(0,t)=K-s_0(t)
-                    for (int i = 1; i < N1; i++)
+                    iterCount++;
+                    
+                    var a_j = (2d * r - 2d * q - sigma2 + 2d * mu_j_l) / sigma2;
+                    lambda_j_minus_1 = lambda_j;
+                    lambda_j = Math.Sqrt(a_j * a_j - 4d * b);
+
+                    u_curr = Solve(N1, r, q, sigma, s0_deriv_dash, tau, h, u_prev, sigma2, s0_dash_j, mu_j_l, a_j, s0_dash_j_minus_1, lambda_j, lambda_j_minus_1);
+
+                    var rho_j_l = s0[j - 1] + tau * mu_j_l;
+                    eta_j_l_m2 = eta_j_l_m1;
+                    eta_j_l_m1 = eta_j_l;
+                    eta_j_l = K - rho_j_l - u_curr[0];
+                    if (Math.Abs(eta_j_l) <= Tol)
                     {
-                        var ga = -(r - q - (sigma2 / 2d) + (s_t_shtrih / K)) * K;
-                        double x = i * h;
-                        double xl = x - h / 2d;
-                        double xr = x + h / 2d;
-                        double xlp = xl - ga*tau;
-                        double xrp = xr - ga*tau;
-
-                        // will use gammas from 
-                        // Vladimir V. Shaidurov*, Alexander V. Vyatkin, and Elena V. Kuchunova
-                        // Semi-Lagrangian difference approximations with different stability requirements 2018
-                        // (2.25) - gammas for L_inf for du/dt+a(du/dx)
-                        double gammmal = (1d / (8d * tau)) * (1d - ((4d * tau) / h) * ga);
-                        double gammmac = (1d / (8d * tau)) * (6d + ((4d * tau) / h) * ga - ((4d * tau) / h) * ga);
-                        double gammmar = (1d / (8d * tau)) * (1d + ((4d * tau) / h) * ga);
-
-                        double uvl = u0[i - 1];
-                        double uvc = u0[i];
-                        double uvr = u0[i + 1];
-                        f[i] = gammmal * uvl + gammmac * uvc + gammmar * uvr;
+                        s0_deriv_dash = s0_deriv_hat = mu_j_l;
+                        s0_dash_j = rho_j_l;
+                        s0[j] = s0_dash_j;
+                        break;
+                    }
+                    // ReSharper disable once RedundantIfElseBlock
+                    else
+                    {
+                        l += 1;
+                        if (l == 1)
+                        {
+                            mu_j_l_m1 = mu_j_l;
+                            mu_j_l = mu_j_l_m1 + eps;
+                        }
+                        else
+                        {
+                            mu_j_l_m2 = mu_j_l_m1;
+                            mu_j_l_m1 = mu_j_l;
+                            var mu_val1 = eta_j_l_m1 * mu_j_l_m2 - eta_j_l_m2 * mu_j_l_m1;
+                            var mu_val2 = eta_j_l_m1 - eta_j_l_m2;
+                            mu_j_l = mu_val1 / mu_val2;
+                        }
                     }
 
-                    // thomas
-                    // b - диагональ, лежащая под главной (нумеруется: [1;n-1])
-                    var db = new double[N1];
-                    for (var i = 1; i <= N1 - 1; ++i)
+                    for (var i = 0; i < u_prev.Length; i++)
                     {
-                        var x = i * h;
-                        db[i] = 0d;
+                        u_curr[i] = u_prev[i];
                     }
-                    // right boundary cond
-                    db[N1 - 1] = 0d;
-                    // главная диагональ матрицы A (нумеруется: [0;n-1])
-                    double[] dc = new double[N1];
-                    for (var i = 1; i <= N1 - 1; ++i)
-                    {
-                        var x = i * h;
-                        dc[i] = 0d;
-                    }
-                    // right boundary condition
-                    dc[N1 - 1] = 0d;
-                    // диагональ, лежащая над главной (нумеруется: [0;n-2])
-                    double[] dd = new double[N1];
-                    for (var i = 0; i <= N1 - 2; ++i)
-                    {
-                        var x = i * h;
-                        dd[i] = 0d;
-                    }
-                    // right boundary condition
-                    dd[N1 - 2] = 0d;
 
-                    u1 = ThomasAlgo(N1, db, dc, dd, f);
-
-                    // calculate s0c = s0_k
-                    // from (20)
-                    s0c = K - u1[0];
-                } while (Math.Abs(s0c - s0p) > s0eps);
-
-                // update current values before get on next time step
-                s0[k] = s0c;
-                // copy current to prev and zero current
-                for (int tmp = 0; tmp < u1.Length; tmp++)
-                {
-                    u0[tmp] = u1[tmp];
-                    u1[tmp] = 0d;
+                    s0_dash_j_minus_1 = s0_dash_j;
                 }
             }
 
             // check convexity
-            for (var i = 1; i < s0.Length; i--)
+            for (var i = 1; i <= s0.Length - 1; i++)
             {
                 if (s0[i - 1] > s0[i])
                 {
@@ -165,7 +129,89 @@ namespace AmericanOptionAlbena
             }
         }
 
-        private static double[] ThomasAlgo(int n, double[] b, double[] c, double[] d, double[] r)
+        private static double GetAlpha(double r, double q, double sigma, double s0_deriv_dash)
+        {
+            var val = (sigma * sigma) / 2d;
+            return r - q - val + s0_deriv_dash;
+        }
+
+        private static double[] Solve(
+            int N1,
+            double r,
+            double q,
+            double sigma,
+            double s0_deriv_dash,
+            double tau,
+            double h,
+            double[] u_prev,
+            double sigma2,
+            double s0_dash_tj,
+            double mu_j_l,
+            double a_j,
+            double s0_dash_j_minus_1,
+            double lambda_j,
+            double lambda_j_minus_1)
+        {
+            // calculate right part
+            var f = new double[N1];
+            var alpha = GetAlpha(r, q, sigma, s0_deriv_dash);
+            var gamma1 = 1d / tau - alpha / h;
+            var gamma2 = alpha / h;
+
+            f[0] = gamma1 * u_prev[0] + gamma2 * u_prev[1] - (sigma2 * s0_dash_tj) / h;
+            for (var i = 1; i < N1 - 1; i++)
+            {
+                f[i] = gamma1 * u_prev[i] + gamma2 * u_prev[i + 1];
+            }
+
+            var nu_j = 2d / (lambda_j_minus_1 + lambda_j + 2d * (s0_dash_j_minus_1 - mu_j_l) / sigma2);
+            f[N1 - 1] = 0.5d * (gamma1 * u_prev[N1 - 1] + gamma2 * (u_prev[N1 - 1] + h)) + nu_j / (tau * h) * u_prev[N1 - 1];
+
+            Utils.Print(f, "f");
+            
+            // b - below main diagonal (indexed as [1;n-1])
+            var db = new double[N1];
+            db[0] = 0d;
+            for (var i = 1; i < N1 - 1; ++i)
+            {
+                db[i] = -sigma2 / (2d * h * h);
+            }
+
+            db[N1 - 1] = -sigma2 / (2d * h * h); // right boundary condition
+
+            // main diagonal of matrix (indexed as [0;n-1])
+            var dc = new double[N1];
+            dc[0] = sigma2 / (h * h) + r + 1d / tau + (-sigma2 / (2d * h * h));
+            for (var i = 1; i < N1 - 1; ++i)
+            {
+                dc[i] = sigma2 / (h * h) + r + 1d / tau;
+            }
+
+            var val1 = sigma2 / (2d * h * h);
+            var val2 = sigma2 * (a_j + lambda_j) / (4d * h);
+            var val3 = 0.5d * (1d / tau + r);
+            var val4 = 1d / (lambda_j * tau * h);
+            dc[N1 - 1] = val1 + val2 + val3 + val4; // right boundary condition
+
+            // d - up to main diagonal (indexed as [0;n-2])
+            var dd = new double[N1];
+            dd[0] = -sigma2 / (h * h);
+            for (var i = 0; i <= N1 - 2; ++i)
+            {
+                dd[i] = -sigma2 / (2d * h * h);
+            }
+
+            // right boundary condition
+            dd[N1 - 2] = 0d;
+            // Utils.Print(db, "db");
+            // Utils.Print(dc, "dc");
+            // Utils.Print(dd, "dd");
+            double[] u_curr = SolveByTridiagonalMatrixAlgorithm(N1, db, dc, dd, f);
+            Utils.Print(u_curr, "u_curr");
+            return u_curr;
+        }
+
+        private static double[] SolveByTridiagonalMatrixAlgorithm(int n, double[] b, double[] c, double[] d, double[] r)
         {
             for (var i = 0; i < c.Length; i++)
             {
