@@ -2,11 +2,15 @@
 namespace AmericanOptionAlbena
 {
     using System;
+    using System.Diagnostics.CodeAnalysis;
     using System.IO;
-    using CoreLib.Utils;
 
+    [SuppressMessage("ReSharper", "ConvertToCompoundAssignment")]
     public static class Program
     {
+        [SuppressMessage("ReSharper", "RedundantAssignment")]
+        [SuppressMessage("ReSharper", "TooWideLocalVariableScope")]
+        [SuppressMessage("ReSharper", "RedundantIfElseBlock")]
         public static void Main()
         {
             const double Tol = 10e-3; // eps to refine eta
@@ -40,24 +44,29 @@ namespace AmericanOptionAlbena
             var s0_deriv_dash = 0d;
             var s0_dash_j = 0d;
             var s0_dash_j_minus_1 = 0d;
-            var eta_j_l_m2 = 0d;
-            var eta_j_l_m1 = 0d;
-            var eta_j_l = 0d;
+            var eta_j_l_m2 = double.MinValue;
+            var eta_j_l_m1 = double.MinValue;
+            var eta_j_l = double.MinValue;
             var lambda_j = 0d;
             var lambda_j_minus_1 = 0d;
 
             for (var j = 1; j <= M; j++)
             {
                 var l = 0;
-                var mu_j_l_m2 = 0d;
-                var mu_j_l_m1 = 0d;
-                var mu_j_l = s0_deriv_hat;
-
-                var iterCount = 0;
+                
+                var mu_j_l_m2 = double.MinValue;
+                var mu_j_l_m1 = double.MinValue;
+                // we MUST take mu_j_l = eps on j == 1 because s0_deriv_hat = 0 for j = 0 and
+                // the secant method mu_j_l = (eta_j_l_m1 * mu_j_l_m2 - eta_j_l_m2 * mu_j_l_m1) / (eta_j_l_m1 - eta_j_l_m2);
+                // will return ZERO when l = 2
+                // so in the algorithm from the paper we should change the line
+                // "In the beginning ˆs00(0) = ¯s00(0) = 0 and ˜s0(0) = ¯s0(0) = 0."
+                // to "In the beginning ˆs00(0) = eps, ¯s00(0) = 0, and ˜s0(0) = ¯s0(0) = 0."
+                // i.e. we should take the non-zero initial guess for ˆs00(0).
+                var mu_j_l = j == 1 ? eps : s0_deriv_hat;  
+                 
                 while (true)
                 {
-                    iterCount++;
-                    
                     var a_j = (2d * r - 2d * q - sigma2 + 2d * mu_j_l) / sigma2;
                     lambda_j_minus_1 = lambda_j;
                     lambda_j = Math.Sqrt(a_j * a_j - 4d * b);
@@ -67,7 +76,7 @@ namespace AmericanOptionAlbena
                     var rho_j_l = s0[j - 1] + tau * mu_j_l;
                     eta_j_l_m2 = eta_j_l_m1;
                     eta_j_l_m1 = eta_j_l;
-                    eta_j_l = K - rho_j_l - u_curr[0];
+                    eta_j_l = K - rho_j_l - u_curr[0]; 
                     if (Math.Abs(eta_j_l) <= Tol)
                     {
                         s0_deriv_dash = s0_deriv_hat = mu_j_l;
@@ -75,22 +84,45 @@ namespace AmericanOptionAlbena
                         s0[j] = s0_dash_j;
                         break;
                     }
-                    // ReSharper disable once RedundantIfElseBlock
                     else
                     {
                         l += 1;
+                        Console.WriteLine("l=" + l);
                         if (l == 1)
-                        {
-                            mu_j_l_m1 = mu_j_l;
-                            mu_j_l = mu_j_l_m1 + eps;
-                        }
-                        else
                         {
                             mu_j_l_m2 = mu_j_l_m1;
                             mu_j_l_m1 = mu_j_l;
-                            var mu_val1 = eta_j_l_m1 * mu_j_l_m2 - eta_j_l_m2 * mu_j_l_m1;
-                            var mu_val2 = eta_j_l_m1 - eta_j_l_m2;
-                            mu_j_l = mu_val1 / mu_val2;
+                            mu_j_l = mu_j_l + eps;
+                            Console.WriteLine("mu_j(l-2) " + mu_j_l_m2);
+                            Console.WriteLine("mu_j(l-1) " + mu_j_l_m1);
+                            Console.WriteLine("mu_j(l) " + mu_j_l);
+                            Console.WriteLine("eta_j(l-2) " + eta_j_l_m2);
+                            Console.WriteLine("eta_j(l-1) " + eta_j_l_m1);
+                            Console.WriteLine("eta_j(l) " + eta_j_l);
+                        }
+                        else
+                        {
+                            Console.WriteLine("mu_j_l_m2 " + mu_j_l_m2);
+                            Console.WriteLine("mu_j_l_m1 " + mu_j_l_m1);
+                            Console.WriteLine("mu_j_l " + mu_j_l);
+                            Console.WriteLine("eta_j_l_m2 " + eta_j_l_m2);
+                            Console.WriteLine("eta_j_l_m1 " + eta_j_l_m1);
+                            Console.WriteLine("eta_j_l " + eta_j_l);
+                            mu_j_l_m2 = mu_j_l_m1;
+                            mu_j_l_m1 = mu_j_l;
+                            // Console.WriteLine("mu_j_l_m2 " + mu_j_l_m2);
+                            // Console.WriteLine("mu_j_l_m1 " + mu_j_l_m1);
+                            // Console.WriteLine("mu_j_l " + mu_j_l);
+                            mu_j_l = (eta_j_l_m1 * mu_j_l_m2 - eta_j_l_m2 * mu_j_l_m1) / (eta_j_l_m1 - eta_j_l_m2);
+                            // mu_j_l_m2 = mu_j_l_m1;
+                            // mu_j_l_m1 = mu_j_l;
+                            // var mu_val1 = eta_j_l * mu_j_l_m1 - eta_j_l_m1 * mu_j_l;
+                            // var mu_val2 = eta_j_l_m1 - eta_j_l_m2;
+                            // mu_j_l = mu_val1 / mu_val2;
+                            Console.WriteLine("(eta_j_l_m1 * mu_j_l_m2 - eta_j_l_m2 * mu_j_l_m1)/(eta_j_l_m1 - eta_j_l_m2)");
+                            Console.WriteLine("mu_j_l_m2 " + mu_j_l_m2);
+                            Console.WriteLine("mu_j_l_m1 " + mu_j_l_m1);
+                            Console.WriteLine("mu_j_l " + mu_j_l);
                         }
                     }
 
@@ -145,7 +177,7 @@ namespace AmericanOptionAlbena
             double h,
             double[] u_prev,
             double sigma2,
-            double s0_dash_tj,
+            double s0_dash_j,
             double mu_j_l,
             double a_j,
             double s0_dash_j_minus_1,
@@ -158,16 +190,17 @@ namespace AmericanOptionAlbena
             var gamma1 = 1d / tau - alpha / h;
             var gamma2 = alpha / h;
 
-            f[0] = gamma1 * u_prev[0] + gamma2 * u_prev[1] - (sigma2 * s0_dash_tj) / h;
+            f[0] = gamma1 * u_prev[0] + gamma2 * u_prev[1] - (sigma2 * s0_dash_j) / h;
             for (var i = 1; i < N1 - 1; i++)
             {
                 f[i] = gamma1 * u_prev[i] + gamma2 * u_prev[i + 1];
             }
 
             var nu_j = 2d / (lambda_j_minus_1 + lambda_j + 2d * (s0_dash_j_minus_1 - mu_j_l) / sigma2);
-            f[N1 - 1] = 0.5d * (gamma1 * u_prev[N1 - 1] + gamma2 * (u_prev[N1 - 1] + h)) + nu_j / (tau * h) * u_prev[N1 - 1];
+            var u_prev_n_plus_1 = 0d; // u_prev[N1]; TODO: How to calculate the value at the index N1
+            f[N1 - 1] = 0.5d * (gamma1 * u_prev[N1 - 1] + gamma2 * u_prev_n_plus_1) + (nu_j / (tau * h)) * u_prev[N1 - 1];
 
-            Utils.Print(f, "f");
+            // Utils.Print(f, "f");
             
             // b - below main diagonal (indexed as [1;n-1])
             var db = new double[N1];
@@ -181,10 +214,10 @@ namespace AmericanOptionAlbena
 
             // main diagonal of matrix (indexed as [0;n-1])
             var dc = new double[N1];
-            dc[0] = sigma2 / (h * h) + r + 1d / tau + (-sigma2 / (2d * h * h));
+            dc[0] = sigma2 / (h * h) + r + (1d / tau) + (-sigma2 / (2d * h * h));
             for (var i = 1; i < N1 - 1; ++i)
             {
-                dc[i] = sigma2 / (h * h) + r + 1d / tau;
+                dc[i] = sigma2 / (h * h) + r + (1d / tau);
             }
 
             var val1 = sigma2 / (2d * h * h);
@@ -196,7 +229,7 @@ namespace AmericanOptionAlbena
             // d - up to main diagonal (indexed as [0;n-2])
             var dd = new double[N1];
             dd[0] = -sigma2 / (h * h);
-            for (var i = 0; i <= N1 - 2; ++i)
+            for (var i = 1; i < N1 - 2; ++i)
             {
                 dd[i] = -sigma2 / (2d * h * h);
             }
@@ -207,7 +240,7 @@ namespace AmericanOptionAlbena
             // Utils.Print(dc, "dc");
             // Utils.Print(dd, "dd");
             double[] u_curr = SolveByTridiagonalMatrixAlgorithm(N1, db, dc, dd, f);
-            Utils.Print(u_curr, "u_curr");
+            // Utils.Print(u_curr, "u_curr");
             return u_curr;
         }
 
@@ -222,15 +255,14 @@ namespace AmericanOptionAlbena
                 }
             }
 
-            var delta = new double[n];
-            var beta = new double[n];
-            var lambda = new double[n];
-
             if (Math.Abs(c[0]) < double.Epsilon)
             {
                 throw new InvalidOperationException("c[0] == 0");
             }
 
+            var delta = new double[n];
+            var beta = new double[n];
+            var lambda = new double[n];
             delta[0] = c[0];
             beta[0] = -d[0] / delta[0];
             lambda[0] = r[0] / delta[0];
