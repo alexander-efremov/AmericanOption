@@ -39,6 +39,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AmericanOptionCalculator.cs" />
+    <Compile Include="FileUtils.cs" />
     <Compile Include="Parameters.cs" />
     <Compile Include="Point.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

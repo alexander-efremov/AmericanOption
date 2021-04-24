@@ -5,6 +5,7 @@ namespace CoreLib.Utils
     using System.Diagnostics.CodeAnalysis;
     using System.Linq;
 
+
     public static class Utils
     {
         [SuppressMessage("ReSharper", "UnusedMember.Global")]
@@ -75,7 +76,7 @@ namespace CoreLib.Utils
             Console.WriteLine();
         }
         
-        public static void PrintAsMatrix(double[] arr, int n, int m, string header)
+        public static void PrintAsVector(double[] arr, string header)
         {
             Console.WriteLine(header);
             for (var i = 0; i < arr.Length; i++)
