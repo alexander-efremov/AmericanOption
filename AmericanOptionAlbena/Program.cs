@@ -15,7 +15,7 @@ namespace AmericanOptionAlbena
         public static void Main()
         {
             const int l_max_iterations = 1000; // max iteration on l
-            const double Tol = 10e-3; // eps to refine eta
+            const double Tol = 10e-10; // eps to refine eta
             const double eps = 10e-3; // eps to refine mu
             const double lb = 0d; // left bound
             const double rb = 50d; // right bound
@@ -27,26 +27,24 @@ namespace AmericanOptionAlbena
             const double r = 0.1d; // the risk-free rate
             const double K = 10; // the strike price
             const double q = 0.0d; // the dividend rate
-            const double b = -((2d * r) / sigma2);
             const int N = 800; // the number of space intervals
             const double h = (rb - lb) / N; // the space step
             const int N1 = N + 1; // the number of points
             const int M = 1000; // the number of time intervals
             const double tau = T / M; // the time step
-            var s0 = new double[M + 1]; // the s0 solution
             var u_curr = new double[N1]; // the current solution
             var u_prev = new double[N1]; // the previous solution
             var s0_hat_deriv = new double[M + 1];
-            var s0_dash_deriv = new double[M + 1];
             var s0_dash = new double[M + 1];
+            var s0_wave = new double[M + 1];
             var lambda = new double[M + 1];
-            var a = new double[M];
+            var a = new double[M + 1];
 
             for (var j = 1; j <= M; j++)
             {
                 var mu_j = new double[l_max_iterations];
                 var eta_j = new double[l_max_iterations];
-                var rho_j = new double[l_max_iterations];
+                double rho_j_l = 0d;
                 var l = 0;
                 mu_j[l] = s0_hat_deriv[j - 1];
                 Console.WriteLine("l = {0} eta_j[l-2] = {1}", l, (l > 1 ? eta_j[l - 2] : 0d));
@@ -59,15 +57,16 @@ namespace AmericanOptionAlbena
                 while (l < l_max_iterations)
                 {
                     a[j] = (2d * r - 2d * q - sigma2 + 2d * mu_j[l]) / sigma2;
+                    double b = (-2d * r) / sigma2;
                     lambda[j] = Math.Sqrt(a[j] * a[j] - 4d * b);
-                    u_curr = Solve(l, j, N1, r, q, s0_dash_deriv[j], tau, h, u_prev, sigma2, rho_j, mu_j[l], a[j], lambda);
-                    rho_j[l] = s0[j - 1] + tau * mu_j[l];
+                    u_curr = Solve(l, j, N1, r, q, tau, h, u_prev, sigma2, rho_j_l, s0_dash, mu_j[l], a[j], lambda);
+                    rho_j_l = s0_wave[j - 1] + tau * mu_j[l];
                     
-                    eta_j[l] = K - rho_j[l] - u_curr[0];
+                    eta_j[l] = K - rho_j_l - u_curr[0];
                     if (Math.Abs(eta_j[l]) <= Tol)
                     {
-                        s0_dash_deriv[j] = s0_hat_deriv[j] = mu_j[l];
-                        s0[j] = rho_j[l];
+                        s0_hat_deriv[j] = mu_j[l];
+                        s0_wave[j] = rho_j_l;
                         break;
                     }
 
@@ -81,7 +80,6 @@ namespace AmericanOptionAlbena
                         Console.WriteLine("l = {0} mu_j[l-1] = {1}", l, mu_j[l - 1]);
                         Console.WriteLine("l = {0} mu_j[l] = {1}", l, mu_j[l]);
                         Console.WriteLine("----------------------------------");
-                        
                     }
                     else
                     {
@@ -106,14 +104,12 @@ namespace AmericanOptionAlbena
                 if (l >= l_max_iterations)
                     throw new InvalidOperationException("The 'l' exceed the maximum number of iterations.");
                 
-                s0_dash[j] = rho_j[l];
+                s0_dash[j] = rho_j_l;
                 for (var i = 0; i < u_prev.Length; i++)
                     u_prev[i] = u_curr[i];
-
-                break;
             }
 
-            FileUtils.WriteVectorToFile("S0.dat", s0);
+            FileUtils.WriteVectorToFile("S0.dat", s0_wave);
 
             // // check convexity
             // for (var i = 1; i <= s0.Length - 1; i++)
@@ -147,40 +143,44 @@ namespace AmericanOptionAlbena
             int N1,
             double r,
             double q,
-            double s0_deriv_dash,
             double tau,
             double h,
             double[] u_prev,
             double sigma2,
-            double[] rho_j, // to toke l-th approximation of s_dash_derivative (t_j)
+            double rho_j_l, // to toke l-th approximation of s_dash_derivative (t_j)
+            double[] s0_dash, // to toke l-th approximation of s_dash_derivative (t_j)
             double mu_j_l,
             double a_j,
             double[] lambda)
         {
+            try
+            {
+                Console.WriteLine("l = {0} j = {1} s0_dash[j] = {2}", l, j, rho_j_l);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+
             // calculate the right part
-            var alpha = r - q - ((sigma2) / 2d) + s0_deriv_dash;
+            var alpha = r - q - (sigma2 / 2d) + mu_j_l;
             var gamma1 = 1d / tau - alpha / h;
             var gamma2 = alpha / h;
-
-            Console.WriteLine("l = {0} j = {1} s0_dash[j] = {2}", l, j, rho_j[j]);
-
             var f = new double[N1];
-            f[0] = gamma1 * u_prev[0] + gamma2 * u_prev[1] - (sigma2 / h) * rho_j[j];
+            f[0] = gamma1 * u_prev[0] + gamma2 * u_prev[1] - (sigma2 / h) * rho_j_l;
             for (var i = 1; i < N1 - 1; i++)
                 f[i] = gamma1 * u_prev[i] + gamma2 * u_prev[i + 1];
-            var nu_j = 2d / (lambda[j - 1] + lambda[j] + 2d * (rho_j[j - 1] - mu_j_l) / sigma2);
+            var nu_j = 2d / (lambda[j - 1] + lambda[j] + 2d * (s0_dash[j - 1] - mu_j_l) / sigma2);
             var u_prev_n_plus_1 = 0d; // u_prev[N1]; TODO: How to calculate the value at the index N1
             f[N1 - 1] = 0.5d * (gamma1 * u_prev[N1 - 1] + gamma2 * u_prev_n_plus_1) + (nu_j / (tau * h)) * u_prev[N1 - 1];
 
             // if (l == 1)
             //     Console.WriteLine();
-
-            double s = 0;
-            for (var i = 0; i < f.Length; i++)
-                s += f[i];
-
+            // double s = 0;
+            // for (var i = 0; i < f.Length; i++)
+            //     s += f[i];
             // Console.WriteLine(s);
-
             // Utils.Print(f, "f");
 
             // b - below main diagonal (indexed as [1;n-1])
