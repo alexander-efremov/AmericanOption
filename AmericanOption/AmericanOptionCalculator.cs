@@ -1,14 +1,13 @@
-﻿namespace AmericanOptions
-{
-    using System;
-    using System.Collections.Generic;
-    using System.Diagnostics.CodeAnalysis;
-    using System.Globalization;
-    using System.IO;
-    using System.Linq;
-    using AmericanOption;
-    using CoreLib;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using CoreLib;
 
+namespace AmericanOption
+{
     // from new presentation with FEM
     [SuppressMessage("ReSharper", "CommentTypo", Justification = "OK.")]
     public class AmericanOptionCalculator : AmericanOptionCalculatorBase
@@ -38,28 +37,22 @@
         {
             this.allowOutputFile = allowOutputFile;
             this.allowOutputConsole = allowOutputConsole;
-            this.outputPath = parameters.WorkDir;
-            if (string.IsNullOrEmpty(this.outputPath))
-            {
-                this.outputPath = this.GetWorkDir() + "AO/";
-            }
+            outputPath = parameters.WorkDir;
+            if (string.IsNullOrEmpty(outputPath))
+                outputPath = GetWorkDir() + "AO/";
 
-            this.MValue = parameters.M;
-            this.TValue = parameters.T;
-            this.smoothness = parameters.Smoothness;
-            this.saveSolutions = parameters.SaveVSolutions;
+            MValue = parameters.M;
+            TValue = parameters.T;
+            smoothness = parameters.Smoothness;
+            saveSolutions = parameters.SaveVSolutions;
 
-            this.outputPathStat = Path.Combine(this.outputPath, "stat");
-            if (!Directory.Exists(this.outputPathStat))
-            {
-                Directory.CreateDirectory(this.outputPathStat);
-            }
+            outputPathStat = Path.Combine(outputPath, "stat");
+            if (!Directory.Exists(outputPathStat))
+                Directory.CreateDirectory(outputPathStat);
 
-            this.outputPathRp = Path.Combine(this.outputPath, "rp");
-            if (!Directory.Exists(this.outputPathRp))
-            {
-                Directory.CreateDirectory(this.outputPathRp);
-            }
+            outputPathRp = Path.Combine(outputPath, "rp");
+            if (!Directory.Exists(outputPathRp))
+                Directory.CreateDirectory(outputPathRp);
         }
 
         /// <summary>
@@ -69,22 +62,20 @@
         /// <returns></returns>
         public List<SolutionData> GetExactSolutions(double[] S0t)
         {
-            if (Math.Abs(this.GetM() * this.GetTau() - this.GetT()) > double.Epsilon)
-            {
+            if (Math.Abs(GetM() * GetTau() - GetT()) > double.Epsilon)
                 throw new Exception("GetExactSolutions");
-            }
 
             var list = new List<SolutionData>
             {
-                new SolutionData(S0t, this.GetM())
+                new SolutionData(S0t, GetM())
                 {
-                    Solution = this.GetVonT() // V(S, T) = (K - S)+
+                    Solution = GetVonT() // V(S, T) = (K - S)+
                 }
             };
 
-            for (var k = this.GetM() - 1; k >= 0; k--)
+            for (var k = GetM() - 1; k >= 0; k--)
             {
-                Point[] solution = this.GetExactSolution(this.GetTau(), k, S0t[k]);
+                Point[] solution = GetExactSolution(GetTau(), k, S0t[k]);
                 var solutionData = new SolutionData(S0t, k)
                 {
                     Solution = solution
@@ -101,14 +92,12 @@
         /// <returns></returns>
         public List<SolutionData> GetExactSolutions2(double[] S0t)
         {
-            if (Math.Abs(this.GetM() * this.GetTau() - this.GetT()) > double.Epsilon)
-            {
+            if (Math.Abs(GetM() * GetTau() - GetT()) > double.Epsilon)
                 throw new Exception("GetExactSolutions");
-            }
 
             int startPosOfS01;
-            Point[] solution2 = this.GetExactSolution2(this.GetM(), this.GetM(), 0d, out startPosOfS01);
-            var item = new SolutionData(0d, this.GetM())
+            Point[] solution2 = GetExactSolution2(GetM(), GetM(), 0d, out startPosOfS01);
+            var item = new SolutionData(0d, GetM())
             {
                 Solution = solution2,
                 StartPosOfS0 = startPosOfS01
@@ -118,10 +107,10 @@
                 item
             };
             
-            for (var k = this.GetM() - 1; k >= 0; k--)
+            for (var k = GetM() - 1; k >= 0; k--)
             {
                 int startPosOfS02;
-                Point[] solution = this.GetExactSolution2(this.GetTau(), k, S0t[k], out  startPosOfS02);
+                Point[] solution = GetExactSolution2(GetTau(), k, S0t[k], out  startPosOfS02);
                 var solutionData = new SolutionData(S0t, k)
                 {
                     Solution = solution,
@@ -135,7 +124,7 @@
 
         public int GetM()
         {
-            return this.MValue;
+            return MValue;
         }
 
         /// <summary>
@@ -148,7 +137,7 @@
             // then here we reverse it
             var list = new List<SolutionData>();
 
-            foreach (var data in this.solutions)
+            foreach (var data in solutions)
             {
                 Point[] array = data.Solution.ToArray();
                 var solutionData = new SolutionData(data.S0, data.k);
@@ -161,7 +150,7 @@
 
         public double GetT()
         {
-            return this.TValue;
+            return TValue;
         }
 
         /// <summary>
@@ -171,88 +160,74 @@
         public double[] Solve()
         {
             // var printer = new ThomasArrayPrinter();
-            double[] VNext = this.GetVST(); // V(S, T) = (K - S)+
+            double[] VNext = GetVST(); // V(S, T) = (K - S)+
 
-            var printer = this.GetTecplotPrinter();
+            var printer = GetTecplotPrinter();
             // tecplotPrinter.PrintXY(Path.Combine(_outputPath, "VST"), 0d, GetH(), V);
             
-            var S0t = new double[this.GetM() + 1];
-            S0t[this.GetM()] = this.GetK();
+            var S0t = new double[GetM() + 1];
+            S0t[GetM()] = GetK();
             
-            if (this.saveSolutions)
-            {
-                 this.SaveNumericSolution(VNext, this.GetM(), S0t[this.GetM()]);
-            }
+            if (saveSolutions)
+                SaveNumericSolution(VNext, GetM(), S0t[GetM()]);
 
-            this.PrintHeader(S0t);
-            this.CreateFileWithStatistics();
-            this.PrintVST(printer, VNext, S0t);
+            PrintHeader(S0t);
+            CreateFileWithStatistics();
+            PrintVST(printer, VNext, S0t);
 
-            for (var m = this.GetM() - 1; m >= 0; --m)
+            for (var m = GetM() - 1; m >= 0; --m)
             {
-                var tau = this.GetTau();
-                if (this.allowOutputConsole)
-                {
+                var tau = GetTau();
+                if (allowOutputConsole)
                     Console.WriteLine("Time step = " + m);
-                }
 
                 double[] VCurrent;
                 var iter = 0;
                 var S0Next = S0t[m + 1];
                 var S0Current = S0Next;
                 double S0Diff;
-                if (this.allowOutputConsole)
+                if (allowOutputConsole)
                 {
                     Console.WriteLine("m = " + m);
                     Console.WriteLine("S0Current = " + S0Current);
                 }
                 
                 //var h = this.GetH();
-                var h = (this.Getb() - this.GetK()) / this.GetN();
+                var h = (Getb() - GetK()) / GetN();
                 
                 do
                 {
                     // calculate new V(S, t_k)
-                    VCurrent = this.CalculateV(S0Current, VNext, tau, m, h, out double[] rp);
+                    VCurrent = CalculateV(S0Current, VNext, tau, m, h, out double[] rp);
 
                     if (VCurrent[0] <= 0d)
-                    {
                         throw new Exception("VCurrent[0] <= 0d");
-                    }
 
                     // calculate new S0(t)_i
                     var S0CurrentPrev = S0Current;
-                    S0Current = this.GetK() - VCurrent[0];
-                    this.CheckS0(this.GetK() - VCurrent[0], S0CurrentPrev);
-                    this.PrintData(S0Current, printer, rp, ++iter, m, S0CurrentPrev, VCurrent);
-                    S0Diff = Math.Abs(this.GetK() - VCurrent[0] - S0Current);
-                } while (S0Diff > this.GetS0Eps());
+                    S0Current = GetK() - VCurrent[0];
+                    CheckS0(GetK() - VCurrent[0], S0CurrentPrev);
+                    PrintData(S0Current, printer, rp, ++iter, m, S0CurrentPrev, VCurrent);
+                    S0Diff = Math.Abs(GetK() - VCurrent[0] - S0Current);
+                } while (S0Diff > GetS0Eps());
 
                 // Console.WriteLine(m + " " + S0Current);
 
                 // TODO: why we get some negative values instead of zero?
                 RemoveNegativeValues(VCurrent);
                 
-                if (this.saveSolutions)
-                {
-                     this.SaveNumericSolution(VCurrent, m, S0Current);
-                }
+                if (saveSolutions)
+                    SaveNumericSolution(VCurrent, m, S0Current);
 
                 S0t[m] = S0Current;
                 for (var i = 0; i < VCurrent.Length; i++)
-                {
                     VNext[i] = VCurrent[i];
-                }
 
-                if (this.allowOutputFile)
-                {
-                    printer.PrintXY(Path.Combine(this.outputPath, "V" + m), this.GetTau(), m, this.GetH(), VCurrent, S0Current);
-                }
+                if (allowOutputFile)
+                    printer.PrintXY(Path.Combine(outputPath, "V" + m), GetTau(), m, GetH(), VCurrent, S0Current);
 
-                if (this.allowOutputConsole)
-                {
+                if (allowOutputConsole)
                     Console.WriteLine("--------------------------------------------------");
-                }
             }
 
             return S0t;
@@ -270,19 +245,15 @@
         private static void RemoveNegativeValues(IList<double> VCurrent)
         {
             for (var i = 0; i < VCurrent.Count; i++)
-            {
                 if (VCurrent[i] < 0d)
-                {
                     VCurrent[i] = 0d;
-                }
-            }
         }
 
         private double[] CalculateRightPart(double S0, IReadOnlyList<double> Vk1, double h, double tau, int m)
         {
-            var rp = new double[this.GetN1()];
-            var r = this.GetR();
-            var sigma = this.GetSquaredSigma();
+            var rp = new double[GetN1()];
+            var r = GetR();
+            var sigma = GetSquaredSigma();
 
             // var hph0 = Math.Pow(this.GetAlpha(0, m) * (0+1) * h, this.GetBeta(m)); // h_{i+1/2}
             var hph0 = h;
@@ -295,7 +266,7 @@
             var beta0 =  1d / (8d * tau) * (3d - 2d * tau * r * smh0 / hmh0) * (1d + 2d * tau * r * smh0 / hmh0) 
                 + 1d / (8d * tau) * (3d + 2d * tau * r * sph0 / hph0) * (1d - 2d * tau * r * sph0 / hph0);
             var betap1 = 1d / (8d * tau) * (1d - 2d * tau * r * sph0 / hph0) * (1d - 2d * tau * r * sph0 / hph0);
-            var f0 = this.GetF(sigma, r, this.GetK(), h, S0, this.GetTau(), m, this.GetT(), S0, 0);
+            var f0 = GetF(sigma, r, GetK(), h, S0, GetTau(), m, GetT(), S0, 0);
 
             var x0 = -hph0 / 2d * f0 + sigma * S0 * S0 / 2d
                                      + hph0 / 2d * (beta0 * Vk1[0] + betap1 * Vk1[1]);
@@ -320,7 +291,7 @@
 
                 var betaIp1 = 1d / (8d * tau) * (1d - 2d * tau * r * siph / hph) * (1d - 2d * tau * r * siph / hph);
 
-                var f = this.GetF(sigma, r, this.GetK(), h, xi, tau, m, this.GetT(), S0, i);
+                var f = GetF(sigma, r, GetK(), h, xi, tau, m, GetT(), S0, i);
                 rp[i] = (hmh + hph) / 2d * f + (hmh + hph) / 2d * (betaIm1 * Vk1[i - 1] + betaI * Vk1[i] + betaIp1 * Vk1[i + 1]);
             }
 
@@ -340,11 +311,11 @@
 
         private double[] CalculateV(double s0Old, IReadOnlyList<double> Vk1, double tau, int m, double h, out double[] rp)
         {
-            rp = this.CalculateRightPart(s0Old, Vk1, h, tau, m);
-            double[] b_t = this.GetB(this.GetN1(), s0Old, h, this.GetSquaredSigma(), tau);
-            double[] c_t = this.GetC(this.GetN1(), s0Old, h, this.GetSquaredSigma(), tau, this.GetR());
-            double[] d_t = this.GetD(this.GetN1(), s0Old, h, this.GetSquaredSigma(), tau);
-            double[] Vk = this.ThomasAlgorithmCalculator.Calculate(b_t, c_t, d_t, rp);
+            rp = CalculateRightPart(s0Old, Vk1, h, tau, m);
+            double[] b_t = GetB(GetN1(), s0Old, h, GetSquaredSigma(), tau);
+            double[] c_t = GetC(GetN1(), s0Old, h, GetSquaredSigma(), tau, GetR());
+            double[] d_t = GetD(GetN1(), s0Old, h, GetSquaredSigma(), tau);
+            double[] Vk = ThomasAlgorithmCalculator.Calculate(b_t, c_t, d_t, rp);
 
             // PrintThomasArraysToConsole(b_t, c_t, d_t);
             return Vk;
@@ -353,37 +324,27 @@
         private void CheckS0(double S0Prev, double S0Current)
         {
             if (S0Prev <= 0d)
-            {
                 throw new Exception("S0New <= 0d");
-            }
 
-            if (S0Prev >= this.GetK())
-            {
-                throw new Exception($"S0New >= K: S0New = {S0Prev} K = {this.GetK()}");
-            }
-            
+            if (S0Prev >= GetK())
+                throw new Exception($"S0New >= K: S0New = {S0Prev} K = {GetK()}");
+
             if (S0Prev >= S0Current)
-            {
                 throw new Exception($"S0CurrentPrev: {S0Prev.ToString("e8", CultureInfo.InvariantCulture)} >= S0Current: {S0Current.ToString("e8", CultureInfo.InvariantCulture)}");
-            }
         }
 
         private void CreateFileWithStatistics()
         {
-            if (!this.allowOutputFile)
-            {
+            if (!allowOutputFile)
                 return;
-            }
 
-            if (File.Exists(Path.Combine(this.outputPathStat, "stat.txt")))
-            {
-                File.Delete(Path.Combine(this.outputPathStat, "stat.txt"));
-            }
+            if (File.Exists(Path.Combine(outputPathStat, "stat.txt")))
+                File.Delete(Path.Combine(outputPathStat, "stat.txt"));
         }
 
-        private double Get_a0(double T,  double K, double smoothness)
+        private double Get_a0(double T,  double K, double smooth)
         {
-            var calculateA0 = K / (smoothness * T);
+            var calculateA0 = K / (smooth * T);
             return calculateA0;
         }
 
@@ -405,9 +366,7 @@
                 var si = S0 + i * h;
                 var hmh = S0 + i * h - (S0 + (i - 1) * h); // h_{i - 1/2}
                 if (!((hmh * hmh) < (4d * tau * sigmaSq * si * si)))
-                {
                     throw new ArgumentException("hmh is invalid: tau: " + tau + " sigmaSq: " + sigmaSq + " si: " + si + " si^2: " + si*si);
-                }
 
                 b[i] = hmh / (4d * tau) - (sigmaSq * si * si) / (2d * hmh);
             }
@@ -429,9 +388,7 @@
                 var hmh = si - (S0 + (i - 1) * h); // h_{i-1/2}
                 var hph = S0 + (i + 1) * h - si; // h_{i+1/2}
                 if (hmh * hmh > 4d * tau * sigma_sq * si * si)
-                {
                     throw new ArgumentException("hmh is invalid");
-                }
 
                 c[i] = (sigma_sq * si * si) / (2d * hmh) + (sigma_sq * si * si) / (2d * hph) + (hmh + hph) * (1d / (4d * tau) + r / 2d);
             }
@@ -482,39 +439,37 @@
             double t = tau * m;
             // this.UpdateH(S0);
             
-            var V = new Point[this.GetN1()];
-            var r = this.GetR();
-            var K = this.GetK();
-            var T = this.GetT();
-            var sigma = this.GetSquaredSigma();
+            var V = new Point[GetN1()];
+            var r = GetR();
+            var K = GetK();
+            var T = GetT();
+            var sigma = GetSquaredSigma();
 
             var list = new List<Point>();
-            var superH = this.GetSuperH();
+            var superH = GetSuperH();
             int j = 0;
             while (0d + j * superH < S0)
             {
                 var S = 0d + j * superH;
                 if (S > S0) break;
-                list.Add(new Point(S, this.GetK()-S));
+                list.Add(new Point(S, GetK()-S));
                 j++;
             }
             
-            for (int i = 0; i < this.GetN1() ; i++)
+            for (int i = 0; i < GetN1() ; i++)
             {
-                var S = S0 + i * this.GetH();
+                var S = S0 + i * GetH();
                 // Vi
                 var VS = (T - t)
                          * (sigma / (2d * r))
                          * Math.Pow(K / (1d + sigma / (2d * r)), (2d * r + sigma) / sigma)
-                         * Math.Pow(S - this.Get_a0(T, K, this.GetSmoothness()) * t, -2d * r / sigma);
+                         * Math.Pow(S - Get_a0(T, K, GetSmoothness()) * t, -2d * r / sigma);
 
                 V[i] = new Point(S, VS);
             }
 
             foreach (var point in V)
-            {
                 list.Add(point);
-            }
 
             // for (int i = 0; i < this.GetN1() ; i++)
             // {
@@ -565,36 +520,36 @@
             double t = tau * m;
             // this.UpdateH(s0);
 
-            var h = this.GetH();
+            var h = GetH();
             var V = new List<Point>();
-            var r = this.GetR();
-            var K = this.GetK();
-            var T = this.GetT();
-            var sigma = this.GetSquaredSigma();
+            var r = GetR();
+            var K = GetK();
+            var T = GetT();
+            var sigma = GetSquaredSigma();
             var i = 0;
-            while (i * this.GetH() < s0)
+            while (i * GetH() < s0)
             {
                 V.Add(new Point(
-                    this.Geta() + i * this.GetH(), 
-                    this.GetK() - i * this.GetH()));
+                    Geta() + i * GetH(), 
+                    GetK() - i * GetH()));
                 i++;
             }
 
             startPosOfS0 = i;
             i = 0;
-            while (s0 + i * h < this.GetK())
+            while (s0 + i * h < GetK())
             {
                 var S = s0 + i * h;
                 var VS = (T - t)
                         * (sigma / (2d * r))
                         * Math.Pow(K / (1d + sigma / (2d * r)), (2d * r + sigma) / sigma)
-                        * Math.Pow(S - this.Get_a0(T, K, this.smoothness) * t, -2d * r / sigma);
+                        * Math.Pow(S - Get_a0(T, K, smoothness) * t, -2d * r / sigma);
                 V.Add(new Point(S, VS));
                 
                 i++;
             }
             
-            while (s0 + i * h < this.Getb())
+            while (s0 + i * h < Getb())
             {
                 V.Add(new Point());
                 i++;
@@ -801,24 +756,20 @@
 
         private double GetSmoothness()
         {
-            return this.smoothness;
+            return smoothness;
         }
 
         private double[] GetVST()
         {
             // this.UpdateH(this.GetK());
-            var arr = new double[this.GetN1()];
+            var arr = new double[GetN1()];
             for (var i = 0; i < arr.Length; ++i)
             {
-                var S = this.GetK() + i * this.GetH();
-                if (S <= this.GetK())
-                {
-                    arr[i] = this.GetK() - S;
-                }
+                var S = GetK() + i * GetH();
+                if (S <= GetK())
+                    arr[i] = GetK() - S;
                 else
-                {
                     arr[i] = 0d;
-                }
             }
 
             return arr;
@@ -826,32 +777,28 @@
 
         private Point[] GetVonT()
         {
-            var superH = this.GetSuperH();
+            var superH = GetSuperH();
             
             var list = new List<Point>();
 
             var s = 0d;
             int i = 0;
-            while (s < this.GetK())
+            while (s < GetK())
             {
                 s = 0d + i * superH;
-                if (s > this.GetK())
-                {
+                if (s > GetK())
                     break;
-                }
 
-                list.Add(new Point(s, this.GetK()-s));
+                list.Add(new Point(s, GetK()-s));
                 i++;
             }
 
-            for (int j = 0; j < this.GetN1(); j++)
+            for (int j = 0; j < GetN1(); j++)
             {
-                s = this.GetK() + j * superH;
-                if (s > this.Getb())
-                {
+                s = GetK() + j * superH;
+                if (s > Getb())
                     break;
-                }
-                
+
                 list.Add(new Point(s, 0));
             }
 
@@ -860,43 +807,37 @@
 
         private double GetSuperH()
         {
-            return this.GetH() / 1;
+            return GetH() / 1d;
         }
 
         private void PrintData(double s0Current, TecplotPrinter tecplotPrinter, double[] rp, int iter, int m, double S0Next, IReadOnlyList<double> Vk)
         {
-            this.PrintRpToTecplot(tecplotPrinter, rp, s0Current);
-            this.PrintStatistics(iter, m, this.GetH(), S0Next, s0Current);
-            this.PrintValuesToConsole(iter, this.GetH(), S0Next, Vk, s0Current);
+            PrintRpToTecplot(tecplotPrinter, rp, s0Current);
+            PrintStatistics(iter, m, GetH(), S0Next, s0Current);
+            PrintValuesToConsole(iter, GetH(), S0Next, Vk, s0Current);
         }
 
         private void PrintHeader(IReadOnlyList<double> St)
         {
-            if (!this.allowOutputConsole)
-            {
+            if (!allowOutputConsole)
                 return;
-            }
 
-            Console.WriteLine($"Number of time steps = {this.GetM()} h = {this.GetH()} S(T) = {St[St.Count - 1]}");
+            Console.WriteLine($"Number of time steps = {GetM()} h = {GetH()} S(T) = {St[St.Count - 1]}");
             Console.WriteLine("--------------------------------------------------");
         }
 
         private void PrintRpToTecplot(TecplotPrinter tecplotPrinter, double[] rp, double S0New)
         {
-            if (this.allowOutputFile)
-            {
-                tecplotPrinter.PrintXY(Path.Combine(this.outputPathRp, "temporal-rp"), 0d, 0, this.GetH(), rp, S0New);
-            }
+            if (allowOutputFile)
+                tecplotPrinter.PrintXY(Path.Combine(outputPathRp, "temporal-rp"), 0d, 0, GetH(), rp, S0New);
         }
 
         private void PrintStatistics(int iter, int m, double h_old, double S0Old, double S0New)
         {
-            if (!this.allowOutputFile)
-            {
+            if (!allowOutputFile)
                 return;
-            }
 
-            using (var streamWriter = File.AppendText(Path.Combine(this.outputPathStat, "stat.txt")))
+            using (var streamWriter = File.AppendText(Path.Combine(outputPathStat, "stat.txt")))
             {
                 streamWriter.WriteLine(
                     new string(' ', 2) + " Time step = {0} Iteration = " + iter + " h = {1} S0 = {2} Abs(S0New-S0Old)={3} S0Eps={4} Cnd={5}",
@@ -904,41 +845,33 @@
                     h_old,
                     S0Old,
                     Math.Abs(S0New - S0Old),
-                    this.GetS0Eps(),
-                    Math.Abs(S0New - S0Old) > this.GetS0Eps());
+                    GetS0Eps(),
+                    Math.Abs(S0New - S0Old) > GetS0Eps());
             }
         }
 
         private void PrintValuesToConsole(int iter, double h_old, double S0Old, IReadOnlyList<double> Vk, double S0New)
         {
-            if (this.allowOutputConsole)
-            {
+            if (allowOutputConsole)
                 Console.WriteLine(new string(' ', 2) + "Iteration = " + iter + " h = {0} S0_old = {1} Vk[0] = {2} S0_new = {3}", h_old, S0Old, Vk[0], S0New);
-            }
         }
 
         private void PrintVST(TecplotPrinter tecplotPrinter, double[] Vk1, IReadOnlyList<double> St)
         {
-            if (this.allowOutputFile)
-            {
-                tecplotPrinter.PrintXY(this.outputPath + "V" + this.GetM(), this.GetTau(), this.GetM(), this.GetH(), Vk1, St[St.Count - 1]);
-            }
+            if (allowOutputFile)
+                tecplotPrinter.PrintXY(outputPath + "V" + GetM(), GetTau(), GetM(), GetH(), Vk1, St[St.Count - 1]);
         }
 
         private void SaveNumericSolution(IReadOnlyList<double> V, int m, double S0)
         {
             var temp = new Point[V.Count];
             for (var i = 0; i < V.Count; i++)
-            {
-                temp[i] = new Point(S0+i*this.GetH(),V[i]);
-            }
+                temp[i] = new Point(S0+i*GetH(),V[i]);
 
-            this.solutions.Add(new SolutionData(S0, m)
+            solutions.Add(new SolutionData(S0, m)
             {
                 Solution = temp
             });
         }
     }
-
-    
 }

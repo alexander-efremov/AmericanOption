@@ -46,6 +46,7 @@
     <Compile Include="PerpetualAmericanOptionTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="AmericanOptionTests.cs" />
+    <Compile Include="ThomasTest.cs" />
     <Compile Include="UnitTestBase.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -3,7 +3,6 @@
     using System;
     using System.IO;
     using AmericanOption;
-    using AmericanOptions;
 
     internal class Program
     {

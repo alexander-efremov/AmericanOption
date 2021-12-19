@@ -8,7 +8,6 @@ namespace UnitTests
     using System.Linq;
     using System.Text;
     using AmericanOption;
-    using AmericanOptions;
     using CoreLib;
     using CoreLib.Utils;
     using NUnit.Framework;
