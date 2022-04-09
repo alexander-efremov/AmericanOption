@@ -7,14 +7,8 @@ using System.Text;
 #pragma warning disable 219
 namespace AmericanOptionAlbena
 {
-    [SuppressMessage("ReSharper", "ConvertToCompoundAssignment")]
-    [SuppressMessage("ReSharper", "SuggestBaseTypeForParameter")]
-    [SuppressMessage("ReSharper", "ArrangeRedundantParentheses")]
     public static class Program
     {
-        [SuppressMessage("ReSharper", "RedundantAssignment")]
-        [SuppressMessage("ReSharper", "TooWideLocalVariableScope")]
-        [SuppressMessage("ReSharper", "RedundantIfElseBlock")]
         public static void Main()
         {
             const int l_max_iterations = 1000; // max iteration on l
@@ -29,7 +23,7 @@ namespace AmericanOptionAlbena
             const double sigma2 = sigma * sigma; // the squared sigma
             const double r = 0.1d; // the risk-free rate
             const double K = 10; // the strike price
-            const double q = 0.01d; // the dividend rate
+            const double q = 0.2d; // the dividend rate
             const int N = 800; // the number of space intervals
             const int N1 = N + 1; // the number of points
             const double h = (rb - lb) / N; // the space step
@@ -41,7 +35,7 @@ namespace AmericanOptionAlbena
             var s0_wave = new double[M + 1];
             var lambda = new double[M + 1];
             var a = new double[M + 1];
-            // var sols = new List<double[]>();
+            var sols = new List<double[]>();
             var print = true;
 
             // s0_hat_deriv[0] = s0_wave[0] = -1; // failed on condition var alpha = r - q - (sigma2 / 2d) + mu_j_l; Debug.Assert(alpha >= 0, "alpha>=0");
@@ -61,16 +55,6 @@ namespace AmericanOptionAlbena
                 var rho_j_l = 0d;
                 var l = 0;
                 mu_j[l] = s0_hat_deriv[j - 1];
-                if (print)
-                {
-                    Console.WriteLine("l = {0} eta_j[l-2] = {1}", l, l > 1 ? eta_j[l - 2] : 0d);
-                    Console.WriteLine("l = {0} eta_j[l-1] = {1}", l, l > 0 ? eta_j[l - 1] : 0d);
-                    Console.WriteLine("l = {0} eta_j[l] = {1}", l, eta_j[l]);
-                    Console.WriteLine("l = {0} mu_j[l-2] = {1}", l, 0d);
-                    Console.WriteLine("l = {0} mu_j[l-1] = {1}", l, 0d);
-                    Console.WriteLine("l = {0} mu_j[l] = {1}", l, mu_j[l]);
-                    Console.WriteLine("----------------------------------");
-                }
 
                 while (l < l_max_iterations)
                 {
@@ -79,9 +63,7 @@ namespace AmericanOptionAlbena
                     lambda[j] = Math.Sqrt(a[j] * a[j] - 4d * b);
                     rho_j_l = s0_wave[j - 1] + tau * mu_j[l];
                     u_curr = Solve(j, N1, K, r, q, tau, h, u_prev, sigma2, rho_j_l, s0_hat_deriv, mu_j[l], a, lambda);
-                    //sols.Add(u_curr);
 
-                    //eta_j[l] = K - rho_j_l - u_curr[0];
                     eta_j[l] = K * (1d - Math.Exp(rho_j_l)) - u_curr[0];
                     if (Math.Abs(eta_j[l]) <= Tol)
                     {
@@ -93,44 +75,12 @@ namespace AmericanOptionAlbena
                     if (++l == 1)
                     {
                         mu_j[l] = mu_j[l - 1] + eps;
-                        if (print)
-                        {
-                            Console.WriteLine("l = {0} eta_j[l-2] = {1}", l, 0d);
-                            Console.WriteLine("l = {0} eta_j[l-1] = {1}", l, l > 0 ? eta_j[l - 1] : 0d);
-                            Console.WriteLine("l = {0} eta_j[l] = {1}", l, eta_j[l]);
-                            Console.WriteLine("l = {0} mu_j[l-2] = {1}", l, 0d);
-                            Console.WriteLine("l = {0} mu_j[l-1] = {1}", l, mu_j[l - 1]);
-                            Console.WriteLine("l = {0} mu_j[l] = {1}", l, mu_j[l]);
-                            Console.WriteLine("----------------------------------");
-                        }
                     }
                     else
                     {
-                        if (print)
-                        {
-                            Console.WriteLine("l = {0} mu_j[l-2] = {1}", l, mu_j[l - 2]);
-                            Console.WriteLine("l = {0} mu_j[l-1] = {1}", l, mu_j[l - 1]);
-                            Console.WriteLine("l = {0} mu_j[l] = {1}", l, mu_j[l]);
-                            Console.WriteLine("l = {0} eta_j[l-2] = {1}", l, eta_j[l - 2]);
-                            Console.WriteLine("l = {0} eta_j[l-1] = {1}", l, eta_j[l - 1]);
-                        }
-
                         var value = (eta_j[l - 1] * mu_j[l - 2] - eta_j[l - 2] * mu_j[l - 1]) /
                                     (eta_j[l - 1] - eta_j[l - 2]);
                         mu_j[l] = value;
-
-                        if (print)
-                        {
-                            Console.WriteLine(
-                                "l = {0} (eta_j[l - 1] * mu_j[l - 2] - eta_j[l - 2] * mu_j[l - 1]) = {1:g6}",
-                                l, eta_j[l - 1] * mu_j[l - 2] - eta_j[l - 2] * mu_j[l - 1]);
-                            Console.WriteLine("l = {0} (eta_j[l - 1] - eta_j[l - 2]) = {1:g6}", l,
-                                eta_j[l - 1] - eta_j[l - 2]);
-                            Console.WriteLine("l = {0} mu_j[l-2] = {1}", l, mu_j[l - 2]);
-                            Console.WriteLine("l = {0} mu_j[l-1] = {1}", l, mu_j[l - 1]);
-                            Console.WriteLine("l = {0} calculated mu_j[l] = {1}", l, mu_j[l]);
-                            Console.WriteLine("----------------------------------");
-                        }
                     }
                 }
 
@@ -139,113 +89,24 @@ namespace AmericanOptionAlbena
 
                 for (var i = 0; i < u_prev.Length; i++)
                     u_prev[i] = u_curr[i];
-
-                // if (Math.Abs(s0_wave[j] - s0_wave[j-1]) < Tol)
-                //     break;
             }
 
-            // var printer = new TecplotPrinter(K, rb);
-            // for (var i = 0; i < sols.Count; i++)
-            // {
-            //     var frame = "V(S,t) on t=";
-            //     if (i == 0)
-            //         frame += "T";
-            //     else
-            //         frame += sols.Count - i + "(T/" + sols.Count + ")";
-            //
-            //     printer.PrintXY(
-            //         Path.Combine(Directory.GetCurrentDirectory(), "numeric/numericSolution"),
-            //         i,
-            //         (tau * (M - i)).ToString("F8"),
-            //         h.ToString("F8"),
-            //         h,
-            //         K,
-            //         sols[i],
-            //         "numeric_" + (tau * (M - i)).ToString("F8"),
-            //         frame,
-            //         i == 0);
-            // }
-
-            WriteVectorToFile("S0.dat", s0_wave);
-            WriteVectorToFile("S0_hat_deriv.dat", s0_hat_deriv);
-            // PrintToTecplot($"{nameof(s0_wave)}_nx={s0_wave.Length - 1}_tau={tau}.dat", s0_wave, tau);
-            // PrintToTecplotT($"{nameof(s0_wave)}_reversed_nx={s0_wave.Length - 1}_tau={tau}.dat", s0_wave, tau, T);
-
-            // значения S0 после обратного преобразования
-            PrintS0WaveDirectTime($"{nameof(s0_wave)}_T-t_nx={s0_wave.Length}_tau={tau}.dat", s0_wave, tau, T);
+            WriteVectorToFile("S0.arr", s0_wave);
+            WriteVectorToFile("S0_hat_deriv.arr", s0_hat_deriv);
+            // значения производных
+            PrintS0HatDirectTime($"{nameof(s0_hat_deriv)}_t_nx={s0_hat_deriv.Length}_tau={tau}.dat", s0_hat_deriv, tau);
+            // значения S0 до обратного преобразования
+            PrintS0WaveDirectTime($"{nameof(s0_wave)}_t_nx={s0_wave.Length}_tau={tau}.dat", s0_wave, tau);
             // print s0 to tecplot file
             var s0 = new double[s0_wave.Length];
             for (var i = 0; i < s0_wave.Length; i++)
                 s0[i] = K * Math.Exp(s0_wave[i]);
             // значения S0 после обратного преобразования
-            PrintS0DirectTime($"{nameof(s0)}_T-t_nx={s0.Length}_tau={tau}.dat", s0, tau, T);
-            // значения производных
-            PrintS0HatDirectTime($"{nameof(s0_hat_deriv)}_T-t_nx={s0.Length}_tau={tau}.dat", s0_hat_deriv, tau, T);
+            PrintS0ReversedTime($"{nameof(s0)}_T-t_nx={s0.Length}_tau={tau}.dat", s0, tau, T);
         }
 
-        private static void PrintS0DirectTime(string name, double[] arr, double tau, double T)
-        {
-            using var writer2 = new StreamWriter(name, false);
-            writer2.WriteLine("TITLE = 'DEM DATA | DEM DATA | DEM DATA | DEM DATA');");
-            writer2.WriteLine("VARIABLES = t S0");
-            writer2.WriteLine("ZONE T='SubZone'");
-            writer2.WriteLine($"I={arr.Length - 1} K={1} ZONETYPE=Ordered");
-            writer2.WriteLine("DATAPACKING=POINT\nDT=(DOUBLE DOUBLE)");
-            for (var i = 0; i < arr.Length; i++)
-                writer2.WriteLine("{0:e12} {1:e12}", tau * i, arr[i]);
-        }
-
-        private static void PrintS0WaveDirectTime(string name, double[] arr, double tau, double T)
-        {
-            using var writer2 = new StreamWriter(name, false);
-            writer2.WriteLine("TITLE = 'DEM DATA | DEM DATA | DEM DATA | DEM DATA');");
-            writer2.WriteLine("VARIABLES = t S0W");
-            writer2.WriteLine("ZONE T='SubZone'");
-            writer2.WriteLine($"I={arr.Length - 1} K={1} ZONETYPE=Ordered");
-            writer2.WriteLine("DATAPACKING=POINT\nDT=(DOUBLE DOUBLE)");
-            for (var i = 0; i < arr.Length; i++)
-                writer2.WriteLine("{0:e12} {1:e12}", tau * i, arr[i]);
-        }
-
-        private static void PrintS0HatDirectTime(string name, double[] arr, double tau, double T)
-        {
-            using var writer2 = new StreamWriter(name, false);
-            writer2.WriteLine("TITLE = 'DEM DATA | DEM DATA | DEM DATA | DEM DATA');");
-            writer2.WriteLine("VARIABLES = t S0_Deriv");
-            writer2.WriteLine("ZONE T='SubZone'");
-            writer2.WriteLine($"I={arr.Length - 1} K={1} ZONETYPE=Ordered");
-            writer2.WriteLine("DATAPACKING=POINT\nDT=(DOUBLE DOUBLE)");
-            for (var i = 0; i < arr.Length; i++)
-                writer2.WriteLine("{0:e12} {1:e12}", tau * i, arr[i]);
-        }
-
-        private static void PrintToTecplotT(string name, double[] s0, double tau, double T)
-        {
-            using var writer2 = new StreamWriter(name, false);
-            writer2.WriteLine(
-                "TITLE = 'DEM DATA | DEM DATA | DEM DATA | DEM DATA'\nVARIABLES = S {0}\nZONE T='{1}'",
-                "T - t", "SubZone");
-            writer2.WriteLine($"I={s0.Length - 1} K={1} ZONETYPE=Ordered");
-            writer2.WriteLine("DATAPACKING=POINT\nDT=(DOUBLE DOUBLE)");
-            for (var i = 0; i < s0.Length; i++)
-                writer2.WriteLine("{0:e12} {1:e12}", s0[i], T - tau * i);
-        }
-
-        private static double[] Solve(
-            int j,
-            int N1,
-            double K,
-            double r,
-            double q,
-            double tau,
-            double h,
-            double[] u_prev,
-            double sigma2,
-            double rho_j_l,
-            double[] s0_hat_deriv,
-            double mu_j_l,
-            double[] arr_a,
-            double[] lambda)
+        private static double[] Solve(int j, int N1, double K, double r, double q, double tau, double h, double[] u_prev, 
+            double sigma2, double rho_j_l, double[] s0_hat_deriv, double mu_j_l, double[] arr_a, double[] lambda)
         {
             // calculate the right part
             // var alpha = r - q - (sigma2 / 2d) + s0_wave[j - 1];
@@ -348,6 +209,73 @@ namespace AmericanOptionAlbena
             for (var i = n - 2; i >= 0; --i)
                 x[i] = alpha[i] * x[i + 1] + beta[i];
             return x;
+        }
+
+        private static void PrintLowerBound(double r, double q, double sigma2, double K)
+        {
+            var omega = (-r + q + sigma2 / 2d) / (sigma2);
+            var alpha_min = omega - Math.Sqrt(omega * omega + ((2d * r) / sigma2));
+            var reversed_alpha_min = 1d / alpha_min;
+            var S0LowerBound = K / (1d - reversed_alpha_min);
+            var lnS0LowerBound = Math.Log(S0LowerBound / K);
+            Console.WriteLine("r: " + r);
+            Console.WriteLine("q: " + q);
+            Console.WriteLine("sigma2: " + sigma2);
+            Console.WriteLine("sigma2/2d: " + sigma2 / 2d);
+            Console.WriteLine("omega: " + omega);
+            Console.WriteLine("alpha_minus: " + alpha_min);
+            Console.WriteLine("1/alpha_minus: " + reversed_alpha_min);
+            Console.WriteLine("S_0 lower bound (K/(1-1/alpha_minus)): " + S0LowerBound);
+            Console.WriteLine("ln(S_0/K): " + lnS0LowerBound);
+            Console.WriteLine("==");
+        }
+
+        private static void PrintS0ReversedTime(string name, double[] arr, double tau, double T)
+        {
+            using var writer2 = new StreamWriter(name, false);
+            writer2.WriteLine("TITLE = 'DEM DATA | DEM DATA | DEM DATA | DEM DATA');");
+            writer2.WriteLine("VARIABLES = t S0");
+            writer2.WriteLine("ZONE T='SubZone'");
+            writer2.WriteLine($"I={arr.Length - 1} K={1} ZONETYPE=Ordered");
+            writer2.WriteLine("DATAPACKING=POINT\nDT=(DOUBLE DOUBLE)");
+            for (var i = 0; i < arr.Length; i++)
+                writer2.WriteLine("{0:e12} {1:e12}", T - tau * i, arr[i]);
+        }
+
+        private static void PrintS0WaveDirectTime(string name, double[] arr, double tau)
+        {
+            using var writer2 = new StreamWriter(name, false);
+            writer2.WriteLine("TITLE = 'DEM DATA | DEM DATA | DEM DATA | DEM DATA');");
+            writer2.WriteLine("VARIABLES = t S0W");
+            writer2.WriteLine("ZONE T='SubZone'");
+            writer2.WriteLine($"I={arr.Length - 1} K={1} ZONETYPE=Ordered");
+            writer2.WriteLine("DATAPACKING=POINT\nDT=(DOUBLE DOUBLE)");
+            for (var i = 0; i < arr.Length; i++)
+                writer2.WriteLine("{0:e12} {1:e12}", tau * i, arr[i]);
+        }
+
+        private static void PrintS0HatDirectTime(string name, double[] arr, double tau)
+        {
+            using var writer2 = new StreamWriter(name, false);
+            writer2.WriteLine("TITLE = 'DEM DATA | DEM DATA | DEM DATA | DEM DATA');");
+            writer2.WriteLine("VARIABLES = t S0_Deriv");
+            writer2.WriteLine("ZONE T='SubZone'");
+            writer2.WriteLine($"I={arr.Length - 1} K={1} ZONETYPE=Ordered");
+            writer2.WriteLine("DATAPACKING=POINT\nDT=(DOUBLE DOUBLE)");
+            for (var i = 0; i < arr.Length; i++)
+                writer2.WriteLine("{0:e12} {1:e12}", tau * i, arr[i]);
+        }
+
+        private static void PrintToTecplotT(string name, double[] s0, double tau, double T)
+        {
+            using var writer2 = new StreamWriter(name, false);
+            writer2.WriteLine(
+                "TITLE = 'DEM DATA | DEM DATA | DEM DATA | DEM DATA'\nVARIABLES = S {0}\nZONE T='{1}'",
+                "T - t", "SubZone");
+            writer2.WriteLine($"I={s0.Length - 1} K={1} ZONETYPE=Ordered");
+            writer2.WriteLine("DATAPACKING=POINT\nDT=(DOUBLE DOUBLE)");
+            for (var i = 0; i < s0.Length; i++)
+                writer2.WriteLine("{0:e12} {1:e12}", s0[i], T - tau * i);
         }
 
         private static void WriteVectorToFile(string path, IList<double> arr)
