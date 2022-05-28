@@ -43,15 +43,14 @@ namespace AmericanOptionAlbena
             var print = true;
 
             // s0_hat_deriv[0] = s0_wave[0] = -1; // failed on condition var alpha = r - q - (sigma2 / 2d) + mu_j_l; Debug.Assert(alpha >= 0, "alpha>=0");
-            var j = 0;
             // s0_hat_deriv[j] = s0_wave[j] = -sigma2 / 2d;
-            s0_hat_deriv[j] = -eps;
-            s0_wave[j] = 0d;
-            var b = (-2d * r) / sigma2;
-            a[j] = (2d * r - 2d * q - sigma2 + 2d * s0_hat_deriv[j]) /
+            const double b = -2d * r / sigma2;
+            s0_hat_deriv[0] = -eps;
+            s0_wave[0] = 0d;
+            a[0] = (2d * r - 2d * q - sigma2 + 2d * s0_hat_deriv[0]) /
                    sigma2; // here s0_hat_deriv[j] == mu_j[l] where l = 0
-            lambda[j] = Math.Sqrt(a[j] * a[j] - 4d * b);
-            for (j = 1; j <= M; j++)
+            lambda[0] = Math.Sqrt(a[0] * a[0] - 4d * b);
+            for (var j = 1; j <= M; j++)
             {
                 var mu_j = new double[l_max_iterations];
                 var eta_j = new double[l_max_iterations];
