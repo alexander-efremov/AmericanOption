@@ -40,15 +40,12 @@ namespace AmericanOptionAlbena
             var s0_wave = new double[M + 1];
             var lambda = new double[M + 1];
             var a = new double[M + 1];
-            var sols = new List<double[]>();
             var print = true;
 
             // s0_hat_deriv[0] = s0_wave[0] = -1; // failed on condition var alpha = r - q - (sigma2 / 2d) + mu_j_l; Debug.Assert(alpha >= 0, "alpha>=0");
-            int j = 0;
+            var j = 0;
             // s0_hat_deriv[j] = s0_wave[j] = -sigma2 / 2d;
             s0_hat_deriv[j] = -eps;
-            // s0_hat_deriv[j] = -1d;
-            // s0_hat_deriv[j] = -0.5d;
             s0_wave[j] = 0d;
             var b = (-2d * r) / sigma2;
             a[j] = (2d * r - 2d * q - sigma2 + 2d * s0_hat_deriv[j]) /
@@ -60,7 +57,6 @@ namespace AmericanOptionAlbena
                 var eta_j = new double[l_max_iterations];
                 var l = 0;
                 mu_j[l] = s0_hat_deriv[j - 1];
-
                 while (l < l_max_iterations)
                 {
                     a[j] = (2d * r - 2d * q - sigma2 + 2d * mu_j[l]) / sigma2;
@@ -73,7 +69,6 @@ namespace AmericanOptionAlbena
                     }
 
                     u_curr = Solve(j, u_prev, rho_j_l, s0_hat_deriv, mu_j[l], a, lambda);
-
                     // eta_j[l] = K * (1d - Math.Exp(rho_j_l)) - u_curr[0];
                     eta_j[l] = K * Math.Exp(rho_j_l) + ((u_curr[1] - u_curr[0]) / h);
                     Console.WriteLine("l = {0} j = {1} mu_j_l {7} K {2} rho_j_l {3} u[1] {4} u[0] {5}  eta_j_l = {6}",
@@ -207,6 +202,7 @@ namespace AmericanOptionAlbena
             return x;
         }
 
+        [SuppressMessage("ReSharper", "UnusedMember.Local")]
         private static void PrintLowerBound(double r, double q, double sigma2, double K)
         {
             var omega = (-r + q + sigma2 / 2d) / (sigma2);
@@ -262,11 +258,11 @@ namespace AmericanOptionAlbena
                 writer.WriteLine("{0:e12} {1:e12}", tau * i, arr[i]);
         }
 
+        [SuppressMessage("ReSharper", "UnusedMember.Local")]
         private static void PrintToTecplotT(string name, double[] s0, double tau, double T)
         {
             using var writer = new StreamWriter(name!, false);
-            writer.WriteLine(
-                "TITLE = 'DEM DATA | DEM DATA | DEM DATA | DEM DATA'\nVARIABLES = S {0}\nZONE T='{1}'",
+            writer.WriteLine("TITLE = 'DEM DATA | DEM DATA | DEM DATA | DEM DATA'\nVARIABLES = S {0}\nZONE T='{1}'",
                 "T - t", "SubZone");
             writer.WriteLine($"I={s0.Length - 1} K={1} ZONETYPE=Ordered");
             writer.WriteLine("DATAPACKING=POINT\nDT=(DOUBLE DOUBLE)");
