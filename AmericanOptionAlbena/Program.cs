@@ -31,6 +31,8 @@ namespace AmericanOptionAlbena
         private const double h = (rb - lb) / N; // the space step
         private const int M = 10000; // the number of time intervals
         private const double tau = T / M; // the time step
+        private const double alpha = 1.1d; // condense parameter for t
+        private const double beta = 1.1d; // condense parameter for h
 
         public static void Main()
         {
