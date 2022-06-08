@@ -28,12 +28,12 @@ namespace AmericanOptionAlbena
         private const double q = 0.01d; // the dividend rate
         private const int N = 1000; // the number of space intervals
         private const int N1 = N + 1; // the number of points
+        private const int N0 = (int)(N / 10d)*3; // the number of points before h0
         private const double h = (rb - lb) / N; // the space step
-        private const double h0 = N/10d; // the space step
         private const int M = 10000; // the number of time intervals
         private const double tau = T / M; // the time step
         private const double alpha = 1.1d; // condense parameter for t
-        private const double beta = 1.1d; // condense parameter for h
+        private const double beta = 1.3d; // condense parameter for h
 
         public static void Main()
         {
@@ -124,7 +124,21 @@ namespace AmericanOptionAlbena
             var gamma2_jm1 = (alpha_jm1 / h);
             f[0] = K * (1d - Math.Exp(rho_j_l));
             for (var i = 1; i < N1 - 1; i++)
-                f[i] = gamma1_jm1 * u_prev[i] + gamma2_jm1 * u_prev[i + 1];
+            {
+                if (i < N0)
+                {
+                    var gamma1_jm1_0 = (1d / tau) - alpha_jm1 / GetH(i, h, beta);
+                    // todo: возможно тут h_{i+1}, то есть надо GetH(i + 1, h, beta)
+                    // todo: но тогда метод разваливается, rho = NaN
+                    var gamma2_jm1_0 = (alpha_jm1 / GetH(i, h, beta)); 
+                    f[i] = gamma1_jm1_0 * u_prev[i] + gamma2_jm1_0 * u_prev[i + 1];
+                }
+                else
+                {
+                    f[i] = gamma1_jm1 * u_prev[i] + gamma2_jm1 * u_prev[i + 1];
+                }
+            }
+
             var nu_j = 2d / (lambda[j - 1] + lambda[j] + (2d * (s0_hat_deriv[j - 1] - mu_j_l)) / sigma2);
 
             // formula 31 is applied to j-1 time level
@@ -144,16 +158,36 @@ namespace AmericanOptionAlbena
             // a - below main diagonal (indexed as [1;n-1])
             var a0 = new double[N1];
             a0[0] = 0d;
-            for (var i = 1; i < N1 - 1; ++i) 
-                a0[i] = -sigma2 / (2d * h * h);
+            for (var i = 1; i < N1 - 1; ++i)
+            {
+                if (i < N0)
+                {
+                    a0[i] = -sigma2 / (2d * GetH(i, h, beta) * GetH(i, h, beta));
+                }
+                else
+                {
+                    a0[i] = -sigma2 / (2d * h * h);
+                }
+            }
+
             a0[N1 - 1] = -sigma2 / (2d * h * h);
 
             // main diagonal of matrix (indexed as [0;n-1])
             var b0 = new double[N1];
             // b0[0] = sigma2 / (h * h) + r + (1d / tau);
             b0[0] = 1d;
-            for (var i = 1; i < N1 - 1; ++i) 
-                b0[i] = sigma2 / (h * h) + r + (1d / tau);
+            for (var i = 1; i < N1 - 1; ++i)
+            {
+                if (i < N0)
+                {
+                    b0[i] = sigma2 / (GetH(i, h, beta) * GetH(i, h, beta)) + r + (1d / tau);
+                }
+                else
+                {
+                    b0[i] = sigma2 / (h * h) + r + (1d / tau);
+                }
+            }
+
             var val1 = sigma2 / (2d * h * h);
             var val2 = (sigma2 * (arr_a[j] + lambda[j])) / (4d * h);
             var val3 = 0.5d * ((1d / tau) + r);
@@ -164,8 +198,18 @@ namespace AmericanOptionAlbena
             var c0 = new double[N1];
             // c0[0] = -sigma2 / (h * h);
             c0[0] = 0d;
-            for (var i = 1; i < N1 - 2; ++i) 
-                c0[i] = -sigma2 / (2d * h * h);
+            for (var i = 1; i < N1 - 2; ++i)
+            {
+                if (i < N0)
+                {
+                    c0[i] = -sigma2 / (2d * GetH(i, h, beta) * GetH(i, h, beta));
+                }
+                else
+                {
+                    c0[i] = -sigma2 / (2d * h * h);
+                }
+            }
+
             c0[N1 - 2] = 0d;
 
             // Utils.Print(db, "db");
@@ -175,6 +219,8 @@ namespace AmericanOptionAlbena
             // Utils.Print(u_curr, "u_curr");
             return u;
         }
+
+        private static double GetH(int i, double h, double in_beta) => Math.Pow(i * h, in_beta);
 
         private static double[] SolveByTridiagonalMatrixAlgorithm(int n, double[] a, double[] b, double[] c, double[] d)
         {
