@@ -186,24 +186,24 @@ namespace AmericanOptionAlbena
             if (Math.Abs(b[0]) < double.Epsilon)
                 throw new InvalidOperationException("c[0] == 0");
             var y = new double[n];
-            var alpha = new double[n];
-            var beta = new double[n];
+            var alpha_arr = new double[n];
+            var beta_arr = new double[n];
             y[0] = b[0];
-            alpha[0] = -c[0] / y[0];
-            beta[0] = d[0] / y[0];
+            alpha_arr[0] = -c[0] / y[0];
+            beta_arr[0] = d[0] / y[0];
             for (var i = 1; i < n - 1; ++i)
             {
-                y[i] = b[i] + a[i] * alpha[i - 1];
-                alpha[i] = -c[i] / y[i];
-                beta[i] = (d[i] - a[i] * beta[i - 1]) / y[i];
+                y[i] = b[i] + a[i] * alpha_arr[i - 1];
+                alpha_arr[i] = -c[i] / y[i];
+                beta_arr[i] = (d[i] - a[i] * beta_arr[i - 1]) / y[i];
             }
 
-            y[n - 1] = b[n - 1] + a[n - 1] * alpha[n - 2];
-            beta[n - 1] = (d[n - 1] - a[n - 1] * beta[n - 2]) / y[n - 1];
+            y[n - 1] = b[n - 1] + a[n - 1] * alpha_arr[n - 2];
+            beta_arr[n - 1] = (d[n - 1] - a[n - 1] * beta_arr[n - 2]) / y[n - 1];
             var x = new double[n];
-            x[n - 1] = beta[n - 1];
+            x[n - 1] = beta_arr[n - 1];
             for (var i = n - 2; i >= 0; --i)
-                x[i] = alpha[i] * x[i + 1] + beta[i];
+                x[i] = alpha_arr[i] * x[i + 1] + beta_arr[i];
             return x;
         }
 
