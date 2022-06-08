@@ -26,9 +26,10 @@ namespace AmericanOptionAlbena
         private const double r = 0.1d; // the risk-free rate
         private const double K = 10; // the strike price
         private const double q = 0.01d; // the dividend rate
-        private const int N = 800; // the number of space intervals
+        private const int N = 1000; // the number of space intervals
         private const int N1 = N + 1; // the number of points
         private const double h = (rb - lb) / N; // the space step
+        private const double h0 = N/10d; // the space step
         private const int M = 10000; // the number of time intervals
         private const double tau = T / M; // the time step
         private const double alpha = 1.1d; // condense parameter for t
@@ -119,7 +120,7 @@ namespace AmericanOptionAlbena
             // var alpha = r - q - (sigma2 / 2d) + s0_wave[j - 1];
             var f = new double[N1];
             var alpha_jm1 = r - q - (sigma2 / 2d) + s0_hat_deriv[j - 1];
-            var gamma1_jm1 = (1d / tau) - (alpha_jm1 / h);
+            var gamma1_jm1 = (1d / tau) - alpha_jm1 / h;
             var gamma2_jm1 = (alpha_jm1 / h);
             f[0] = K * (1d - Math.Exp(rho_j_l));
             for (var i = 1; i < N1 - 1; i++)
@@ -143,14 +144,16 @@ namespace AmericanOptionAlbena
             // a - below main diagonal (indexed as [1;n-1])
             var a0 = new double[N1];
             a0[0] = 0d;
-            for (var i = 1; i < N1 - 1; ++i) a0[i] = -sigma2 / (2d * h * h);
+            for (var i = 1; i < N1 - 1; ++i) 
+                a0[i] = -sigma2 / (2d * h * h);
             a0[N1 - 1] = -sigma2 / (2d * h * h);
 
             // main diagonal of matrix (indexed as [0;n-1])
             var b0 = new double[N1];
             // b0[0] = sigma2 / (h * h) + r + (1d / tau);
             b0[0] = 1d;
-            for (var i = 1; i < N1 - 1; ++i) b0[i] = sigma2 / (h * h) + r + (1d / tau);
+            for (var i = 1; i < N1 - 1; ++i) 
+                b0[i] = sigma2 / (h * h) + r + (1d / tau);
             var val1 = sigma2 / (2d * h * h);
             var val2 = (sigma2 * (arr_a[j] + lambda[j])) / (4d * h);
             var val3 = 0.5d * ((1d / tau) + r);
@@ -161,7 +164,8 @@ namespace AmericanOptionAlbena
             var c0 = new double[N1];
             // c0[0] = -sigma2 / (h * h);
             c0[0] = 0d;
-            for (var i = 1; i < N1 - 2; ++i) c0[i] = -sigma2 / (2d * h * h);
+            for (var i = 1; i < N1 - 2; ++i) 
+                c0[i] = -sigma2 / (2d * h * h);
             c0[N1 - 2] = 0d;
 
             // Utils.Print(db, "db");
