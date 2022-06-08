@@ -28,12 +28,16 @@ namespace AmericanOptionAlbena
         private const double q = 0.01d; // the dividend rate
         private const int N = 1000; // the number of space intervals
         private const int N1 = N + 1; // the number of points
-        private const int N0 = (int)(N / 10d)*3; // the number of points before h0
+        private const int N0 = (int)(N / 10d); // the number of points before h0
         private const double h = (rb - lb) / N; // the space step
         private const int M = 10000; // the number of time intervals
+        private const double M0 = (M / 100d) * 10; // the time step until we condense the time mesh
         private const double tau = T / M; // the time step
         private const double alpha = 1.1d; // condense parameter for t
         private const double beta = 1.3d; // condense parameter for h
+        private const bool print = true; // the parameter which allows enable/disable printing of the results
+        private const bool is_time_condensed = true; // the parameter which allows enable/disable condensed time mesh
+        private const bool is_space_condensed = true; // the parameter which allows enable/disable condensed space mesh
 
         public static void Main()
         {
@@ -43,7 +47,6 @@ namespace AmericanOptionAlbena
             var s0_wave = new double[M + 1];
             var lambda = new double[M + 1];
             var a = new double[M + 1];
-            var print = true;
 
             // s0_hat_deriv[0] = s0_wave[0] = -1; // failed on condition var alpha = r - q - (sigma2 / 2d) + mu_j_l; Debug.Assert(alpha >= 0, "alpha>=0");
             // s0_hat_deriv[j] = s0_wave[j] = -sigma2 / 2d;
@@ -63,7 +66,8 @@ namespace AmericanOptionAlbena
                 {
                     a[j] = (2d * r - 2d * q - sigma2 + 2d * mu_j[l]) / sigma2;
                     lambda[j] = Math.Sqrt(a[j] * a[j] - 4d * b);
-                    var rho_j_l = s0_wave[j - 1] + tau * mu_j[l];
+                    var tau_0 = j < M0 ? Get_tau(j, tau, alpha) : tau;
+                    var rho_j_l = s0_wave[j - 1] + tau_0 * mu_j[l];
                     if (double.IsNaN(rho_j_l))
                     {
                         Console.WriteLine("rho is NaN!");
@@ -127,10 +131,11 @@ namespace AmericanOptionAlbena
             {
                 if (i < N0)
                 {
-                    var gamma1_jm1_0 = (1d / tau) - alpha_jm1 / GetH(i, h, beta);
+                    var tau_0 = j < M0 ? Get_tau(j, tau, alpha) : tau;
+                    var gamma1_jm1_0 = (1d / tau_0) - alpha_jm1 / Get_h(i, h, beta);
                     // todo: возможно тут h_{i+1}, то есть надо GetH(i + 1, h, beta)
                     // todo: но тогда метод разваливается, rho = NaN
-                    var gamma2_jm1_0 = (alpha_jm1 / GetH(i, h, beta)); 
+                    var gamma2_jm1_0 = (alpha_jm1 / Get_h(i, h, beta));
                     f[i] = gamma1_jm1_0 * u_prev[i] + gamma2_jm1_0 * u_prev[i + 1];
                 }
                 else
@@ -162,7 +167,7 @@ namespace AmericanOptionAlbena
             {
                 if (i < N0)
                 {
-                    a0[i] = -sigma2 / (2d * GetH(i, h, beta) * GetH(i, h, beta));
+                    a0[i] = -sigma2 / (2d * Get_h(i, h, beta) * Get_h(i, h, beta));
                 }
                 else
                 {
@@ -180,7 +185,8 @@ namespace AmericanOptionAlbena
             {
                 if (i < N0)
                 {
-                    b0[i] = sigma2 / (GetH(i, h, beta) * GetH(i, h, beta)) + r + (1d / tau);
+                    var tau_0 = j < M0 ? Get_tau(j, tau, alpha) : tau;
+                    b0[i] = sigma2 / (Get_h(i, h, beta) * Get_h(i, h, beta)) + r + (1d / tau_0);
                 }
                 else
                 {
@@ -202,7 +208,7 @@ namespace AmericanOptionAlbena
             {
                 if (i < N0)
                 {
-                    c0[i] = -sigma2 / (2d * GetH(i, h, beta) * GetH(i, h, beta));
+                    c0[i] = -sigma2 / (2d * Get_h(i, h, beta) * Get_h(i, h, beta));
                 }
                 else
                 {
@@ -220,7 +226,11 @@ namespace AmericanOptionAlbena
             return u;
         }
 
-        private static double GetH(int i, double h, double in_beta) => Math.Pow(i * h, in_beta);
+        private static double Get_h(int in_i, double in_h, double in_beta) =>
+            is_space_condensed ? Math.Pow(in_i * in_h, in_beta) : in_h;
+
+        private static double Get_tau(int in_j, double in_tau, double in_alpha) =>
+            is_time_condensed ? Math.Pow(in_j * in_tau, in_alpha) : in_tau;
 
         private static double[] SolveByTridiagonalMatrixAlgorithm(int n, double[] a, double[] b, double[] c, double[] d)
         {
