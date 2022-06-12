@@ -314,7 +314,7 @@ namespace AmericanOptionAlbena
         {
             using var writer = new StreamWriter(name!, false);
             writer.WriteLine("TITLE = 'DEM DATA | DEM DATA | DEM DATA | DEM DATA');");
-            writer.WriteLine("VARIABLES = S0W t");
+            writer.WriteLine("VARIABLES = S0_W t");
             writer.WriteLine("ZONE T='SubZone'");
             writer.WriteLine($"I={arr.Length - 1} K={1} ZONETYPE=Ordered");
             writer.WriteLine("DATAPACKING=POINT\nDT=(DOUBLE DOUBLE)");
@@ -326,12 +326,12 @@ namespace AmericanOptionAlbena
         {
             using var writer = new StreamWriter(name!, false);
             writer.WriteLine("TITLE = 'DEM DATA | DEM DATA | DEM DATA | DEM DATA');");
-            writer.WriteLine("VARIABLES = t S0_Deriv");
+            writer.WriteLine("VARIABLES = S0_Deriv t");
             writer.WriteLine("ZONE T='SubZone'");
             writer.WriteLine($"I={arr.Length - 1} K={1} ZONETYPE=Ordered");
             writer.WriteLine("DATAPACKING=POINT\nDT=(DOUBLE DOUBLE)");
             for (var i = 0; i < arr.Length; i++)
-                writer.WriteLine("{0:e12} {1:e12}", tau * i, arr[i]);
+                writer.WriteLine("{0:e12} {1:e12}", arr[i], tau * i);
         }
 
         [SuppressMessage("ReSharper", "UnusedMember.Local")]
