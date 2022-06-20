@@ -34,10 +34,10 @@ namespace AmericanOptionAlbena
         private const double M0 = 166; // the time step until we condense the time mesh
         private const double tau = T / M; // the time step
         private const double alpha = 2d; // condense parameter for t
-        private const double beta = 1.3d; // condense parameter for h
+        private const double beta = 1.8d; // condense parameter for h
         private const bool print = true; // the parameter which allows enable/disable printing of the results
-        private const bool is_time_condensed = false; // the parameter which allows enable/disable condensed time mesh
-        private const bool is_space_condensed = false; // the parameter which allows enable/disable condensed space mesh
+        private const bool is_time_condensed = true; // the parameter which allows enable/disable condensed time mesh
+        private const bool is_space_condensed = true; // the parameter which allows enable/disable condensed space mesh
 
         public static void Main()
         {
@@ -66,8 +66,7 @@ namespace AmericanOptionAlbena
                 {
                     a[j] = (2d * r - 2d * q - sigma2 + 2d * mu_j[l]) / sigma2;
                     lambda[j] = Math.Sqrt(a[j] * a[j] - 4d * b);
-                    var tau_0 = j < M0 && is_time_condensed ? Get_tau(j, tau, alpha) : tau;
-                    var rho_j_l = s0_wave[j - 1] + tau_0 * mu_j[l];
+                    var rho_j_l = s0_wave[j - 1] + Get_tau(j, tau, alpha) * mu_j[l];
                     if (double.IsNaN(rho_j_l))
                     {
                         Console.WriteLine("rho is NaN!");
@@ -76,7 +75,7 @@ namespace AmericanOptionAlbena
 
                     u_curr = Solve(j, u_prev, rho_j_l, s0_hat_deriv, mu_j[l], a, lambda);
                     // eta_j[l] = K * (1d - Math.Exp(rho_j_l)) - u_curr[0];
-                    eta_j[l] = K * Math.Exp(rho_j_l) + ((u_curr[1] - u_curr[0]) / h);
+                    eta_j[l] = K * Math.Exp(rho_j_l) + ((u_curr[1] - u_curr[0]) / Get_h(1, h, beta));
                     Console.WriteLine("l = {0} j = {1} mu_j_l {7} K {2} rho_j_l {3} u[1] {4} u[0] {5}  eta_j_l = {6}",
                         l, j, K, rho_j_l, u_curr[1], u_curr[0], eta_j[l], mu_j[l]);
                     if (Math.Abs(eta_j[l]) <= Tol)
@@ -121,51 +120,29 @@ namespace AmericanOptionAlbena
             // var alpha = r - q - (sigma2 / 2d) + s0_wave[j - 1];
             var f = new double[N1];
             var alpha_jm1 = r - q - (sigma2 / 2d) + s0_hat_deriv[j - 1];
-            var gamma1_jm1 = (1d / tau) - alpha_jm1 / h;
-            var gamma2_jm1 = (alpha_jm1 / h);
             f[0] = K * (1d - Math.Exp(rho_j_l));
             for (var i = 1; i < N1 - 1; i++)
             {
-                if (i < N0 && is_space_condensed)
-                {
-                    var tau_0 = j < M0 && is_time_condensed ? Get_tau(j, tau, alpha) : tau;
-                    var gamma1_jm1_0 = (1d / tau_0) - alpha_jm1 / Get_h(i, h, beta);
-                    // todo: возможно тут h_{i+1}, то есть надо GetH(i + 1, h, beta)
-                    // todo: но тогда метод разваливается, rho = NaN
-                    var gamma2_jm1_0 = (alpha_jm1 / Get_h(i, h, beta));
-                    f[i] = gamma1_jm1_0 * u_prev[i] + gamma2_jm1_0 * u_prev[i + 1];
-                }
-                else
-                    f[i] = gamma1_jm1 * u_prev[i] + gamma2_jm1 * u_prev[i + 1];
+                var gamma1_jm1_0 = (1d / Get_tau(j, tau, alpha)) - alpha_jm1 / Get_h(i, h, beta);
+                var gamma2_jm1_0 = (alpha_jm1 / Get_h(i, h, beta));
+                f[i] = gamma1_jm1_0 * u_prev[i] + gamma2_jm1_0 * u_prev[i + 1];
             }
 
             var nu_j = 2d / (lambda[j - 1] + lambda[j] + (2d * (s0_hat_deriv[j - 1] - mu_j_l)) / sigma2);
 
             // formula 31 is applied to j-1 time level
             // here /*x_{n+1}-x_n= x_n + h - x_n = h*/
+            var gamma1_jm1 = (1d / Get_tau(j, tau, alpha)) - alpha_jm1 / Get_h(N1-1, h, beta);
+            var gamma2_jm1 = (alpha_jm1 / Get_h(N1-1, h, beta));
             var u_prev_np1 = u_prev[N1 - 1] * Math.Exp(-((lambda[j - 1] + arr_a[j - 1]) * h) / 2d);
             f[N1 - 1] = 0.5d * (gamma1_jm1 * u_prev[N1 - 1] + gamma2_jm1 * u_prev_np1) +
                         (nu_j * u_prev[N1 - 1]) / (tau * h);
-
-            // if (l == 1)
-            //     Console.WriteLine();
-            // double s = 0;
-            // for (var i = 0; i < f.Length; i++)
-            //     s += f[i];
-            // Console.WriteLine(s);
-            // Utils.Print(f, "f");
 
             // a - below main diagonal (indexed as [1;n-1])
             var a0 = new double[N1];
             a0[0] = 0d;
             for (var i = 1; i < N1 - 1; ++i)
-            {
-                if (i < N0 && is_space_condensed)
-                    a0[i] = -sigma2 / (2d * Get_h(i, h, beta) * Get_h(i, h, beta));
-                else
-                    a0[i] = -sigma2 / (2d * h * h);
-            }
-
+                a0[i] = -sigma2 / (2d * Get_h(i, h, beta) * Get_h(i, h, beta));
             a0[N1 - 1] = -sigma2 / (2d * h * h);
 
             // main diagonal of matrix (indexed as [0;n-1])
@@ -173,15 +150,7 @@ namespace AmericanOptionAlbena
             // b0[0] = sigma2 / (h * h) + r + (1d / tau);
             b0[0] = 1d;
             for (var i = 1; i < N1 - 1; ++i)
-            {
-                if (i < N0 && is_space_condensed)
-                {
-                    var tau_0 = j < M0 && is_time_condensed ? Get_tau(j, tau, alpha) : tau;
-                    b0[i] = sigma2 / (Get_h(i, h, beta) * Get_h(i, h, beta)) + r + (1d / tau_0);
-                }
-                else
-                    b0[i] = sigma2 / (h * h) + r + (1d / tau);
-            }
+                b0[i] = sigma2 / (Get_h(i, h, beta) * Get_h(i, h, beta)) + r + (1d / Get_tau(j, tau, alpha));
 
             var val1 = sigma2 / (2d * h * h);
             var val2 = (sigma2 * (arr_a[j] + lambda[j])) / (4d * h);
@@ -194,13 +163,7 @@ namespace AmericanOptionAlbena
             // c0[0] = -sigma2 / (h * h);
             c0[0] = 0d;
             for (var i = 1; i < N1 - 2; ++i)
-            {
-                if (i < N0 && is_space_condensed)
-                    c0[i] = -sigma2 / (2d * Get_h(i, h, beta) * Get_h(i, h, beta));
-                else
-                    c0[i] = -sigma2 / (2d * h * h);
-            }
-
+                c0[i] = -sigma2 / (2d * Get_h(i, h, beta) * Get_h(i, h, beta));
             c0[N1 - 2] = 0d;
 
             // Utils.Print(db, "db");
@@ -212,10 +175,10 @@ namespace AmericanOptionAlbena
         }
 
         private static double Get_h(int in_i, double in_h, double in_beta) =>
-            is_space_condensed ? Math.Pow(in_i * in_h, in_beta) : in_h;
+            in_i < N0 && is_space_condensed ? Math.Pow(in_i * in_h, in_beta) : in_h;
 
         private static double Get_tau(int in_j, double in_tau, double in_alpha) =>
-            is_time_condensed ? Math.Pow(in_j * in_tau, in_alpha) : in_tau;
+            in_j < M0 && is_time_condensed ? Math.Pow(in_j * in_tau, in_alpha) : in_tau;
 
         [SuppressMessage("ReSharper", "UnusedMember.Local")]
         private static void PrintCondensedMeshes()
