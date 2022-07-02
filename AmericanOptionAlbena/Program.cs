@@ -226,19 +226,7 @@ namespace AmericanOptionAlbena
             return u;
         }
 
-        private static double Get_h1(int in_i, double in_h, double in_beta)
-        {
-            if (in_i > N0)
-                throw new InvalidOperationException("i > N0!");
-            return Math.Pow(in_i * in_h, in_beta);
-        }
-
-        private static double Get_tau1(int in_j, double in_tau, double in_alpha)
-        {
-            if (in_j > M0)
-                throw new InvalidOperationException("j > M0!");
-            return Math.Pow(in_j * in_tau, in_alpha);
-        }
+       
 
         private static double Get_h2(int in_i, double in_h, double in_beta)
         {
@@ -271,6 +259,20 @@ namespace AmericanOptionAlbena
             }
 
             return Math.Pow(t, in_alpha);
+        }
+        
+        private static double Get_h1(int in_i, double in_h, double in_beta)
+        {
+            if (in_i > N0)
+                throw new InvalidOperationException("i > N0!");
+            return Math.Pow(in_i * in_h, in_beta);
+        }
+
+        private static double Get_tau1(int in_j, double in_tau, double in_alpha)
+        {
+            if (in_j > M0)
+                throw new InvalidOperationException("j > M0!");
+            return Math.Pow(in_j * in_tau, in_alpha);
         }
 
         private static void CheckParameters()
