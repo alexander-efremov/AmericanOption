@@ -165,8 +165,7 @@ namespace AmericanOptionAlbena
             var gamma1_jm1 = 1d / tau - alpha_jm1 / h;
             var gamma2_jm1 = alpha_jm1 / h;
             var u_prev_np1 = u_prev[N1 - 1] * Math.Exp(-((lambda[j - 1] + arr_a[j - 1]) * h) / 2d);
-            f[N1 - 1] = 0.5d * (gamma1_jm1 * u_prev[N1 - 1] + gamma2_jm1 * u_prev_np1) +
-                        nu_j * u_prev[N1 - 1] / (tau * h);
+            f[N1 - 1] = 0.5d * (gamma1_jm1 * u_prev[N1 - 1] + gamma2_jm1 * u_prev_np1) + nu_j * u_prev[N1 - 1] / (tau * h);
 
             var a0 = new double[N1];
             var b0 = new double[N1];
@@ -192,8 +191,7 @@ namespace AmericanOptionAlbena
                 if (is_condensed_meshes && i < N0)
                 {
                     var tau0 = j < M0 ? Get_tau2(j, tau, alpha) : tau;
-                    b0[i] = sigma2 / (Get_h2(i, h, beta) * Get_h2(i + 1, h, beta)) + r +
-                            1d / tau0;
+                    b0[i] = sigma2 / (Get_h2(i, h, beta) * Get_h2(i + 1, h, beta)) + r + 1d / tau0;
                 }
                 else
                 {
