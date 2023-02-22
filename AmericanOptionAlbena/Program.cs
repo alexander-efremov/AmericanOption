@@ -45,8 +45,6 @@ namespace AmericanOptionAlbena
         // private const bool is_space_condensed = true; // the parameter which allows enable/disable condensed space mesh
         private static readonly bool is_condensed_h = false; // the parameter which allows enable/disable condensed meshes
         private static readonly bool is_condensed_tau = true; // the parameter which allows enable/disable condensed meshes
-        private static readonly bool is_start_approximation_enabled = true; // the parameter which allows enable/disable aproximate solution
-        private const int j_star = 20; // the time step after that we switch to iteration algorithm
 
         private static readonly double[] taus = GetTaus();
         private static readonly double[] hs = GetHs();
@@ -73,53 +71,36 @@ namespace AmericanOptionAlbena
             s0_wave[0] = 0d;
             a[0] = (2d * r - 2d * q - sigma2 + 2d * s0_hat_deriv[0]) / sigma2; // here s0_hat_deriv[j] == mu_j[l] where l = 0
             lambda[0] = Math.Sqrt(a[0] * a[0] - 4d * b);
-            
+
             for (var j = 1; j <= M; j++)
             {
                 var tau = is_condensed_tau ? taus[j - 1] : tau0;
-                if (is_start_approximation_enabled && j <= j_star)
+                var mu_j = new double[l_max_iterations];
+                var eta_j = new double[l_max_iterations];
+                var l = 0;
+                mu_j[l] = s0_hat_deriv[j - 1];
+                while (l < l_max_iterations)
                 {
-                    var theta = tau * j;
-                    var mu_j = sigma * (1d - Math.Abs(Math.Log(theta))) / (2d * Math.Sqrt(theta * Math.Abs(Math.Log(theta))) * (1d - sigma * Math.Sqrt(theta * Math.Abs(Math.Log(theta)))));
-                    var rho_j_l = Math.Log(1d - sigma * Math.Sqrt(theta * Math.Abs(Math.Log(theta))));
-                    CheckNaN(rho_j_l);
-                    a[j] = (2d * r - 2d * q - sigma2 + 2d * mu_j) / sigma2;
+                    a[j] = (2d * r - 2d * q - sigma2 + 2d * mu_j[l]) / sigma2;
                     lambda[j] = Math.Sqrt(a[j] * a[j] - 4d * b);
-                    u_curr = Solve(j, u_prev, rho_j_l, s0_hat_deriv, mu_j, a, lambda, tau);
+                    var rho_j_l = s0_wave[j - 1] + tau * mu_j[l];
+                    CheckNaN(rho_j_l);
+                    u_curr = Solve(j, u_prev, rho_j_l, s0_hat_deriv, mu_j[l], a, lambda, tau);
+                    var h0 = is_condensed_h ? hs[0] : h;
+                    eta_j[l] = K * Math.Exp(rho_j_l) + (u_curr[1] - u_curr[0]) / h0;
                     if (print)
-                        Console.WriteLine("j* = {0} mu_j_l {5} K {1} rho_j_l {2} u[1] {3} u[0] {4}", j, K, rho_j_l, u_curr[1], u_curr[0], mu_j);
-                    s0_hat_deriv[j] = mu_j;
-                    s0_wave[j] = rho_j_l;
-                }
-                else
-                {
-                    var mu_j = new double[l_max_iterations];
-                    var eta_j = new double[l_max_iterations];
-                    var l = 0;
-                    mu_j[l] = s0_hat_deriv[j - 1];
-                    while (l < l_max_iterations)
+                        Console.WriteLine("l = {0} j = {1} mu_j_l {7} K {2} rho_j_l {3} u[1] {4} u[0] {5} eta_j_l = {6}", l, j, K, rho_j_l, u_curr[1], u_curr[0], eta_j[l], mu_j[l]);
+                    if (Math.Abs(eta_j[l]) <= Tol)
                     {
-                        a[j] = (2d * r - 2d * q - sigma2 + 2d * mu_j[l]) / sigma2;
-                        lambda[j] = Math.Sqrt(a[j] * a[j] - 4d * b);
-                        var rho_j_l = s0_wave[j - 1] + tau * mu_j[l];
-                        CheckNaN(rho_j_l);
-                        u_curr = Solve(j, u_prev, rho_j_l, s0_hat_deriv, mu_j[l], a, lambda, tau);
-                        var h0 = is_condensed_h ? hs[0] : h;
-                        eta_j[l] = K * Math.Exp(rho_j_l) + (u_curr[1] - u_curr[0]) / h0;
-                        if (print)
-                            Console.WriteLine("l = {0} j = {1} mu_j_l {7} K {2} rho_j_l {3} u[1] {4} u[0] {5} eta_j_l = {6}", l, j, K, rho_j_l, u_curr[1], u_curr[0], eta_j[l], mu_j[l]);
-                        if (Math.Abs(eta_j[l]) <= Tol)
-                        {
-                            s0_hat_deriv[j] = mu_j[l];
-                            s0_wave[j] = rho_j_l;
-                            break;
-                        }
-
-                        if (++l == 1)
-                            mu_j[l] = mu_j[l - 1] - eps;
-                        else
-                            mu_j[l] = (eta_j[l - 1] * mu_j[l - 2] - eta_j[l - 2] * mu_j[l - 1]) / (eta_j[l - 1] - eta_j[l - 2]);
+                        s0_hat_deriv[j] = mu_j[l];
+                        s0_wave[j] = rho_j_l;
+                        break;
                     }
+
+                    if (++l == 1)
+                        mu_j[l] = mu_j[l - 1] - eps;
+                    else
+                        mu_j[l] = (eta_j[l - 1] * mu_j[l - 2] - eta_j[l - 2] * mu_j[l - 1]) / (eta_j[l - 1] - eta_j[l - 2]);
                 }
 
                 for (var i = 0; i < u_prev.Length; i++)
@@ -128,19 +109,10 @@ namespace AmericanOptionAlbena
 
             WriteVectorToFile("S0.arr", s0_wave);
             WriteVectorToFile("S0_hat_deriv.arr", s0_hat_deriv);
-            // значения производных
-            S0HatDirectTime(
-                $"{(is_condensed_h ? "1" : "11")}_{nameof(s0_hat_deriv)}_N1={N1}_T={T}_h_condensed_{is_condensed_h}_tau_condensed_{is_condensed_tau}_approx_{is_start_approximation_enabled}_j_{j_star}.dat",
-                s0_hat_deriv, tau0);
-            // значения S0 до обратного преобразования
-            S0WaveDirectTime(
-                $"{(is_condensed_h ? "2" : "22")}_{nameof(s0_wave)}_N1={N1}_T={T}_h_condensed_{is_condensed_h}_tau_condensed_{is_condensed_tau}_approx_{is_start_approximation_enabled}_{j_star}.dat",
-                s0_wave, tau0);
             var s0 = GetS0(s0_wave);
-            // значения S0 после обратного преобразования
-            S0ReversedTime(
-                $"{(is_condensed_h ? "3" : "33")}_{nameof(s0)}_T-t_N1={N1}_T={T}_h_condensed_{is_condensed_h}_tau_condensed_{is_condensed_tau}_approx_{is_start_approximation_enabled}_{j_star}.dat",
-                s0, T, tau0);
+            S0HatDirectTime($"{(is_condensed_h ? "1" : "11")}_{nameof(s0_hat_deriv)}_N1={N1}_T={T}_h_condensed_{is_condensed_h}_tau_condensed_{is_condensed_tau}.dat", s0_hat_deriv, tau0);
+            S0WaveDirectTime($"{(is_condensed_h ? "2" : "22")}_{nameof(s0_wave)}_N1={N1}_T={T}_h_condensed_{is_condensed_h}_tau_condensed_{is_condensed_tau}.dat", s0_wave, tau0);
+            S0ReversedTime($"{(is_condensed_h ? "3" : "33")}_{nameof(s0)}_T-t_N1={N1}_T={T}_h_condensed_{is_condensed_h}_tau_condensed_{is_condensed_tau}.dat", s0, T, tau0);
         }
 
         private static double[] Solve(int j, double[] u_prev, double rho_j_l, double[] s0_hat_deriv, double mu_j_l, double[] arr_a, double[] lambda, double in_tau)
@@ -358,7 +330,7 @@ namespace AmericanOptionAlbena
             Console.WriteLine("==");
         }
 
-        private static void S0WaveDirectTime(string name, IReadOnlyList<double> arr, double in_tau)
+        private static void S0WaveDirectTime(string name, IReadOnlyList<double> arr, double in_tau) // значения S0 до обратного преобразования
         {
             using var writer = new StreamWriter(name!, false);
             writer.WriteLine("TITLE = 'DEM DATA | DEM DATA | DEM DATA | DEM DATA');");
@@ -383,7 +355,7 @@ namespace AmericanOptionAlbena
             writer.WriteLine(sb.ToString());
         }
 
-        private static void S0HatDirectTime(string name, IReadOnlyList<double> arr, double in_tau)
+        private static void S0HatDirectTime(string name, IReadOnlyList<double> arr, double in_tau) // значения производных
         {
             using var writer = new StreamWriter(name!, false);
             writer.WriteLine("TITLE = 'DEM DATA | DEM DATA | DEM DATA | DEM DATA');");
@@ -408,7 +380,7 @@ namespace AmericanOptionAlbena
             writer.WriteLine(sb.ToString());
         }
 
-        private static void S0ReversedTime(string name, IReadOnlyList<double> arr, double T, double in_tau)
+        private static void S0ReversedTime(string name, IReadOnlyList<double> arr, double T, double in_tau) // значения S0 после обратного преобразования
         {
             using var writer = new StreamWriter(name!, false);
             writer.WriteLine("TITLE = 'DEM DATA | DEM DATA | DEM DATA | DEM DATA');");
