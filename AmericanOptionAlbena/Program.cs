@@ -177,7 +177,7 @@ namespace AmericanOptionAlbena
             a0[0] = 0d;
             for (var i = 1; i < N1 - 1; ++i)
                 if (is_condensed_h)
-                    a0[i] = -sigma2 / (hs[i - 1] * (hs[i - 1] * hs[i]));
+                    a0[i] = -sigma2 / (hs[i - 1] * (hs[i - 1] + hs[i]));
                 else
                     a0[i] = -sigma2 / (2d * h * h);
 
