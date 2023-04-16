@@ -3,7 +3,6 @@ namespace UnitTests
     using System;
     using System.Collections.Generic;
     using CoreLib;
-    using CoreLib.Utils;
     using NUnit.Framework;
 
     public abstract class UnitTestBase

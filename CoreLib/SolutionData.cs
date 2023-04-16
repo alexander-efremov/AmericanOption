@@ -1,27 +1,27 @@
-﻿namespace CoreLib
-{
-    using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
+namespace CoreLib
+{
     public class SolutionData
     {
-        public SolutionData(IReadOnlyList<double> S0arr, int k)
+        public SolutionData(IReadOnlyList<double> s0, int k)
         {
-            this.k = k;
-            this.S0 = S0arr[k];
+            K = k;
+            S0 = s0[k];
         }
 
-        public SolutionData(double S0, int k)
+        public SolutionData(double s0, int k)
         {
-            this.k = k;
-            this.S0 = S0;
+            K = k;
+            S0 = s0;
         }
 
-        public int k { get; private set; }
+        public int K { get; private set; }
 
         public double S0 { get; private set; }
 
         public Point[] Solution { get; set; }
 
-        public int StartPosOfS0 { get;  set; }
+        public int StartPosOfS0 { get; set; }
     }
 }

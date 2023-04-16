@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text;
+using CoreLib;
 
 #pragma warning disable 219
 #pragma warning disable CS0162
@@ -38,19 +39,22 @@ namespace AmericanOptionAlbena
         private const double tau0 = T / M; // the time step
         private const double alpha = 2d; // condense parameter for t
         private const double beta = 2d; // condense parameter for h
+        private const double beta_mu = 0.5d; // the parameter to update mu
 
         private const bool print = true; // the parameter which allows enable/disable printing of the results
 
         // private const bool is_time_condensed = true; // the parameter which allows enable/disable condensed time mesh
         // private const bool is_space_condensed = true; // the parameter which allows enable/disable condensed space mesh
         private static readonly bool is_condensed_h = false; // the parameter which allows enable/disable condensed meshes
-        private static readonly bool is_condensed_tau = false; // the parameter which allows enable/disable condensed meshes
+        private static readonly bool is_condensed_tau = true; // the parameter which allows enable/disable condensed meshes
 
         private static readonly double[] taus = GetTaus();
         private static readonly double[] hs = GetHs();
 
         public static void Main()
         {
+            if (File.Exists("log.txt"))
+                File.Delete("log.txt");
             Debug.Assert(q < r);
             // PrintCondensedMeshesTau();
             // PrintCondensedMeshesH();
@@ -90,8 +94,10 @@ namespace AmericanOptionAlbena
                     eta_j[l] = K * Math.Exp(rho_j_l) + (u_curr[1] - u_curr[0]) / h0;
                     if (print)
                     {
-                        Console.WriteLine("l = {0:G10} j = {1:G10} K {2:N10} mu_j_l {7:G10} rho_j_l {3:N10} u[1] {4:G10} u[0] {5:G10} eta_j_l = {6:G10}", l, j, K, rho_j_l, u_curr[1], u_curr[0],
-                            eta_j[l], mu_j[l]);
+                        var value = string.Format("l = {0:G10} j = {1:G10} K {2:N10} mu_j_l {7:G10} rho_j_l {3:N10} u[1] {4:G10} u[0] {5:G10} eta_j_l = {6:G10}", l, j, K, rho_j_l, u_curr[1],
+                            u_curr[0], eta_j[l], mu_j[l]);
+                        File.AppendAllText("log.txt", value + Environment.NewLine);
+                        // Console.WriteLine(value);
                     }
 
                     if (Math.Abs(eta_j[l]) <= Tol)
@@ -102,7 +108,7 @@ namespace AmericanOptionAlbena
                     }
 
                     if (++l == 1)
-                        mu_j[l] = mu_j[l - 1] - eps;
+                        mu_j[l] = beta_mu * mu_j[l - 1] - eps;
                     else
                         mu_j[l] = (eta_j[l - 1] * mu_j[l - 2] - eta_j[l - 2] * mu_j[l - 1]) / (eta_j[l - 1] - eta_j[l - 2]);
                 }
@@ -168,7 +174,7 @@ namespace AmericanOptionAlbena
             }
             else
             {
-                var val1 = (sigma2 / 2d) * (1d / (h * h) + (alpha_tj + lambda[j]) / (2d * h));
+                var val1 = (sigma2 / 2d) * (1d / (h * h) + (a[j] + lambda[j]) / (2d * h));
                 var val2 = 0.5d * (1d / in_tau + r) + 1d / (lambda[j] * in_tau * h);
                 var val3 = alpha_tj / (2d * h);
                 b0[N1 - 1] = val1 + val2 - val3;
@@ -182,13 +188,15 @@ namespace AmericanOptionAlbena
                 if (is_condensed_h)
                     c0[i] = -sigma2 / (hs[i] * (hs[i - 1] + hs[i])) - alpha_tj / hs[i];
                 else
-                    c0[i] = -sigma2 / (2d * h * h) - alpha_tj / hs[i];
+                    c0[i] = -sigma2 / (2d * h * h) - alpha_tj / h;
             c0[N1 - 2] = 0d;
 
-            var u = SolveByTridiagonalMatrixAlgorithm(N1, a0, b0, c0, f);
-            // Utils.Print(db, "db");
-            // Utils.Print(dc, "dc");
-            // Utils.Print(dd, "dd");
+            if (j == 1)
+                Utils.PrintMatrix1(N1, a0, b0, c0, $"A_{j}.txt");
+            var u = SolveByTridiagonalMatrixAlgorithm(j, N1, a0, b0, c0, f);
+            // Utils.Print(a0, "db");
+            // Utils.Print(b0, "dc");
+            // Utils.Print(c0, "dd");
             // Utils.Print(u_curr, "u_curr");
             return u;
         }
@@ -227,12 +235,12 @@ namespace AmericanOptionAlbena
             return Math.Pow(t, in_alpha);
         }
 
-        private static double[] SolveByTridiagonalMatrixAlgorithm(int n, IReadOnlyList<double> a, IReadOnlyList<double> b, IReadOnlyList<double> c, IReadOnlyList<double> d)
+        private static double[] SolveByTridiagonalMatrixAlgorithm(int j, int n, IReadOnlyList<double> a, IReadOnlyList<double> b, IReadOnlyList<double> c, IReadOnlyList<double> d)
         {
             for (var i = 0; i < b.Count; i++)
                 if (Math.Abs(b[i]) < Math.Abs(a[i]) + Math.Abs(c[i]))
                     throw new Exception(
-                        $"There is no diagonal dominance! i={i} {Math.Abs(a[i])} {Math.Abs(b[i])} {Math.Abs(c[i])} sum={Math.Abs(a[i] + c[i])} ");
+                        $"There is no diagonal dominance! j={j} i={i}: {Math.Abs(a[i])} {Math.Abs(b[i])} {Math.Abs(c[i])} sum={Math.Abs(a[i] + c[i])} ");
 
             if (Math.Abs(b[0]) < double.Epsilon)
                 throw new InvalidOperationException("c[0] == 0");
@@ -405,7 +413,7 @@ namespace AmericanOptionAlbena
             Console.Out.Flush();
             throw new Exception("rho is NaN!");
         }
-        
+
         [SuppressMessage("ReSharper", "UnusedMember.Local")]
         private static void PrintCondensedMeshesTau()
         {

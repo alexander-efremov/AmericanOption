@@ -20,94 +20,94 @@ namespace CoreLib
 
         protected AmericanOptionCalculatorBase(Parameters parameters)
         {
-            this.alpha = parameters.Alpha;
-            this.beta = parameters.Beta;
-            this.a = parameters.A;
-            this.b = parameters.B;
-            this.sigmaSq = parameters.SigmaSq;
-            this.tau = parameters.Tau;
-            this.n = parameters.N;
-            this.n1 = this.n + 1;
-            this.r = parameters.R;
-            this.K = parameters.K;
-            this.h = parameters.B / parameters.N;
-            this.S0Eps = parameters.S0Eps;
-            this.workDir = parameters.WorkDir;
+            alpha = parameters.Alpha;
+            beta = parameters.Beta;
+            a = parameters.A;
+            b = parameters.B;
+            sigmaSq = parameters.SigmaSq;
+            tau = parameters.Tau;
+            n = parameters.N;
+            n1 = n + 1;
+            r = parameters.R;
+            K = parameters.K;
+            h = parameters.B / parameters.N;
+            S0Eps = parameters.S0Eps;
+            workDir = parameters.WorkDir;
 
-            this.CheckParameters();
+            CheckParameters();
 
-            this.ThomasAlgorithmCalculator = new ThomasAlgorithmCalculator(this.n1);
+            ThomasAlgorithmCalculator = new ThomasAlgorithmCalculator(n1);
         }
 
         protected ThomasAlgorithmCalculator ThomasAlgorithmCalculator { get; }
 
         public double Geta()
         {
-            return this.a;
+            return a;
         }
 
         public double GetH()
         {
-            return this.h;
+            return h;
         }
 
         public double GetK()
         {
-            return this.K;
+            return K;
         }
 
         public double GetLeftBoundary()
         {
-            return this.a;
+            return a;
         }
 
         public int GetN()
         {
-            return this.n;
+            return n;
         }
 
         public int GetN1()
         {
-            return this.n1;
+            return n1;
         }
 
         public double GetR()
         {
-            return this.r;
+            return r;
         }
 
         public double GetRightBoundary()
         {
-            return this.b;
+            return b;
         }
 
         public double GetS0Eps()
         {
-            return this.S0Eps;
+            return S0Eps;
         }
 
         public double GetSquaredSigma()
         {
-            return this.sigmaSq;
+            return sigmaSq;
         }
 
         public double GetTau()
         {
-            return this.tau;
+            return tau;
         }
         
         // public double GetAlpha(int i, int m)
         // {
         //     // alpha = alpha / m
-        //     //return this.alpha;
-        //     return this.alpha / (i  + m + 1);
+        //     //return alpha;
+        //     return alpha / (i  + m + 1);
         // }
         //
         // public double GetBeta(int m)
         // {
         //     // beta = beta_s - m*h^2
-        //     return this.beta  ;
-        //     //return this.beta - m * (this.h * this.h);
+        //     return beta  ;
+        //     //return beta - m * (h * h);
         // }
 
         protected void UpdateH1(double S0)
@@ -117,9 +117,9 @@ namespace CoreLib
                 throw new ArgumentException("S0");
             }
 
-            this.h = (this.b - S0) / this.n;
+            h = (b - S0) / n;
 
-            if (this.h <= 0d)
+            if (h <= 0d)
             {
                 throw new ArgumentException("h");
             }
@@ -127,32 +127,32 @@ namespace CoreLib
 
         protected double Getb()
         {
-            return this.b;
+            return b;
         }
 
         protected string GetWorkDir()
         {
-            return this.workDir;
+            return workDir;
         }
 
         private void CheckParameters()
         {
-            if (this.n < 2)
+            if (n < 2)
             {
                 throw new ArgumentException("n");
             }
 
-            if (this.n1 != this.n + 1)
+            if (n1 != n + 1)
             {
                 throw new ArgumentException("n_1");
             }
 
-            if (this.tau <= 0d)
+            if (tau <= 0d)
             {
                 throw new ArgumentException("tau");
             }
 
-            if (this.K <= 0d)
+            if (K <= 0d)
             {
                 throw new ArgumentException("K");
             }
@@ -160,7 +160,7 @@ namespace CoreLib
         
         public TecplotPrinterSpecial GetTecplotPrinter()
         {
-            return new TecplotPrinterSpecial(0d, this.GetRightBoundary());
+            return new TecplotPrinterSpecial(0d, GetRightBoundary());
         }
     }
 }

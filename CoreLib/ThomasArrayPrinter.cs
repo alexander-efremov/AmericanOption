@@ -1,33 +1,25 @@
+using System;
+using System.Diagnostics.CodeAnalysis;
+
 namespace CoreLib
 {
-    using System;
-    using System.Diagnostics.CodeAnalysis;
-
     [SuppressMessage("ReSharper", "UnusedType.Global", Justification = "UsedType")]
     public class ThomasArrayPrinter
     {
         // ReSharper disable once UnusedMember.Global
-        public void PrintThomasArrays(double[] b_t, double[] c_t, double[] d_t)
+        public void PrintThomasArrays(double[] b, double[] c, double[] d)
         {
             Console.WriteLine("B:");
-            for (var i = 0; i < b_t.Length; i++)
-            {
-                Console.Write(b_t[i].ToString("E") + " ");
-            }
+            for (var i = 0; i < b.Length; i++)
+                Console.Write(b[i].ToString("E") + " ");
 
-            Console.WriteLine();
-            Console.WriteLine("C:");
-            for (var i = 0; i < c_t.Length; i++)
-            {
-                Console.Write(c_t[i].ToString("E") + " ");
-            }
+            Console.WriteLine("\nC:");
+            for (var i = 0; i < c.Length; i++)
+                Console.Write(c[i].ToString("E") + " ");
 
-            Console.WriteLine();
-            Console.WriteLine("D:");
-            for (var i = 0; i < d_t.Length; i++)
-            {
-                Console.Write(d_t[i].ToString("E") + " ");
-            }
+            Console.WriteLine("\nD:");
+            for (var i = 0; i < d.Length; i++)
+                Console.Write(d[i].ToString("E") + " ");
 
             Console.WriteLine();
         }
