@@ -68,6 +68,13 @@ namespace CoreLib
             Console.WriteLine();
         }
 
+        public static void PrintToFile(string name, double[] a, double[] b, double[] c)
+        {
+            using var writer = new StreamWriter(name!, false);
+            for (int k = 0; k < a.Length; k++)
+                writer.WriteLine($"{a[k]} {b[k]} {c[k]}");
+        }
+
         public static void PrintMatrix(int n1, double[] a0, double[] b0, double[] c0, string name, bool printOnConsole = false)
         {
             using var writer = new StreamWriter(name, false);

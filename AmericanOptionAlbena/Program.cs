@@ -18,7 +18,7 @@ namespace AmericanOptionAlbena
     {
         private const int l_max_iterations = 1000; // max iteration on l
         private const double Tol = 10e-10; // eps to refine eta
-        private const double eps = 10e-3; // eps to refine mu
+        private const double eps = 1e-3; // eps to refine rho
         private const double lb = 0d; // left bound
         private const double rb = 100d; // right bound
         private const double T0 = 0d; // the start time
@@ -29,7 +29,7 @@ namespace AmericanOptionAlbena
         private const double r = 0.1d; // the risk-free rate
         private const double K = 10d; // the strike price
         private const double q = 0.01d; // the dividend rate
-        private const int N = 1000; // the number of space intervals
+        private const int N = 10000; // the number of space intervals
         private const int N1 = N + 1; // the number of points
 
         private const double h = (rb - lb) / N; // the space step
@@ -46,7 +46,7 @@ namespace AmericanOptionAlbena
         // private const bool is_time_condensed = true; // the parameter which allows enable/disable condensed time mesh
         // private const bool is_space_condensed = true; // the parameter which allows enable/disable condensed space mesh
         private static readonly bool is_condensed_h = false; // the parameter which allows enable/disable condensed meshes
-        private static readonly bool is_condensed_tau = true; // the parameter which allows enable/disable condensed meshes
+        private static readonly bool is_condensed_tau = false; // the parameter which allows enable/disable condensed meshes
 
         private static readonly double[] taus = GetTaus();
         private static readonly double[] hs = GetHs();
@@ -64,80 +64,74 @@ namespace AmericanOptionAlbena
             // return;
             var u_curr = new double[N1]; // the current solution
             var u_prev = new double[N1]; // the previous solution
-            var s0_hat_deriv = new double[M + 1];
             var s0_wave = new double[M + 1];
             var lambda = new double[M + 1];
             var a = new double[M + 1];
-            // s0_hat_deriv[0] = s0_wave[0] = -1; // failed on condition var alpha = r - q - (sigma2 / 2d) + mu_j_l; Debug.Assert(alpha >= 0, "alpha>=0");
+            // s0_hat_deriv[0] = s0_wave[0] = -1;
             // s0_hat_deriv[j] = s0_wave[j] = -sigma2 / 2d;
             const double b = -2d * r / sigma2;
-            s0_hat_deriv[0] = 0d;
             s0_wave[0] = 0d;
-            a[0] = (2d * r - 2d * q - sigma2 + 2d * s0_hat_deriv[0]) / sigma2; // here s0_hat_deriv[j] == mu_j[l] where l = 0
+            a[0] = (2d * r - 2d * q - sigma2 + 2d * 0d) / sigma2;
             lambda[0] = Math.Sqrt(a[0] * a[0] - 4d * b);
 
             for (var j = 1; j <= M; j++)
             {
                 var tau = is_condensed_tau ? taus[j - 1] : tau0;
-                var mu_j = new double[l_max_iterations];
-                var eta_j = new double[l_max_iterations];
                 var l = 0;
-                mu_j[l] = s0_hat_deriv[j - 1];
+                var eta_j = new double[l_max_iterations];
+                var rho_j = new double[l_max_iterations];
+                rho_j[l] = s0_wave[j - 1];
                 while (l < l_max_iterations)
                 {
-                    a[j] = (2d * r - 2d * q - sigma2 + 2d * mu_j[l]) / sigma2;
+                    CheckNaN(rho_j[l]);
+                    var s_approx = (rho_j[l] - s0_wave[j - 1]) / tau;
+                    a[j] = (2d * r - 2d * q - sigma2 + 2d * s_approx) / sigma2;
                     lambda[j] = Math.Sqrt(a[j] * a[j] - 4d * b);
-                    var rho_j_l = s0_wave[j - 1] + tau * mu_j[l];
-                    CheckNaN(rho_j_l);
-                    u_curr = Solve(j, u_prev, rho_j_l, s0_hat_deriv, mu_j[l], a, lambda, tau);
+                    u_curr = Solve(l, j, u_prev, rho_j, s0_wave, a, lambda, tau);
                     var h0 = is_condensed_h ? hs[0] : h;
-                    eta_j[l] = K * Math.Exp(rho_j_l) + (u_curr[1] - u_curr[0]) / h0;
+                    eta_j[l] = K * Math.Exp(rho_j[l]) - (u_curr[1] - u_curr[0]) / h0;
                     if (print)
                     {
-                        var value = string.Format("l = {0:G10} j = {1:G10} K {2:N10} mu_j_l {7:G10} rho_j_l {3:N10} u[1] {4:G10} u[0] {5:G10} eta_j_l = {6:G10}", l, j, K, rho_j_l, u_curr[1],
-                            u_curr[0], eta_j[l], mu_j[l]);
-                        File.AppendAllText("log.txt", value + Environment.NewLine);
-                        // Console.WriteLine(value);
+                        File.AppendAllText("log.txt",
+                            $"l = {l:G10} j = {j:G10} K {K:N10} rho_j_l {rho_j[l]:N10} u[1] {u_curr[1]:G10} u[0] {u_curr[0]:G10} eta_j_l = {eta_j[l]:G10}" + Environment.NewLine);
+                        Console.WriteLine($"l = {l:G10} j = {j:G10} K {K:N10} rho_j_l {rho_j[l]:N10} u[1] {u_curr[1]:G10} u[0] {u_curr[0]:G10} eta_j_l = {eta_j[l]:G10}");
                     }
 
                     if (Math.Abs(eta_j[l]) <= Tol)
                     {
-                        s0_hat_deriv[j] = mu_j[l];
-                        s0_wave[j] = rho_j_l;
+                        s0_wave[j] = rho_j[l];
                         break;
                     }
 
                     if (++l == 1)
-                        mu_j[l] = beta_mu * mu_j[l - 1] - eps;
+                        rho_j[l] = rho_j[l - 1] - eps;
                     else
-                        mu_j[l] = (eta_j[l - 1] * mu_j[l - 2] - eta_j[l - 2] * mu_j[l - 1]) / (eta_j[l - 1] - eta_j[l - 2]);
+                        rho_j[l] = (eta_j[l - 1] * rho_j[l - 2] - eta_j[l - 2] * rho_j[l - 1]) / (eta_j[l - 1] - eta_j[l - 2]);
                 }
 
                 for (var i = 0; i < u_prev.Length; i++)
                     u_prev[i] = u_curr[i];
             }
 
-            WriteVectorToFile("S0.arr", s0_wave);
-            WriteVectorToFile("S0_hat_deriv.arr", s0_hat_deriv);
-            var s0 = GetS0(s0_wave);
-            S0HatDirectTime($"{(is_condensed_h ? "1" : "11")}_{nameof(s0_hat_deriv)}_N1={N1}_T={T}_h_condensed_{is_condensed_h}_tau_condensed_{is_condensed_tau}.dat", s0_hat_deriv, tau0);
+            WriteVectorToFile("S0_wave.arr", s0_wave);
             S0WaveDirectTime($"{(is_condensed_h ? "2" : "22")}_{nameof(s0_wave)}_N1={N1}_T={T}_h_condensed_{is_condensed_h}_tau_condensed_{is_condensed_tau}.dat", s0_wave, tau0);
-            S0ReversedTime($"{(is_condensed_h ? "3" : "33")}_{nameof(s0)}_T-t_N1={N1}_T={T}_h_condensed_{is_condensed_h}_tau_condensed_{is_condensed_tau}.dat", s0, T, tau0);
+            S0ReversedTime($"{(is_condensed_h ? "3" : "33")}_s0_T-t_N1={N1}_T={T}_h_condensed_{is_condensed_h}_tau_condensed_{is_condensed_tau}.dat", GetS0(s0_wave), T, tau0);
         }
 
-        private static double[] Solve(int j, double[] u_prev, double rho_j_l, double[] s0_hat_deriv, double mu_j_l, double[] a, double[] lambda, double in_tau)
+        private static double[] Solve(int l, int j, double[] u_prev, double[] rho_j, double[] s0_wave, double[] a, double[] lambda, double in_tau)
         {
-            var alpha_tj = r - q - sigma2 / 2d + s0_hat_deriv[j];
+            var s_approx = (rho_j[l] - s0_wave[j - 1]) / in_tau;
+            var alpha_tj = r - q - sigma2 / 2d + s_approx;
             var f = new double[N1];
             var h_12 = is_condensed_h ? hs[0] : h;
             var h_32 = is_condensed_h ? hs[1] : h;
             var u_prev_1 = u_prev[1];
-            var u_0j = K * (1d - Math.Exp(rho_j_l));
+            var u_0j = K * (1d - Math.Exp(rho_j[l]));
             f[0] = u_prev_1 / in_tau + (sigma2 / (h_12 * (h_12 + h_32))) * u_0j;
             for (var i = 1; i < N1 - 1; i++)
                 f[i] = u_prev[i] / in_tau;
             var h_Nm12 = is_condensed_h ? hs[N1 - 1] : h;
-            var nu_j = 2d / (lambda[j - 1] + lambda[j] + 2d * (s0_hat_deriv[j - 1] - mu_j_l) / sigma2);
+            var nu_j = 2d / (lambda[j - 1] + lambda[j] + 2d * (s0_wave[j - 1] - s_approx) / sigma2);
             f[N1 - 1] = u_prev[N1 - 1] / (2d * in_tau) + nu_j * u_prev[N1 - 1] / (in_tau * h_Nm12);
 
             var a0 = new double[N1]; // a - below main diagonal (indexed as [1;n-1])
@@ -158,12 +152,12 @@ namespace AmericanOptionAlbena
             if (is_condensed_h)
                 b0[0] = sigma2 / (hs[0] * (hs[0] + hs[1])) + sigma2 / (hs[1] * (hs[0] + hs[1])) + r + 1d / in_tau + alpha_tj / hs[1];
             else
-                b0[0] = sigma2 / (2d * h * h) + sigma2 / (2d * h * h) + r + 1d / in_tau + alpha_tj / h;
+                b0[0] = sigma2 / (h * h) + r + 1d / in_tau + alpha_tj / h;
             for (var i = 1; i < N1 - 1; ++i)
                 if (is_condensed_h)
                     b0[i] = sigma2 / (hs[i - 1] * (hs[i - 1] + hs[i])) + sigma2 / (hs[i] * (hs[i - 1] + hs[i])) + r + 1d / in_tau + alpha_tj / hs[i];
                 else
-                    b0[i] = sigma2 / (2d * h * h) + sigma2 / (2d * h * h) + r + 1d / in_tau + alpha_tj / h;
+                    b0[i] = sigma2 / (h * h) + r + 1d / in_tau + alpha_tj / h;
 
             if (is_condensed_h)
             {
@@ -191,13 +185,11 @@ namespace AmericanOptionAlbena
                     c0[i] = -sigma2 / (2d * h * h) - alpha_tj / h;
             c0[N1 - 2] = 0d;
 
-            if (j == 1)
-                Utils.PrintMatrix1(N1, a0, b0, c0, $"A_{j}.txt");
+            // if (j == 1 && l < 3)
+                // Utils.PrintMatrix1(N1, a0, b0, c0, $"A_{j}.txt");
             var u = SolveByTridiagonalMatrixAlgorithm(j, N1, a0, b0, c0, f);
-            // Utils.Print(a0, "db");
-            // Utils.Print(b0, "dc");
-            // Utils.Print(c0, "dd");
-            // Utils.Print(u_curr, "u_curr");
+            if (j == 1 && l < 3)
+                Utils.PrintToFile($"A_{j}_{l}.txt", a0, b0, c0);
             return u;
         }
 
@@ -315,31 +307,6 @@ namespace AmericanOptionAlbena
                 sb.AppendLine(line);
             var i = Math.Min(arr.Count - 1, lines.Count);
             writer.WriteLine($"I={i} K={1} ZONETYPE=Ordered");
-            writer.WriteLine("DATAPACKING=POINT\nDT=(DOUBLE DOUBLE)");
-            writer.WriteLine(sb.ToString());
-        }
-
-        private static void S0HatDirectTime(string name, IReadOnlyList<double> arr, double in_tau) // значения производных
-        {
-            using var writer = new StreamWriter(name!, false);
-            writer.WriteLine("TITLE = 'DEM DATA | DEM DATA | DEM DATA | DEM DATA');");
-            writer.WriteLine("VARIABLES = S0_Deriv t");
-            writer.WriteLine("ZONE T='SubZone'");
-            var lines = new List<string>();
-            var t = 0d;
-            var j = 0;
-            while (t < T)
-            {
-                lines.Add($"{arr[j]:e16} {t:e16}");
-                t += is_condensed_tau ? taus[j] : in_tau;
-                j++;
-            }
-
-            var sb = new StringBuilder();
-            foreach (var line in lines)
-                sb.AppendLine(line);
-            var I = Math.Min(arr.Count - 1, lines.Count);
-            writer.WriteLine($"I={I} K={1} ZONETYPE=Ordered");
             writer.WriteLine("DATAPACKING=POINT\nDT=(DOUBLE DOUBLE)");
             writer.WriteLine(sb.ToString());
         }
