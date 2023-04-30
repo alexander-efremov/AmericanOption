@@ -92,9 +92,8 @@ namespace AmericanOptionAlbena
                     eta_j[l] = K * Math.Exp(rho_j[l]) - (u_curr[1] - u_curr[0]) / h0;
                     if (print)
                     {
-                        File.AppendAllText("log.txt",
-                            $"l = {l:G10} j = {j:G10} K {K:N10} rho_j_l {rho_j[l]:N10} u[1] {u_curr[1]:G10} u[0] {u_curr[0]:G10} eta_j_l = {eta_j[l]:G10}" + Environment.NewLine);
-                        Console.WriteLine($"l = {l:G10} j = {j:G10} K {K:N10} rho_j_l {rho_j[l]:N10} u[1] {u_curr[1]:G10} u[0] {u_curr[0]:G10} eta_j_l = {eta_j[l]:G10}");
+                        File.AppendAllText("log.txt", $"l = {l:G10} j = {j:G10} rho_j_l {rho_j[l]:N10} u[1] {u_curr[1]:G10} u[0] {u_curr[0]:G10} eta_j_l = {eta_j[l]:G10}" + Environment.NewLine);
+                        Console.WriteLine($"l = {l:G10} j = {j:G10} rho_j_l {rho_j[l]:N10} u[1] {u_curr[1]:G10} u[0] {u_curr[0]:G10} eta_j_l = {eta_j[l]:G10}");
                     }
 
                     if (Math.Abs(eta_j[l]) <= Tol)
@@ -139,25 +138,58 @@ namespace AmericanOptionAlbena
             var c0 = new double[N1]; // c - up to main diagonal (indexed as [0;n-2])
             a0[0] = 0d;
             for (var i = 1; i < N1 - 1; ++i)
+            {
                 if (is_condensed_h)
+                {
                     a0[i] = -sigma2 / (hs[i - 1] * (hs[i - 1] + hs[i]));
+                }
                 else
-                    a0[i] = -sigma2 / (2d * h * h);
+                {
+                    if (alpha_tj >= 0d)
+                        a0[i] = -sigma2 / (2d * h * h);
+                    else
+                        a0[i] = -sigma2 / (2d * h * h) + alpha_tj / h;
+                }
+            }
 
             if (is_condensed_h)
+            {
                 a0[N1 - 1] = -sigma2 / (2d * hs[N1 - 1] * hs[N1 - 1]) + alpha_tj / (2d * hs[N1 - 1]);
+            }
             else
-                a0[N1 - 1] = -sigma2 / (2d * h * h) + alpha_tj / (2d * h);
+            {
+                if (alpha_tj >= 0d)
+                    a0[N1 - 1] = -sigma2 / (2d * h * h);
+                else
+                    a0[N1 - 1] = -sigma2 / (2d * h * h) + alpha_tj / (2d * h);
+            }
 
             if (is_condensed_h)
+            {
                 b0[0] = sigma2 / (hs[0] * (hs[0] + hs[1])) + sigma2 / (hs[1] * (hs[0] + hs[1])) + r + 1d / in_tau + alpha_tj / hs[1];
+            }
             else
-                b0[0] = sigma2 / (h * h) + r + 1d / in_tau + alpha_tj / h;
-            for (var i = 1; i < N1 - 1; ++i)
-                if (is_condensed_h)
-                    b0[i] = sigma2 / (hs[i - 1] * (hs[i - 1] + hs[i])) + sigma2 / (hs[i] * (hs[i - 1] + hs[i])) + r + 1d / in_tau + alpha_tj / hs[i];
+            {
+                if (alpha_tj >= 0d)
+                    b0[0] = sigma2 / (h * h) + r + 1d / in_tau + alpha_tj / h;
                 else
-                    b0[i] = sigma2 / (h * h) + r + 1d / in_tau + alpha_tj / h;
+                    b0[0] = sigma2 / (h * h) + r + 1d / in_tau - alpha_tj / h;
+            }
+
+            for (var i = 1; i < N1 - 1; ++i)
+            {
+                if (is_condensed_h)
+                {
+                    b0[i] = sigma2 / (hs[i - 1] * (hs[i - 1] + hs[i])) + sigma2 / (hs[i] * (hs[i - 1] + hs[i])) + r + 1d / in_tau + alpha_tj / hs[i];
+                }
+                else
+                {
+                    if (alpha_tj >= 0d)
+                        b0[i] = sigma2 / (h * h) + r + 1d / in_tau + alpha_tj / h;
+                    else
+                        b0[i] = sigma2 / (h * h) + r + 1d / in_tau - alpha_tj / h;
+                }
+            }
 
             if (is_condensed_h)
             {
@@ -168,6 +200,7 @@ namespace AmericanOptionAlbena
             }
             else
             {
+                // if (alpha_tj >= 0d) // todo: а что тут?
                 var val1 = (sigma2 / 2d) * (1d / (h * h) + (a[j] + lambda[j]) / (2d * h));
                 var val2 = 0.5d * (1d / in_tau + r) + 1d / (lambda[j] * in_tau * h);
                 var val3 = alpha_tj / (2d * h);
@@ -175,14 +208,31 @@ namespace AmericanOptionAlbena
             }
 
             if (is_condensed_h)
+            {
                 c0[0] = -sigma2 / (hs[0] * (hs[0] + hs[1])) - alpha_tj / hs[1];
+            }
             else
-                c0[0] = -sigma2 / (2d * h * h) - alpha_tj / h;
-            for (var i = 1; i < N1 - 2; ++i)
-                if (is_condensed_h)
-                    c0[i] = -sigma2 / (hs[i] * (hs[i - 1] + hs[i])) - alpha_tj / hs[i];
+            {
+                if (alpha_tj >= 0d)
+                    c0[0] = -sigma2 / (2d * h * h) - alpha_tj / h;
                 else
-                    c0[i] = -sigma2 / (2d * h * h) - alpha_tj / h;
+                    c0[0] = -sigma2 / (2d * h * h);
+            }
+
+            for (var i = 1; i < N1 - 2; ++i)
+            {
+                if (is_condensed_h)
+                {
+                    c0[i] = -sigma2 / (hs[i] * (hs[i - 1] + hs[i])) - alpha_tj / hs[i];
+                }
+                else
+                {
+                    if (alpha_tj >= 0d)
+                        c0[i] = -sigma2 / (2d * h * h) - alpha_tj / h;
+                    else
+                        c0[i] = -sigma2 / (2d * h * h);
+                }
+            }
             c0[N1 - 2] = 0d;
 
             // if (j == 1 && l < 3)
