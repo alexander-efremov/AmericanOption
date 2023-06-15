@@ -16,7 +16,7 @@ namespace AmericanOptionAlbena
     [SuppressMessage("ReSharper", "SuggestBaseTypeForParameter")]
     public static class Program
     {
-        private const int l_max_iterations = 1000; // max iteration on l
+        private const int l_max_iterations = 100; // max iteration on l
         private const double Tol = 10e-10; // eps to refine eta
         private const double eps = 1e-3; // eps to refine rho
         private const double lb = 0d; // left bound
