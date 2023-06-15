@@ -44,13 +44,19 @@ namespace AmericanOptionAlbena
         private const bool print = true; // the parameter which allows enable/disable printing of the results
 
         private static readonly bool nonuniform_h = false; // the parameter which allows enable/disable condensed meshes
-        private static readonly bool nonuniform_tau = true; // the parameter which allows enable/disable condensed meshes
+        private static readonly bool nonuniform_tau = false; // the parameter which allows enable/disable condensed meshes
 
         private static readonly double[] taus = GetTaus();
         private static readonly double[] hs = GetHs();
 
         public static void Main()
         {
+            foreach (var d in hs)
+            {
+                Console.Write(d + " ");
+            }
+
+            Console.WriteLine();
             if (File.Exists("log.txt"))
                 File.Delete("log.txt");
             Debug.Assert(q < r);
@@ -63,6 +69,7 @@ namespace AmericanOptionAlbena
             a[0] = (2d * r - 2d * q - sigma2 + 2d * 0d) / sigma2;
             lambda[0] = Math.Sqrt(a[0] * a[0] - 4d * b);
             for (var j = 1; j <= M; j++)
+            // for (var j = 1; j <= 200; j++)
             {
                 var tau = nonuniform_tau ? taus[j - 1] : tau0;
                 var eta_j = new double[l_max_iterations];
@@ -140,7 +147,7 @@ namespace AmericanOptionAlbena
             var h_12 = nonuniform_h ? hs[0] : h;
             var h_32 = nonuniform_h ? hs[1] : h;
             if (alpha_j >= 0d)
-                f[0] = u_prev[0] / in_tau + sigma2 / (h_12 * (h_12 + h_32)) * u_0j;
+                f[0] = u_prev[0] / in_tau + (u_0j * sigma2) / (h_12 * (h_12 + h_32));
             else
                 f[0] = u_prev[0] / in_tau + (sigma2 / (h_12 * (h_12 + h_32)) - alpha_j / h_12) * u_0j;
             for (var i = 1; i < N1 - 1; i++)
@@ -476,8 +483,8 @@ namespace AmericanOptionAlbena
         {
             var res = new double[N1];
             for (var i = 1; i <= res.Length; i++)
-                res[i - 1] = gh2(i * h, beta) - gh2((i - 1) * h, beta);
-            //res[res.Length - 1] = gh2((res.Length - 1) * h, beta) - gh2((res.Length - 1) * h, beta);
+                //res[i - 1] = gh2(i * h, beta) - gh2((i - 1) * h, beta);
+                res[i - 1] = h; // todo: revert back!
             return res;
         }
 
