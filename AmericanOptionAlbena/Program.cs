@@ -51,11 +51,14 @@ namespace AmericanOptionAlbena
 
         public static void Main()
         {
+            var s = string.Empty;
             foreach (var d in hs)
-            {
-                Console.Write(d + " ");
-            }
+                s += d + " ";
+            
 
+
+            Console.WriteLine(s);
+            File.WriteAllText("hs.txt", s);
             Console.WriteLine();
             if (File.Exists("log.txt"))
                 File.Delete("log.txt");
