@@ -7,8 +7,8 @@
     {
         public Point(double s, double vs)
         {
-            this.S = s;
-            this.VS = vs;
+            S = s;
+            VS = vs;
         }
 
         public double S { get; }
@@ -19,7 +19,7 @@
         /// <returns>The fully qualified type name.</returns>
         public override string ToString()
         {
-            return string.Format("({0:e2}, {1:e2})", this.S, this.VS);
+            return string.Format("({0:e2}, {1:e2})", S, VS);
         }
     }
 }

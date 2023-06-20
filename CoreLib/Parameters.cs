@@ -23,19 +23,19 @@ namespace CoreLib
                 throw new ArgumentException("Alpha must be greater than zero!");
             }
             
-            this.Alpha = alpha;
-            this.Beta = beta;
-            this.A = a;
-            this.A = a;
-            this.B = b;
-            this.N = n;
-            this.N1 = n+1;
-            this.R = r;
-            this.Tau = tau;
-            this.SigmaSq = sigmaSq;
-            this.K = k;
-            this.S0Eps = s0eps;
-            this.WorkDir = workDir;
+            Alpha = alpha;
+            Beta = beta;
+            A = a;
+            A = a;
+            B = b;
+            N = n;
+            N1 = n+1;
+            R = r;
+            Tau = tau;
+            SigmaSq = sigmaSq;
+            K = k;
+            S0Eps = s0eps;
+            WorkDir = workDir;
         }
 
         public double Alpha { get; }

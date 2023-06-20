@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using CoreLib.Utils;
+using CoreLib;
 using NUnit.Framework;
 
 namespace UnitTests
