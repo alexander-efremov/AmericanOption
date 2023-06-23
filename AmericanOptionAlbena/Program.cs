@@ -417,7 +417,7 @@ namespace AmericanOptionAlbena
             using var writer = new StreamWriter(name!, false);
             writer.WriteLine("TITLE = 'DEM DATA | DEM DATA | DEM DATA | DEM DATA');");
             writer.WriteLine("VARIABLES = S0 t");
-            writer.WriteLine($"ZONE T='S0_{(nonUniformH ? "nonuniform_h" : "uniform_h")}'");
+            writer.WriteLine($"ZONE T='S0_{(nonUniformH ? "nonuniform_h" : "uniform_h")}_{(nonUniformTau ? "nonuniform_tau" : "uniform_tau")}'");
             var t = T;
             var s = new StringBuilder();
             int I;
