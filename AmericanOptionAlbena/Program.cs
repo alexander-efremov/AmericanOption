@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text;
@@ -23,8 +22,8 @@ namespace AmericanOptionAlbena
         private const double T0 = 0d; // the start time
         private const double Tn = 1d; // the finish time
         private const double T = Tn - T0; // time interval
-        private const double sigma2 = sigma * sigma; // the squared sigma
         private const double sigma = 0.25d; // the sigma = volatility
+        private const double sigma2 = sigma * sigma; // the squared sigma
         private const double r = 0.1d; // the risk-free rate
         private const double K = 5d; // the strike price
         private const double q = 0.05d; // the dividend rate
@@ -35,113 +34,99 @@ namespace AmericanOptionAlbena
         private const double h = (rb - lb) / N; // the space step
 
         private const int M = 1000; // the number of time intervals
-        private const double tau0 = T / M; // the time step
+        private const double theta0 = T / M; // the time step
         private const double alpha = 2d; // condense parameter for t
         private const double beta = 2d; // condense parameter for h
         // private const double beta_mu = 0.5d; // the parameter to update mu
 
-        private const bool print = true; // the parameter which allows enable/disable printing of the results
-
         private static readonly bool nonuniform_h = false; // the parameter which allows enable/disable condensed meshes
         private static readonly bool nonuniform_tau = false; // the parameter which allows enable/disable condensed meshes
 
-        private static readonly double[] taus = GetTaus();
+        private static readonly double[] thetas = GetThetas();
         private static readonly double[] hs = GetHs();
 
         public static void Main()
         {
-            // var s = string.Empty;
-            // foreach (var d in hs)
-            //     s += d + " ";
-            //
-            // Console.WriteLine(s);
-            // File.WriteAllText("hs.txt", s);
-            // Console.WriteLine();
-
             if (File.Exists("log.txt"))
                 File.Delete("log.txt");
-            Debug.Assert(q < r);
+
             var u_curr = new double[N1]; // the current solution
             var u_prev = new double[N1]; // the previous solution
             var lambda = new double[M + 1];
             var a = new double[M + 1];
-            var s0_dash = new double[M + 1];
-            s0_dash[0] = 0d;
-            a[0] = (2d * r - 2d * q - sigma2 + 2d * 0d) / sigma2;
+            var s0_star = new double[M + 1];
+            s0_star[0] = K;
+            // a[0] = (2d * r - 2d * q - sigma2 + 2d * 0d) / sigma2;
+            var theta00 = nonuniform_tau ? thetas[0] : theta0;
+            var s_approx = (s0_star[0] - 0d) / (theta00 * s0_star[0]);
+            a[0] = (2d * r - 2d * q - sigma2 + 2d * s_approx) / sigma2;
             lambda[0] = Math.Sqrt(a[0] * a[0] - 4d * b);
             for (var j = 1; j <= M; j++)
             {
-                var tau = nonuniform_tau ? taus[j - 1] : tau0;
+                var theta = nonuniform_tau ? thetas[j - 1] : theta0;
                 var eta_j = new double[l_max_iterations];
                 var rho_j = new double[l_max_iterations];
-                rho_j[0] = s0_dash[j - 1];
+                rho_j[0] = s0_star[j - 1];
                 var l = 0;
                 while (l < l_max_iterations)
                 {
-                    CheckNaN(rho_j[l]);
-                    var u_0j = K * (1d - Math.Exp(rho_j[l]));
-                    var result = Solve(l, j, u_prev, rho_j, s0_dash, a, lambda, tau, u_0j);
+                    var u_0j = K - rho_j[l];
+                    var result = Solve(l, j, u_prev, rho_j, s0_star, a, lambda, theta, u_0j);
                     u_curr = result.u_curr;
                     var h0 = nonuniform_h ? hs[1] : h;
-                    eta_j[l] = K * Math.Exp(rho_j[l]) + (u_curr[0] - u_0j) / h0;
-                    if (print)
-                        Console.WriteLine($"l = {l:G10} j = {j:G10} tau {tau} rho_j_l {rho_j[l]:N10} alpha_j {result.alpha_j:N5} u[1] {u_curr[1]:G10} u[0] {u_curr[0]:G10} eta_j_l = {eta_j[l]:G10} u[N] = {u_curr[N]:G10}");
-
+                    eta_j[l] = rho_j[l] + (u_curr[0] - u_0j) / h0;
+                    Console.WriteLine($"l = {l:G10} j = {j:G10} tau {theta} rho_j_l {rho_j[l]:N10} alpha_j {result.alpha_j:N5} u[1] {u_curr[1]:G10} u[0] {u_curr[0]:G10} eta_j_l = {eta_j[l]:G10} u[N] = {u_curr[N]:G10}");
                     if (Math.Abs(eta_j[l]) <= Tol)
                     {
-                        s0_dash[j] = rho_j[l];
+                        s0_star[j] = rho_j[l];
                         break;
                     }
 
                     l++;
                     rho_j[l] = l == 1 ? rho_j[l - 1] - eps : (eta_j[l - 1] * rho_j[l - 2] - eta_j[l - 2] * rho_j[l - 1]) / (eta_j[l - 1] - eta_j[l - 2]);
+                    CheckNaN(rho_j[l]);
                 }
 
                 for (var i = 0; i < u_prev.Length; i++)
                     u_prev[i] = u_curr[i];
             }
 
-            var s0 = GetS0(s0_dash);
-            S0DashDirectTime($"{(nonuniform_h ? "2" : "22")}_{nameof(s0_dash)}_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}.dat", s0_dash, tau0, taus, nonuniform_tau);
-            S0ReversedTime($"{(nonuniform_h ? "3" : "33")}_s0_T-t_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}.dat", s0, T, tau0, taus, nonuniform_tau, nonuniform_h);
-            CheckS0Dash(s0_dash);
-            CheckS0(s0);
+            S0DashDirectTime($"{(nonuniform_h ? "2" : "22")}_{nameof(s0_star)}_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}.dat", s0_star, theta0, thetas, nonuniform_tau);
+            var s0 = GetS0(s0_star);
+            S0ReversedTime($"{(nonuniform_h ? "3" : "33")}_s0_T-t_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}.dat", s0, T, theta0, thetas, nonuniform_tau, nonuniform_h);
+            // CheckS0Dash(s0_star);
+            // CheckS0(s0);
         }
 
-        private static (double[] u_curr, double alpha_j) Solve(int l, int j, double[] u_prev, double[] rho_j, double[] s0_dash, double[] a, double[] lambda, double in_tau, double u_0j)
+        private static (double[] u_curr, double alpha_j) Solve(int l, int j, double[] u_prev, double[] rho_j, double[] s0_star, double[] a, double[] lambda, double in_theta, double u_0j)
         {
             // alpha, a, lambda, nu
-            var s_approx = (rho_j[l] - s0_dash[j - 1]) / in_tau;
+            var s_approx = (rho_j[l] - s0_star[j - 1]) / (in_theta * rho_j[l]);
             a[j] = (2d * r - 2d * q - sigma2 + 2d * s_approx) / sigma2;
             lambda[j] = Math.Sqrt(a[j] * a[j] - 4d * b);
             double nu_j;
             if (j == 1)
-            {
                 nu_j = 0d; // corner case
-            }
             else
             {
-                var tau_j_32 = nonuniform_tau ? taus[j - 2] : tau0;
-                var tau_j_12 = nonuniform_tau ? taus[j - 1] : tau0;
-                var val = 2d * ((s0_dash[j - 1] - s0_dash[j - 2]) / tau_j_32 - (rho_j[l] - s0_dash[j - 1]) / tau_j_12);
+                var tau_j_32 = nonuniform_tau ? thetas[j - 2] : theta0;
+                var tau_j_12 = nonuniform_tau ? thetas[j - 1] : theta0;
+                var val = 2d * ((s0_star[j - 1] - s0_star[j - 2]) / tau_j_32 - (rho_j[l] - s0_star[j - 1]) / tau_j_12);
                 nu_j = 2d / (lambda[j - 1] + lambda[j] + val / sigma2);
             }
 
-            var alpha_j = r - q - sigma2 / 2d + s_approx;
-            // Console.WriteLine(alpha_j);
-            // Debug.Assert(alpha_j >= 0);
-
+            var alpha_j = r - q - sigma2 / 2d + ((rho_j[l] - s0_star[j - 1]) / (in_theta * rho_j[l]));
             var f = new double[N1];
             var h_12 = nonuniform_h ? hs[1] : h;
             var h_32 = nonuniform_h ? hs[2] : h;
             if (alpha_j >= 0d)
-                f[0] = u_prev[0] / in_tau + (u_0j * sigma2) / (h_12 * (h_12 + h_32));
+                f[0] = u_prev[0] / in_theta + (u_0j * sigma2) / (h_12 * (h_12 + h_32));
             else
-                f[0] = u_prev[0] / in_tau + (sigma2 / (h_12 * (h_12 + h_32)) - alpha_j / h_12) * u_0j;
+                f[0] = u_prev[0] / in_theta + (sigma2 / (h_12 * (h_12 + h_32)) - alpha_j / h_12) * u_0j;
             for (var i = 1; i < N1 - 1; i++)
-                f[i] = u_prev[i] / in_tau;
+                f[i] = u_prev[i] / in_theta;
             var h_Nm12 = nonuniform_h ? hs[N] : h;
-            f[N1 - 1] = (0.5d + nu_j / h_Nm12) * (u_prev[N1 - 1] / in_tau);
+            f[N1 - 1] = (0.5d + nu_j / h_Nm12) * (u_prev[N1 - 1] / in_theta);
 
             var a0 = new double[N1]; // a - below main diagonal (indexed as [1;n-1])
             var b0 = new double[N1]; // b - main diagonal of matrix (indexed as [0;n-1])
@@ -181,32 +166,32 @@ namespace AmericanOptionAlbena
             if (nonuniform_h)
             {
                 if (alpha_j >= 0d)
-                    b0[0] = sigma2 / (hs[1] + hs[2]) * (1d / hs[1] + 1d / hs[2]) + (r + 1d / in_tau) + alpha_j / hs[2];
+                    b0[0] = sigma2 / (hs[1] + hs[2]) * (1d / hs[1] + 1d / hs[2]) + (r + 1d / in_theta) + alpha_j / hs[2];
                 else
-                    b0[0] = sigma2 / (hs[1] + hs[2]) * (1d / hs[1] + 1d / hs[2]) + (r + 1d / in_tau) - alpha_j / hs[1];
+                    b0[0] = sigma2 / (hs[1] + hs[2]) * (1d / hs[1] + 1d / hs[2]) + (r + 1d / in_theta) - alpha_j / hs[1];
             }
             else
             {
                 if (alpha_j >= 0d)
-                    b0[0] = sigma2 / (h * h) + (r + 1d / in_tau) + alpha_j / h;
+                    b0[0] = sigma2 / (h * h) + (r + 1d / in_theta) + alpha_j / h;
                 else
-                    b0[0] = sigma2 / (h * h) + (r + 1d / in_tau) - alpha_j / h;
+                    b0[0] = sigma2 / (h * h) + (r + 1d / in_theta) - alpha_j / h;
             }
 
             for (var i = 1; i < N1 - 1; ++i)
                 if (nonuniform_h)
                 {
                     if (alpha_j >= 0d)
-                        b0[i] = sigma2 / (hs[i + 1] + hs[i + 2]) * (1d / hs[i + 1] + 1d / hs[i + 2]) + (r + 1d / in_tau) + alpha_j / hs[i + 2];
+                        b0[i] = sigma2 / (hs[i + 1] + hs[i + 2]) * (1d / hs[i + 1] + 1d / hs[i + 2]) + (r + 1d / in_theta) + alpha_j / hs[i + 2];
                     else
-                        b0[i] = sigma2 / (hs[i + 1] + hs[i + 2]) * (1d / hs[i + 1] + 1d / hs[i + 2]) + (r + 1d / in_tau) - alpha_j / hs[i + 1];
+                        b0[i] = sigma2 / (hs[i + 1] + hs[i + 2]) * (1d / hs[i + 1] + 1d / hs[i + 2]) + (r + 1d / in_theta) - alpha_j / hs[i + 1];
                 }
                 else
                 {
                     if (alpha_j >= 0d)
-                        b0[i] = sigma2 / (h * h) + (r + 1d / in_tau) + alpha_j / h;
+                        b0[i] = sigma2 / (h * h) + (r + 1d / in_theta) + alpha_j / h;
                     else
-                        b0[i] = sigma2 / (h * h) + (r + 1d / in_tau) - alpha_j / h;
+                        b0[i] = sigma2 / (h * h) + (r + 1d / in_theta) - alpha_j / h;
                 }
 
             if (nonuniform_h)
@@ -214,14 +199,14 @@ namespace AmericanOptionAlbena
                 if (alpha_j >= 0)
                 {
                     var val1 = sigma2 / 2d * (1d / (hs[N] * hs[N]) + (a[j] + lambda[j]) / (2d * hs[N]));
-                    var val2 = 0.5d * (1d / in_tau + r) + 1d / (lambda[j] * in_tau * hs[N]);
+                    var val2 = 0.5d * (1d / in_theta + r) + 1d / (lambda[j] * in_theta * hs[N]);
                     var val3 = alpha_j / (2d * hs[N]) * (Math.Exp(-(lambda[j] + a[j]) * hs[N] / 2d) - 1d);
                     b0[N1 - 1] = val1 + val2 - val3;
                 }
                 else
                 {
                     var val1 = sigma2 / 2d * (1d / (hs[N] * hs[N]) + (a[j] + lambda[j]) / (2d * hs[N]));
-                    var val2 = 0.5d * (1d / in_tau + r) + 1d / (lambda[j] * in_tau * hs[N]);
+                    var val2 = 0.5d * (1d / in_theta + r) + 1d / (lambda[j] * in_theta * hs[N]);
                     var val3 = alpha_j / (2d * hs[N]);
                     b0[N1 - 1] = val1 + val2 - val3;
                 }
@@ -231,14 +216,14 @@ namespace AmericanOptionAlbena
                 if (alpha_j >= 0)
                 {
                     var val1 = sigma2 / 2d * (1d / (h * h) + (a[j] + lambda[j]) / (2d * h));
-                    var val2 = 0.5d * (1d / in_tau + r) + 1d / (lambda[j] * in_tau * h);
+                    var val2 = 0.5d * (1d / in_theta + r) + 1d / (lambda[j] * in_theta * h);
                     var val3 = alpha_j / (2d * h) * (Math.Exp(-(lambda[j] + a[j]) * h / 2d) - 1d);
                     b0[N1 - 1] = val1 + val2 - val3;
                 }
                 else
                 {
                     var val1 = sigma2 / 2d * (1d / (h * h) + (a[j] + lambda[j]) / (2d * h));
-                    var val2 = 0.5d * (1d / in_tau + r) + 1d / (lambda[j] * in_tau * h);
+                    var val2 = 0.5d * (1d / in_theta + r) + 1d / (lambda[j] * in_theta * h);
                     var val3 = alpha_j / (2d * h);
                     b0[N1 - 1] = val1 + val2 - val3;
                 }
@@ -277,12 +262,7 @@ namespace AmericanOptionAlbena
 
             c0[N1 - 2] = 0d;
 
-            // if (j == 1 && l < 3)
-            // Utils.PrintMatrix1(N1, a0, b0, c0, $"A_{j}.txt");
-            // throw new Exception("");
             var u = SolveByTridiagonalMatrixAlgorithm(j, N1, a0, b0, c0, f);
-            // if (j == 1 && l < 3)
-            //     Utils.PrintToFile($"A_{j}_{l}.txt", a0, b0, c0);
             return (u, alpha_j);
         }
 
@@ -333,9 +313,13 @@ namespace AmericanOptionAlbena
         private static double[] SolveByTridiagonalMatrixAlgorithm(int j, int n, IReadOnlyList<double> a, IReadOnlyList<double> b, IReadOnlyList<double> c, IReadOnlyList<double> d)
         {
             for (var i = 0; i < b.Count; i++)
+            {
                 if (Math.Abs(b[i]) < Math.Abs(a[i]) + Math.Abs(c[i]))
-                    throw new Exception(
+                {
+                    throw new InvalidOperationException(
                         $"There is no diagonal dominance! j={j} i={i}: {Math.Abs(a[i])} {Math.Abs(b[i])} {Math.Abs(c[i])} sum={Math.Abs(a[i] + c[i])} ");
+                }
+            }
 
             if (Math.Abs(b[0]) < double.Epsilon)
                 throw new InvalidOperationException("c[0] == 0");
@@ -361,11 +345,11 @@ namespace AmericanOptionAlbena
             return x;
         }
 
-        private static double[] GetS0(double[] s0_dash)
+        private static double[] GetS0(double[] s0_star)
         {
-            var res = new double[s0_dash.Length];
+            var res = new double[s0_star.Length];
             for (var i = 0; i < res.Length; ++i)
-                res[i] = K * Math.Exp(s0_dash[i]);
+                res[i] = K * Math.Exp(s0_star[i]);
             return res;
         }
 
@@ -451,19 +435,11 @@ namespace AmericanOptionAlbena
             writer.WriteLine(s);
         }
 
-        private static void WriteVectorToFile(string path, IEnumerable<double> arr)
-        {
-            var builder = new StringBuilder();
-            foreach (var a in arr!)
-                builder.AppendLine(a.ToString("e10"));
-            File.WriteAllText(path, builder.ToString());
-        }
-
-        private static double[] GetTaus()
+        private static double[] GetThetas()
         {
             var res = new double[M + 1];
             for (var j = 1; j < res.Length; j++)
-                res[j - 1] = gt2(j * tau0, alpha) - gt2((j - 1) * tau0, alpha);
+                res[j - 1] = gt2(j * theta0, alpha) - gt2((j - 1) * theta0, alpha);
             return res;
         }
 
@@ -481,7 +457,7 @@ namespace AmericanOptionAlbena
             if (!double.IsNaN(val))
                 return;
             Console.Out.Flush();
-            throw new Exception("rho is NaN!");
+            throw new Exception($"Unexpected NaN value encountered: {val}");
         }
 
         private static void CheckS0Dash(double[] arr)
@@ -507,13 +483,13 @@ namespace AmericanOptionAlbena
         [SuppressMessage("ReSharper", "UnusedMember.Local")]
         private static void PrintCondensedMeshesTau()
         {
-            Console.WriteLine($"M={M} Tn={Tn} T0={T0} T={T} alpha={alpha} tau0={tau0}");
+            Console.WriteLine($"M={M} Tn={Tn} T0={T0} T={T} alpha={alpha} tau0={theta0}");
             Console.WriteLine("TAU V1" + new string(' ', 10) + "TAU V2");
             var t = 0d;
             for (var j = 1; j < 110; j++)
             {
-                var t1 = gt1(j * tau0, alpha) - gt1((j - 1) * tau0, alpha);
-                var t2 = taus[j - 1];
+                var t1 = gt1(j * theta0, alpha) - gt1((j - 1) * theta0, alpha);
+                var t2 = thetas[j - 1];
                 t += t2;
                 Console.Write("j: " + j + " " + t1.ToString("F8") + " " + t2.ToString("F8") + " " + t.ToString("F8") + (t1.Equals(t2) ? '=' : '\0'));
                 Console.WriteLine();
@@ -531,7 +507,7 @@ namespace AmericanOptionAlbena
                 var x1 = gh1(i * h, beta) - gh1((i - 1) * h, beta);
                 var x2 = hs[i - 1];
                 x += x2;
-                Console.Write("i: " + i + " " + x1.ToString("F8") + " " + x2.ToString("F8") + " " + x.ToString("F8") + (x1.Equals(x2) ? '=' : '\0'));
+                Console.Write($"i: {i} {x1:F8} {x2:F8} {x:F8} {(x1.Equals(x2) ? '=' : '\0')}");
                 Console.WriteLine();
             }
         }
