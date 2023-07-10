@@ -5,6 +5,14 @@ namespace PerpetualAmericanOptions
 
     using CoreLib;
 
+    public class Program
+    {
+        public static void Main()
+        {
+        
+        }
+    }
+    
     // from new presentation with FEM
     public class PerpetualAmericanOptionCalculator : AmericanOptionCalculatorBase
     {
