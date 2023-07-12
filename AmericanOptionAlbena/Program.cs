@@ -39,7 +39,6 @@ namespace AmericanOptionAlbena
         private const double tau0 = T / M; // the time step
         private const double alpha = 2d; // condense parameter for t
         private const double beta = 2d; // condense parameter for h
-        // private const double beta_mu = 0.5d; // the parameter to update mu
 
         private const bool print = true; // the parameter which allows enable/disable printing of the results
 
@@ -51,19 +50,11 @@ namespace AmericanOptionAlbena
 
         public static void Main()
         {
-            // var s = string.Empty;
-            // foreach (var d in hs)
-            //     s += d + " ";
-            //
-            // Console.WriteLine(s);
-            // File.WriteAllText("hs.txt", s);
-            // Console.WriteLine();
-
             if (File.Exists("log.txt"))
                 File.Delete("log.txt");
             Debug.Assert(q < r);
-            var u_curr = new double[N1]; // the current solution
-            var u_prev = new double[N1]; // the previous solution
+            var u_curr = new double[N1];
+            var u_prev = new double[N1];
             var lambda = new double[M + 1];
             var a = new double[M + 1];
             var s0 = new double[M + 1];
@@ -84,9 +75,10 @@ namespace AmericanOptionAlbena
                     var result = Solve(l, j, u_prev, rho_j, s0, a, lambda, tau, u_0j);
                     u_curr = result.u_curr;
                     var h0 = nonuniform_h ? hs[1] : h;
-                    eta_j[l] = rho_j[l] + ((u_curr[1] - u_curr[0]) / h0);
+                    eta_j[l] = rho_j[l] + (u_curr[1] - u_0j) / h0;
                     if (print)
-                        Console.WriteLine($"l = {l:G10} j = {j:G10} tau {tau} rho_j_l {rho_j[l]:N10} alpha_j {result.alpha_j:N5} u[1] {u_curr[1]:G10} u[0] {u_curr[0]:G10} eta_j_l = {eta_j[l]:G10} u[N] = {u_curr[N]:G10}");
+                        Console.WriteLine(
+                            $"l = {l:G10} j = {j:G10} tau {tau} rho_j_l {rho_j[l]:N10} alpha_j {result.alpha_j:N5} u[1] {u_curr[1]:G10} u[0] {u_curr[0]:G10} eta_j_l = {eta_j[l]:G10} u[N] = {u_curr[N]:G10}");
 
                     if (Math.Abs(eta_j[l]) <= Tol)
                     {
@@ -105,12 +97,22 @@ namespace AmericanOptionAlbena
                     u_prev[i] = u_curr[i];
             }
 
-            S0DashDirectTime($"{(nonuniform_h ? "2" : "22")}_{nameof(s0)}_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}.dat", s0, tau0, taus, nonuniform_tau);
-            s0 = GetS0(s0);
-            S0ReversedTime($"{(nonuniform_h ? "3" : "33")}_s0_T-t_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}.dat", s0, T, tau0, taus, nonuniform_tau, nonuniform_h);
-            // CheckS0Dash(s0_dash);
-            // CheckS0(s0);
+            var chartName = $"{nameof(s0)}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}";
+            PrintS0($"{GetPrefix('1')}_{nameof(s0)}_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}.dat", chartName, s0, tau0, taus, nonuniform_tau);
+            CheckS0R(s0);
+            s0 = s0.Reverse().ToArray();
+            PrintS0($"{GetPrefix('2')}_s0_T-t_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}.dat", chartName, s0, tau0, taus, nonuniform_tau);
+            CheckS0(s0);
         }
+
+        private static string GetPrefix(char c) => nonuniform_h switch
+        {
+            false when !nonuniform_tau => new string(c, 1),
+            true when !nonuniform_tau => new string(c, 2),
+            false when nonuniform_tau => new string(c, 3),
+            true when nonuniform_tau => new string(c, 4),
+            _ => string.Empty
+        };
 
         private static (double[] u_curr, double alpha_j) Solve(int l, int j, double[] u_prev, double[] rho_j, double[] s0, double[] a, double[] lambda, double in_tau, double u_0j)
         {
@@ -350,8 +352,6 @@ namespace AmericanOptionAlbena
             return x;
         }
 
-        private static double[] GetS0(double[] s0) => s0.Reverse().ToArray();
-
         [SuppressMessage("ReSharper", "UnusedMember.Local")]
         private static void PrintLowerBound(double r, double q, double sigma2, double K)
         {
@@ -372,18 +372,17 @@ namespace AmericanOptionAlbena
             Console.WriteLine("==");
         }
 
-        private static void S0DashDirectTime(string name, double[] arr, double in_tau, double[] in_taus, bool nonUniformTau) // значения S0 до обратного преобразования
+        private static void PrintS0(string name, string chartName, double[] arr, double in_tau, double[] in_taus, bool nonUniformTau)
         {
             using var writer = new StreamWriter(name!, false);
             writer.WriteLine("TITLE = 'DEM DATA | DEM DATA | DEM DATA | DEM DATA');");
-            writer.WriteLine("VARIABLES = S0_dash t");
-            writer.WriteLine("ZONE T='S0_dash'");
+            writer.WriteLine("VARIABLES = S0 t");
+            writer.WriteLine($"ZONE T='{chartName}'");
             var lines = new List<string>();
             var t = 0d;
-            var r1 = arr.Reverse().ToArray();
             for (var k = 0; k < in_taus.Length; k++)
             {
-                lines.Add($"{r1[k]:e16} {t:e16}");
+                lines.Add($"{arr[k]:e16} {t:e16}");
                 t += nonUniformTau ? in_taus[k] : in_tau;
             }
 
@@ -396,58 +395,16 @@ namespace AmericanOptionAlbena
             writer.WriteLine(sb.ToString());
         }
 
-        private static void S0ReversedTime(string name, double[] arr, double T, double in_tau, double[] in_taus, bool nonUniformTau, bool nonUniformH) // значения S0 после обратного преобразования
-        {
-            using var writer = new StreamWriter(name!, false);
-            writer.WriteLine("TITLE = 'DEM DATA | DEM DATA | DEM DATA | DEM DATA');");
-            writer.WriteLine("VARIABLES = S0 t");
-            writer.WriteLine($"ZONE T='S0_{(nonUniformH ? "nonuniform_h" : "uniform_h")}_{(nonUniformTau ? "nonuniform_tau" : "uniform_tau")}'");
-            var t = T;
-            var s = new StringBuilder();
-            int I;
-            if (nonUniformTau)
-            {
-                var j = 0;
-                while (t >= 0)
-                {
-                    s.AppendLine($"{arr[j]:e16} {t:e16}");
-                    t -= in_taus[j];
-                    j++;
-                }
-
-                I = j;
-            }
-            else
-            {
-                foreach (var val in arr)
-                {
-                    s.AppendLine($"{val:e16} {t:e16}");
-                    t -= in_tau;
-                    if (t < 1e-10)
-                        t = 0d;
-                }
-
-                I = arr.Length;
-            }
-
-            writer.WriteLine($"I={I} K={1} ZONETYPE=Ordered");
-            writer.WriteLine("DATAPACKING=POINT\nDT=(DOUBLE DOUBLE)");
-            writer.WriteLine(s);
-        }
-
-        private static void WriteVectorToFile(string path, IEnumerable<double> arr)
-        {
-            var builder = new StringBuilder();
-            foreach (var a in arr!)
-                builder.AppendLine(a.ToString("e10"));
-            File.WriteAllText(path, builder.ToString());
-        }
-
-        private static double[] GetTaus()
+        private static double[] GetTaus(bool validate = true)
         {
             var res = new double[M + 1];
             for (var j = 1; j < res.Length; j++)
                 res[j - 1] = gt2(j * tau0, alpha) - gt2((j - 1) * tau0, alpha);
+            if (!validate)
+                return res;
+            var sum = res.Sum();
+            if (sum > T)
+                throw new InvalidOperationException("Sum of time steps greater than T");
             return res;
         }
 
@@ -456,7 +413,6 @@ namespace AmericanOptionAlbena
             var res = new double[N1 + 1];
             for (var i = 0; i < res.Length - 1; i++)
                 res[i + 1] = gh2((i + 1) * h, beta) - gh2(i * h, beta);
-            // res[i] = h;
             return res;
         }
 
@@ -468,14 +424,14 @@ namespace AmericanOptionAlbena
             throw new Exception("rho is NaN!");
         }
 
-        private static void CheckS0Dash(double[] arr)
+        private static void CheckS0R(double[] arr)
         {
-            if (arr[0] != 0d)
-                throw new Exception("arr[0] is not 0!");
-            for (var i = 2; i < arr.Length; i++)
+            if (Math.Abs(arr[0] - K) > double.Epsilon)
+                throw new Exception($"arr[0] is not {K}!");
+            for (var i = 1; i < arr.Length; i++)
             {
-                if (Math.Abs(arr[i - 1]) > Math.Abs(arr[i]))
-                    throw new Exception($"Math.Abs(arr[{i - 1}]={arr[i - 1]}) is greater than Math.Abs(arr[{i}]={arr[i]})!");
+                if (Math.Abs(arr[i - 1]) < Math.Abs(arr[i]))
+                    throw new Exception($"Math.Abs(arr[{i - 1}]={arr[i - 1]}) is less than Math.Abs(arr[{i}]={arr[i]})!");
             }
         }
 
@@ -483,8 +439,8 @@ namespace AmericanOptionAlbena
         {
             for (var i = 1; i < arr.Length; i++)
             {
-                if (arr[i - 1] < arr[i])
-                    throw new Exception($"arr[{i - 1}]={arr[i - 1]} is less than arr[{i}]={arr[i]}!");
+                if (arr[i - 1] > arr[i])
+                    throw new Exception($"arr[{i - 1}]={arr[i - 1]} is greater than arr[{i}]={arr[i]}!");
             }
         }
 
