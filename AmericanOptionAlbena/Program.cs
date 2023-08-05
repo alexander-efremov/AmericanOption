@@ -77,7 +77,8 @@ namespace AmericanOptionAlbena
                     var h0 = nonuniform_h ? hs[1] : h;
                     eta_j[l] = rho_j[l] + (u_curr[1] - u_0j) / h0;
                     if (print)
-                        Console.WriteLine($"l = {l:G10} j = {j:G10} tau {tau} rho_j_l {rho_j[l]:N10} alpha_j {result.alpha_j:N5} u[1] {u_curr[1]:G10} u[0] {u_curr[0]:G10} eta_j_l = {eta_j[l]:G10} u[N] = {u_curr[N]:G10}");
+                        Console.WriteLine(
+                            $"l = {l:G10} j = {j:G10} tau {tau} rho_j_l {rho_j[l]:N10} alpha_j {result.alpha_j:N5} u[1] {u_curr[1]:G10} u[0] {u_curr[0]:G10} eta_j_l = {eta_j[l]:G10} u[N] = {u_curr[N]:G10}");
 
                     if (Math.Abs(eta_j[l]) <= Tol)
                     {
@@ -97,11 +98,20 @@ namespace AmericanOptionAlbena
             }
 
             var chartName = $"{nameof(s0)}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}";
-            PrintS0($"{GetPrefix('1', nonuniform_tau, nonuniform_h)}_{nameof(s0)}_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}.dat", chartName, s0, tau0, taus, nonuniform_tau);
-            CheckS0R(s0);
-            s0 = s0.Reverse().ToArray();
-            PrintS0($"{GetPrefix('2', nonuniform_tau, nonuniform_h)}_s0_T-t_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}.dat", chartName, s0, tau0, taus, nonuniform_tau);
-            CheckS0(s0);
+            if (nonuniform_tau)
+            {
+                CheckS0R(s0);
+                PrintS0($"{GetPrefix('1', nonuniform_tau, nonuniform_h)}_{nameof(s0)}_t_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}.dat", chartName, s0, taus, false);
+                PrintS0($"{GetPrefix('2', nonuniform_tau, nonuniform_h)}_{nameof(s0)}_T-t_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}.dat", chartName, s0, taus, true);
+            }
+            else
+            {
+                PrintS0($"{GetPrefix('1', nonuniform_tau, nonuniform_h)}_{nameof(s0)}_t_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}.dat", chartName, s0, tau0, M + 1);
+                CheckS0R(s0);
+                s0 = s0.Reverse().ToArray();
+                PrintS0($"{GetPrefix('2', nonuniform_tau, nonuniform_h)}_{nameof(s0)}_T-t_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}.dat", chartName, s0, tau0, M + 1);
+                CheckS0(s0);
+            }
         }
 
         private static string GetPrefix(char c, bool tau, bool h)
@@ -371,7 +381,7 @@ namespace AmericanOptionAlbena
             Console.WriteLine("==");
         }
 
-        private static void PrintS0(string name, string chartName, double[] arr, double in_tau, double[] in_taus, bool nonUniformTau)
+        private static void PrintS0(string name, string chartName, double[] arr, double in_tau, int len)
         {
             using var writer = new StreamWriter(name!, false);
             writer.WriteLine("TITLE = 'DEM DATA | DEM DATA | DEM DATA | DEM DATA');");
@@ -379,10 +389,46 @@ namespace AmericanOptionAlbena
             writer.WriteLine($"ZONE T='{chartName}'");
             var lines = new List<string>();
             var t = 0d;
-            for (var k = 0; k < in_taus.Length; k++)
+            for (var k = 0; k < len; k++)
             {
                 lines.Add($"{arr[k]:e16} {t:e16}");
-                t += nonUniformTau ? in_taus[k] : in_tau;
+                t += in_tau;
+            }
+
+            var sb = new StringBuilder();
+            foreach (var line in lines)
+                sb.AppendLine(line);
+            var i = Math.Min(arr.Length - 1, lines.Count);
+            writer.WriteLine($"I={i} K={1} ZONETYPE=Ordered");
+            writer.WriteLine("DATAPACKING=POINT\nDT=(DOUBLE DOUBLE)");
+            writer.WriteLine(sb.ToString());
+        }
+
+        private static void PrintS0(string name, string chartName, double[] arr, double[] in_taus, bool reverse)
+        {
+            using var writer = new StreamWriter(name!, false);
+            writer.WriteLine("TITLE = 'DEM DATA | DEM DATA | DEM DATA | DEM DATA');");
+            writer.WriteLine("VARIABLES = S0 t");
+            writer.WriteLine($"ZONE T='{chartName}'");
+            var lines = new List<string>();
+            if (reverse)
+            {
+                // ReSharper disable once UseIndexFromEndExpression
+                var t = 0d;
+                for (var k = in_taus.Length - 1; k >= 0; k--)
+                {
+                    t += in_taus[k];
+                    lines.Add($"{arr[k]:e16} {t:e16}");
+                }
+            }
+            else
+            {
+                var t = 0d;
+                for (var k = 0; k < in_taus.Length; k++)
+                {
+                    lines.Add($"{arr[k]:e16} {t:e16}");
+                    t += in_taus[k];
+                }
             }
 
             var sb = new StringBuilder();
@@ -401,8 +447,7 @@ namespace AmericanOptionAlbena
                 res[j - 1] = gt2(j * tau0, alpha) - gt2((j - 1) * tau0, alpha);
             if (!validate)
                 return res;
-            var sum = res.Sum();
-            if (sum > T)
+            if (res.Sum() > T)
                 throw new InvalidOperationException("Sum of time steps greater than T");
             return res;
         }
