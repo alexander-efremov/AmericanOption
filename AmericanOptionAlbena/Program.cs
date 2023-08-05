@@ -43,7 +43,7 @@ namespace AmericanOptionAlbena
         private const bool print = true; // the parameter which allows enable/disable printing of the results
 
         private static readonly bool nonuniform_h = false; // the parameter which allows enable/disable condensed meshes
-        private static readonly bool nonuniform_tau = false; // the parameter which allows enable/disable condensed meshes
+        private static readonly bool nonuniform_tau = true; // the parameter which allows enable/disable condensed meshes
 
         private static readonly double[] taus = GetTaus();
         private static readonly double[] hs = GetHs();
@@ -77,8 +77,7 @@ namespace AmericanOptionAlbena
                     var h0 = nonuniform_h ? hs[1] : h;
                     eta_j[l] = rho_j[l] + (u_curr[1] - u_0j) / h0;
                     if (print)
-                        Console.WriteLine(
-                            $"l = {l:G10} j = {j:G10} tau {tau} rho_j_l {rho_j[l]:N10} alpha_j {result.alpha_j:N5} u[1] {u_curr[1]:G10} u[0] {u_curr[0]:G10} eta_j_l = {eta_j[l]:G10} u[N] = {u_curr[N]:G10}");
+                        Console.WriteLine($"l = {l:G10} j = {j:G10} tau {tau} rho_j_l {rho_j[l]:N10} alpha_j {result.alpha_j:N5} u[1] {u_curr[1]:G10} u[0] {u_curr[0]:G10} eta_j_l = {eta_j[l]:G10} u[N] = {u_curr[N]:G10}");
 
                     if (Math.Abs(eta_j[l]) <= Tol)
                     {
@@ -98,21 +97,21 @@ namespace AmericanOptionAlbena
             }
 
             var chartName = $"{nameof(s0)}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}";
-            PrintS0($"{GetPrefix('1')}_{nameof(s0)}_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}.dat", chartName, s0, tau0, taus, nonuniform_tau);
+            PrintS0($"{GetPrefix('1', nonuniform_tau, nonuniform_h)}_{nameof(s0)}_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}.dat", chartName, s0, tau0, taus, nonuniform_tau);
             CheckS0R(s0);
             s0 = s0.Reverse().ToArray();
-            PrintS0($"{GetPrefix('2')}_s0_T-t_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}.dat", chartName, s0, tau0, taus, nonuniform_tau);
+            PrintS0($"{GetPrefix('2', nonuniform_tau, nonuniform_h)}_s0_T-t_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}.dat", chartName, s0, tau0, taus, nonuniform_tau);
             CheckS0(s0);
         }
 
-        private static string GetPrefix(char c) => nonuniform_h switch
+        private static string GetPrefix(char c, bool tau, bool h)
         {
-            false when !nonuniform_tau => new string(c, 1),
-            true when !nonuniform_tau => new string(c, 2),
-            false when nonuniform_tau => new string(c, 3),
-            true when nonuniform_tau => new string(c, 4),
-            _ => string.Empty
-        };
+            if (!h && !tau)
+                return new string(c, 1);
+            if (h && !tau)
+                return new string(c, 2);
+            return !h ? new string(c, 3) : new string(c, 4);
+        }
 
         private static (double[] u_curr, double alpha_j) Solve(int l, int j, double[] u_prev, double[] rho_j, double[] s0, double[] a, double[] lambda, double in_tau, double u_0j)
         {
@@ -418,16 +417,14 @@ namespace AmericanOptionAlbena
 
         private static void CheckNaN(double val)
         {
-            if (!double.IsNaN(val))
-                return;
+            if (!double.IsNaN(val)) return;
             Console.Out.Flush();
             throw new Exception("rho is NaN!");
         }
 
         private static void CheckS0R(double[] arr)
         {
-            if (Math.Abs(arr[0] - K) > double.Epsilon)
-                throw new Exception($"arr[0] is not {K}!");
+            if (Math.Abs(arr[0] - K) > double.Epsilon) throw new Exception($"arr[0] is not {K}!");
             for (var i = 1; i < arr.Length; i++)
             {
                 if (Math.Abs(arr[i - 1]) < Math.Abs(arr[i]))
