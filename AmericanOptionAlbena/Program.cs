@@ -45,7 +45,7 @@ namespace AmericanOptionAlbena
         private static readonly bool nonuniform_h = false; // the parameter which allows enable/disable condensed meshes
         private static readonly bool nonuniform_tau = true; // the parameter which allows enable/disable condensed meshes
 
-        private static readonly double[] taus = GetTaus();
+        private static readonly IReadOnlyList<double> taus = GetTaus();
         private static readonly double[] hs = GetHs();
 
         public static void Main()
@@ -404,7 +404,7 @@ namespace AmericanOptionAlbena
             writer.WriteLine(sb.ToString());
         }
 
-        private static void PrintS0(string name, string chartName, double[] arr, double[] in_taus, bool reverse)
+        private static void PrintS0(string name, string chartName, double[] arr, IReadOnlyList<double> in_taus, bool reverse)
         {
             using var writer = new StreamWriter(name!, false);
             writer.WriteLine("TITLE = 'DEM DATA | DEM DATA | DEM DATA | DEM DATA');");
@@ -415,16 +415,16 @@ namespace AmericanOptionAlbena
             {
                 // ReSharper disable once UseIndexFromEndExpression
                 var t = 0d;
-                for (var k = in_taus.Length - 1; k >= 0; k--)
+                for (var k = in_taus.Count - 1; k >= 0; k--)
                 {
-                    t += in_taus[k];
                     lines.Add($"{arr[k]:e16} {t:e16}");
+                    t += in_taus[k];
                 }
             }
             else
             {
                 var t = 0d;
-                for (var k = 0; k < in_taus.Length; k++)
+                for (var k = 0; k < in_taus.Count; k++)
                 {
                     lines.Add($"{arr[k]:e16} {t:e16}");
                     t += in_taus[k];
@@ -440,11 +440,18 @@ namespace AmericanOptionAlbena
             writer.WriteLine(sb.ToString());
         }
 
-        private static double[] GetTaus()
+        private static IReadOnlyList<double> GetTaus()
         {
-            var res = new double[M + 1];
-            for (var j = 1; j < res.Length; j++)
-                res[j - 1] = gt2(j * tau0, alpha) - gt2((j - 1) * tau0, alpha);
+            var res = new List<double>();
+            var t = 0d;
+            var j = 1;
+            while (t < T)
+            {
+                res.Add(gt2(j * tau0, alpha) - gt2((j - 1) * tau0, alpha));
+                t += res[j - 1];
+                j++;
+            }
+
             var sum = res.Sum();
             if (sum > T)
                 throw new InvalidOperationException($"Sum of time steps {sum} greater than T {T}");
