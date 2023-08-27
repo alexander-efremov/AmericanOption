@@ -440,15 +440,14 @@ namespace AmericanOptionAlbena
             writer.WriteLine(sb.ToString());
         }
 
-        private static double[] GetTaus(bool validate = true)
+        private static double[] GetTaus()
         {
             var res = new double[M + 1];
             for (var j = 1; j < res.Length; j++)
                 res[j - 1] = gt2(j * tau0, alpha) - gt2((j - 1) * tau0, alpha);
-            if (!validate)
-                return res;
-            if (res.Sum() > T)
-                throw new InvalidOperationException("Sum of time steps greater than T");
+            var sum = res.Sum();
+            if (sum > T)
+                throw new InvalidOperationException($"Sum of time steps {sum} greater than T {T}");
             return res;
         }
 
