@@ -61,7 +61,7 @@ namespace AmericanOptionAlbena
             s0[0] = K;
             a[0] = (2d * r - 2d * q - sigma2 + 2d * 0d) / sigma2;
             lambda[0] = Math.Sqrt(a[0] * a[0] - 4d * b);
-            for (var j = 1; j <= M; j++)
+            for (var j = 1; j <= (nonuniform_tau ? taus.Count : M); j++)
             {
                 var tau = nonuniform_tau ? taus[j - 1] : tau0;
                 var eta_j = new double[l_max_iterations];
@@ -453,7 +453,7 @@ namespace AmericanOptionAlbena
             }
 
             var sum = res.Sum();
-            if (sum > T)
+            if (sum > T && sum - T > res.Last())
                 throw new InvalidOperationException($"Sum of time steps {sum} greater than T {T}");
             return res;
         }
