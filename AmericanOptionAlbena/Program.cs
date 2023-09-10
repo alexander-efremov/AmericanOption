@@ -138,7 +138,7 @@ namespace AmericanOptionAlbena
             {
                 var tau_j_32 = nonuniform_tau ? taus[j - 2] : tau0;
                 var tau_j_12 = nonuniform_tau ? taus[j - 1] : tau0;
-                var val = 2d * ((s0[j - 1] - s0[j - 2]) / tau_j_32 - (rho_j[l] - s0[j - 1]) / tau_j_12);
+                var val = 2d * ((s0[j - 1] - s0[j - 2]) / (tau_j_32 * s0[j - 1]) - (rho_j[l] - s0[j - 1]) / (tau_j_12 * rho_j[l]));
                 nu_j = 2d / (lambda[j - 1] + lambda[j] + val / sigma2);
             }
 
