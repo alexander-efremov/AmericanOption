@@ -102,9 +102,10 @@ namespace AmericanOptionAlbena
             }
 
             var s0 = GetS0(s0_dash);
-            S0DashDirectTime($"{GetPrefix(nonuniform_tau, nonuniform_h)}__{nameof(s0_dash)}_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}.dat", s0_dash, tau0, taus,
+            S0DashDirectTime($"{GetPrefix(nonuniform_tau, nonuniform_h)}_{nameof(s0_dash)}_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}.dat", s0_dash, tau0, taus,
                 nonuniform_tau);
-            S0ReversedTime($"{GetPrefix(nonuniform_tau, nonuniform_h)}_s0_T-t_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}.dat", s0, T, tau0, taus, nonuniform_tau,
+            var chartName = $"{nameof(s0)}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}";
+            S0ReversedTime($"{GetPrefix(nonuniform_tau, nonuniform_h)}_s0_T-t_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}.dat", chartName, s0, T, tau0, taus, nonuniform_tau,
                 nonuniform_h);
             CheckS0Dash(s0_dash);
             CheckS0(s0);
@@ -423,12 +424,12 @@ namespace AmericanOptionAlbena
             writer.WriteLine(sb.ToString());
         }
 
-        private static void S0ReversedTime(string name, double[] arr, double T, double in_tau, double[] in_taus, bool nonUniformTau, bool nonUniformH) // значения S0 после обратного преобразования
+        private static void S0ReversedTime(string name, string chartName, double[] arr, double T, double in_tau, double[] in_taus, bool nonUniformTau, bool nonUniformH) // значения S0 после обратного преобразования
         {
             using var writer = new StreamWriter(name!, false);
             writer.WriteLine("TITLE = 'DEM DATA | DEM DATA | DEM DATA | DEM DATA');");
             writer.WriteLine("VARIABLES = S0 t");
-            writer.WriteLine($"ZONE T='S0_{(nonUniformH ? "nonuniform_h" : "uniform_h")}_{(nonUniformTau ? "nonuniform_tau" : "uniform_tau")}'");
+            writer.WriteLine($"ZONE T='{chartName}'");
             var t = T;
             var s = new StringBuilder();
             int I;
