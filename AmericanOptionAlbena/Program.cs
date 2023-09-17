@@ -102,8 +102,10 @@ namespace AmericanOptionAlbena
             }
 
             var s0 = GetS0(s0_dash);
-            S0DashDirectTime($"{(nonuniform_h ? "2" : "22")}_{nameof(s0_dash)}_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}.dat", s0_dash, tau0, taus, nonuniform_tau);
-            S0ReversedTime($"{(nonuniform_h ? "3" : "33")}_s0_T-t_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}.dat", s0, T, tau0, taus, nonuniform_tau, nonuniform_h);
+            S0DashDirectTime($"{GetPrefix(nonuniform_tau, nonuniform_h)}__{nameof(s0_dash)}_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}.dat", s0_dash, tau0, taus,
+                nonuniform_tau);
+            S0ReversedTime($"{GetPrefix(nonuniform_tau, nonuniform_h)}_s0_T-t_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}.dat", s0, T, tau0, taus, nonuniform_tau,
+                nonuniform_h);
             CheckS0Dash(s0_dash);
             CheckS0(s0);
         }
@@ -284,6 +286,15 @@ namespace AmericanOptionAlbena
             // if (j == 1 && l < 3)
             //     Utils.PrintToFile($"A_{j}_{l}.txt", a0, b0, c0);
             return (u, alpha_j);
+        }
+
+        private static string GetPrefix(bool tau, bool h)
+        {
+            if (!h && !tau)
+                return new string('1', 1);
+            if (h && !tau)
+                return new string('2', 2);
+            return !h ? new string('3', 3) : new string('4', 4);
         }
 
         private static double gh1(double x, double in_beta)
