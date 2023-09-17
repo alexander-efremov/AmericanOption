@@ -23,8 +23,8 @@ namespace AmericanOptionAlbena
         private const double T0 = 0d; // the start time
         private const double Tn = 1d; // the finish time
         private const double T = Tn - T0; // time interval
-        private const double sigma2 = sigma * sigma; // the squared sigma
         private const double sigma = 0.25d; // the sigma = volatility
+        private const double sigma2 = sigma * sigma; // the squared sigma
         private const double r = 0.1d; // the risk-free rate
         private const double K = 5d; // the strike price
         private const double q = 0.05d; // the dividend rate
