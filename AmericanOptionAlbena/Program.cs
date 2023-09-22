@@ -24,11 +24,11 @@ namespace AmericanOptionAlbena
         private const double T0 = 0d; // the start time
         private const double Tn = 1d; // the finish time
         private const double T = Tn - T0; // time interval
-        private const double sigma = 0.25d; // the sigma = volatility
+        private const double sigma = 0.3d; // the sigma = volatility
         private const double sigma2 = sigma * sigma; // the squared sigma
         private const double r = 0.1d; // the risk-free rate
-        private const double K = 5d; // the strike price
-        private const double q = 0.05d; // the dividend rate
+        private const double K = 100d; // the strike price
+        private const double q = 0d; // the dividend rate
         private const int N = 10000; // the number of space intervals
         private const int N1 = N + 1; // the number of points
         private const double b = -2d * r / sigma2;
@@ -43,7 +43,7 @@ namespace AmericanOptionAlbena
         private const bool print = true; // the parameter which allows enable/disable printing of the results
 
         private static readonly bool nonuniform_h = false; // the parameter which allows enable/disable condensed meshes
-        private static readonly bool nonuniform_tau = true; // the parameter which allows enable/disable condensed meshes
+        private static readonly bool nonuniform_tau = false; // the parameter which allows enable/disable condensed meshes
 
         private static readonly IReadOnlyList<double> taus = GetTaus();
         private static readonly double[] hs = GetHs();
@@ -101,15 +101,15 @@ namespace AmericanOptionAlbena
             if (nonuniform_tau)
             {
                 CheckS0R(s0);
-                PrintS0($"{GetPrefix('1', nonuniform_tau, nonuniform_h)}_{nameof(s0)}_t_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}.dat", chartName, s0, taus, false);
-                PrintS0($"{GetPrefix('2', nonuniform_tau, nonuniform_h)}_{nameof(s0)}_T-t_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}.dat", chartName, s0, taus, true);
+                PrintS0($"{GetPrefix('1', nonuniform_tau, nonuniform_h)}_{nameof(s0)}_t_K={K}_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}.dat", chartName, s0, taus, false);
+                PrintS0($"{GetPrefix('2', nonuniform_tau, nonuniform_h)}_{nameof(s0)}_T-t_K={K}_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}.dat", chartName, s0, taus, true);
             }
             else
             {
-                PrintS0($"{GetPrefix('1', nonuniform_tau, nonuniform_h)}_{nameof(s0)}_t_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}.dat", chartName, s0, tau0, M + 1);
+                PrintS0($"{GetPrefix('1', nonuniform_tau, nonuniform_h)}_{nameof(s0)}_t_K={K}_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}.dat", chartName, s0, tau0, M + 1);
                 CheckS0R(s0);
                 s0 = s0.Reverse().ToArray();
-                PrintS0($"{GetPrefix('2', nonuniform_tau, nonuniform_h)}_{nameof(s0)}_T-t_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}.dat", chartName, s0, tau0, M + 1);
+                PrintS0($"{GetPrefix('2', nonuniform_tau, nonuniform_h)}_{nameof(s0)}_T-t_K={K}_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}.dat", chartName, s0, tau0, M + 1);
                 CheckS0(s0);
             }
         }
