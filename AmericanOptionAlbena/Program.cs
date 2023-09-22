@@ -23,11 +23,11 @@ namespace AmericanOptionAlbena
         private const double T0 = 0d; // the start time
         private const double Tn = 1d; // the finish time
         private const double T = Tn - T0; // time interval
-        private const double sigma = 0.25d; // the sigma = volatility
+        private const double sigma = 0.3d; // the sigma = volatility
         private const double sigma2 = sigma * sigma; // the squared sigma
         private const double r = 0.1d; // the risk-free rate
-        private const double K = 5d; // the strike price
-        private const double q = 0.05d; // the dividend rate
+        private const double K = 100d; // the strike price
+        private const double q = 0d; // the dividend rate
         private const int N = 10000; // the number of space intervals
         private const int N1 = N + 1; // the number of points
         private const double b = -2d * r / sigma2;
@@ -102,10 +102,10 @@ namespace AmericanOptionAlbena
             }
 
             var s0 = GetS0(s0_dash);
-            S0DashDirectTime($"{GetPrefix(nonuniform_tau, nonuniform_h)}_{nameof(s0_dash)}_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}.dat", s0_dash, tau0, taus,
+            S0DashDirectTime($"{GetPrefix(nonuniform_tau, nonuniform_h)}_{nameof(s0_dash)}_K={K}_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}.dat", s0_dash, tau0, taus,
                 nonuniform_tau);
             var chartName = $"{nameof(s0)}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}";
-            S0ReversedTime($"{GetPrefix(nonuniform_tau, nonuniform_h)}_s0_T-t_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}.dat", chartName, s0, T, tau0, taus, nonuniform_tau,
+            S0ReversedTime($"{GetPrefix(nonuniform_tau, nonuniform_h)}_s0_T-t_K={K}_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}.dat", chartName, s0, T, tau0, taus, nonuniform_tau,
                 nonuniform_h);
             CheckS0Dash(s0_dash);
             CheckS0(s0);
