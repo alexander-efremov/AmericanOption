@@ -98,7 +98,7 @@ namespace AmericanOptionAlbena
                 nonuniform_tau);
             var chartName = $"{nameof(s0)}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}";
             S0ReversedTime($"{GetPrefix(nonuniform_tau, nonuniform_h)}_s0_T-t_K={K}_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}.dat", chartName, s0, T, tau0, taus,
-                nonuniform_tau, nonuniform_h);
+                nonuniform_tau);
             CheckS0Dash(s0_dash);
             CheckS0(s0);
         }
@@ -109,6 +109,19 @@ namespace AmericanOptionAlbena
             var s_approx = (rho_j[l] - s0_dash[j - 1]) / in_tau;
             a[j] = (2d * r - 2d * q - sigma2 + 2d * s_approx) / sigma2;
             lambda[j] = Math.Sqrt(a[j] * a[j] - 4d * b);
+
+            var alpha_j = r - q - sigma2 / 2d + s_approx;
+            var f = new double[N1];
+            var h_12 = nonuniform_h ? hs[1] : h;
+            var h_32 = nonuniform_h ? hs[2] : h;
+            if (alpha_j >= 0d)
+                f[0] = u_prev[0] / in_tau + (u_0j * sigma2) / (h_12 * (h_12 + h_32));
+            else
+                f[0] = u_prev[0] / in_tau + (sigma2 / (h_12 * (h_12 + h_32)) - alpha_j / h_12) * u_0j;
+            for (var i = 1; i < N1 - 1; i++)
+                f[i] = u_prev[i] / in_tau;
+
+            // finite element
             double nu_j;
             if (j == 1)
             {
@@ -122,19 +135,6 @@ namespace AmericanOptionAlbena
                 nu_j = 2d / (lambda[j - 1] + lambda[j] + val / sigma2);
             }
 
-            var alpha_j = r - q - sigma2 / 2d + s_approx;
-            // Console.WriteLine(alpha_j);
-            // Debug.Assert(alpha_j >= 0);
-
-            var f = new double[N1];
-            var h_12 = nonuniform_h ? hs[1] : h;
-            var h_32 = nonuniform_h ? hs[2] : h;
-            if (alpha_j >= 0d)
-                f[0] = u_prev[0] / in_tau + (u_0j * sigma2) / (h_12 * (h_12 + h_32));
-            else
-                f[0] = u_prev[0] / in_tau + (sigma2 / (h_12 * (h_12 + h_32)) - alpha_j / h_12) * u_0j;
-            for (var i = 1; i < N1 - 1; i++)
-                f[i] = u_prev[i] / in_tau;
             var h_Nm12 = nonuniform_h ? hs[N] : h;
             f[N1 - 1] = (0.5d + nu_j / h_Nm12) * (u_prev[N1 - 1] / in_tau);
 
@@ -417,8 +417,7 @@ namespace AmericanOptionAlbena
             writer.WriteLine(sb.ToString());
         }
 
-        private static void S0ReversedTime(string name, string chartName, double[] arr, double T, double in_tau, double[] in_taus, bool nonUniformTau,
-            bool nonUniformH) // значения S0 после обратного преобразования
+        private static void S0ReversedTime(string name, string chartName, double[] arr, double T, double in_tau, double[] in_taus, bool nonUniformTau) // значения S0 после обратного преобразования
         {
             using var writer = new StreamWriter(name!, false);
             writer.WriteLine("TITLE = 'DEM DATA | DEM DATA | DEM DATA | DEM DATA');");
@@ -455,14 +454,6 @@ namespace AmericanOptionAlbena
             writer.WriteLine($"I={I} K={1} ZONETYPE=Ordered");
             writer.WriteLine("DATAPACKING=POINT\nDT=(DOUBLE DOUBLE)");
             writer.WriteLine(s);
-        }
-
-        private static void WriteVectorToFile(string path, IEnumerable<double> arr)
-        {
-            var builder = new StringBuilder();
-            foreach (var a in arr!)
-                builder.AppendLine(a.ToString("e10"));
-            File.WriteAllText(path, builder.ToString());
         }
 
         private static double[] GetTaus()
