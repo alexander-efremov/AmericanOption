@@ -38,7 +38,6 @@ namespace AmericanOptionAlbena
         private const double tau0 = T / M; // the time step
         private const double alpha = 2d; // condense parameter for t
         private const double beta = 2d; // condense parameter for h
-        // private const double beta_mu = 0.5d; // the parameter to update mu
 
         private const bool print = true; // the parameter which allows enable/disable printing of the results
 
@@ -50,14 +49,6 @@ namespace AmericanOptionAlbena
 
         public static void Main()
         {
-            // var s = string.Empty;
-            // foreach (var d in hs)
-            //     s += d + " ";
-            //
-            // Console.WriteLine(s);
-            // File.WriteAllText("hs.txt", s);
-            // Console.WriteLine();
-
             if (File.Exists("log.txt"))
                 File.Delete("log.txt");
             Debug.Assert(q < r);
@@ -85,7 +76,8 @@ namespace AmericanOptionAlbena
                     var h0 = nonuniform_h ? hs[1] : h;
                     eta_j[l] = K * Math.Exp(rho_j[l]) + (u_curr[0] - u_0j) / h0;
                     if (print)
-                        Console.WriteLine($"l = {l:G10} j = {j:G10} tau {tau} rho_j_l {rho_j[l]:N10} alpha_j {result.alpha_j:N5} u[1] {u_curr[1]:G10} u[0] {u_curr[0]:G10} eta_j_l = {eta_j[l]:G10} u[N] = {u_curr[N]:G10}");
+                        Console.WriteLine(
+                            $"l = {l:G10} j = {j:G10} tau {tau} rho_j_l {rho_j[l]:N10} alpha_j {result.alpha_j:N5} u[1] {u_curr[1]:G10} u[0] {u_curr[0]:G10} eta_j_l = {eta_j[l]:G10} u[N] = {u_curr[N]:G10}");
 
                     if (Math.Abs(eta_j[l]) <= Tol)
                     {
@@ -105,8 +97,8 @@ namespace AmericanOptionAlbena
             S0DashDirectTime($"{GetPrefix(nonuniform_tau, nonuniform_h)}_{nameof(s0_dash)}_K={K}_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}.dat", s0_dash, tau0, taus,
                 nonuniform_tau);
             var chartName = $"{nameof(s0)}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}";
-            S0ReversedTime($"{GetPrefix(nonuniform_tau, nonuniform_h)}_s0_T-t_K={K}_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}.dat", chartName, s0, T, tau0, taus, nonuniform_tau,
-                nonuniform_h);
+            S0ReversedTime($"{GetPrefix(nonuniform_tau, nonuniform_h)}_s0_T-t_K={K}_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}.dat", chartName, s0, T, tau0, taus,
+                nonuniform_tau, nonuniform_h);
             CheckS0Dash(s0_dash);
             CheckS0(s0);
         }
@@ -151,6 +143,7 @@ namespace AmericanOptionAlbena
             var c0 = new double[N1]; // c - up to main diagonal (indexed as [0;n-2])
             a0[0] = 0d;
             for (var i = 1; i < N1 - 1; ++i)
+            {
                 if (nonuniform_h)
                 {
                     if (alpha_j >= 0d)
@@ -165,6 +158,7 @@ namespace AmericanOptionAlbena
                     else
                         a0[i] = -sigma2 / (2d * h * h) + alpha_j / h;
                 }
+            }
 
             if (nonuniform_h)
             {
@@ -197,6 +191,7 @@ namespace AmericanOptionAlbena
             }
 
             for (var i = 1; i < N1 - 1; ++i)
+            {
                 if (nonuniform_h)
                 {
                     if (alpha_j >= 0d)
@@ -211,6 +206,7 @@ namespace AmericanOptionAlbena
                     else
                         b0[i] = sigma2 / (h * h) + (r + 1d / in_tau) - alpha_j / h;
                 }
+            }
 
             if (nonuniform_h)
             {
@@ -263,6 +259,7 @@ namespace AmericanOptionAlbena
             }
 
             for (var i = 1; i < N1 - 2; ++i)
+            {
                 if (nonuniform_h)
                 {
                     if (alpha_j >= 0d)
@@ -277,15 +274,11 @@ namespace AmericanOptionAlbena
                     else
                         c0[i] = -sigma2 / (2d * h * h);
                 }
+            }
 
             c0[N1 - 2] = 0d;
 
-            // if (j == 1 && l < 3)
-            // Utils.PrintMatrix1(N1, a0, b0, c0, $"A_{j}.txt");
-            // throw new Exception("");
             var u = SolveByTridiagonalMatrixAlgorithm(j, N1, a0, b0, c0, f);
-            // if (j == 1 && l < 3)
-            //     Utils.PrintToFile($"A_{j}_{l}.txt", a0, b0, c0);
             return (u, alpha_j);
         }
 
@@ -424,7 +417,8 @@ namespace AmericanOptionAlbena
             writer.WriteLine(sb.ToString());
         }
 
-        private static void S0ReversedTime(string name, string chartName, double[] arr, double T, double in_tau, double[] in_taus, bool nonUniformTau, bool nonUniformH) // значения S0 после обратного преобразования
+        private static void S0ReversedTime(string name, string chartName, double[] arr, double T, double in_tau, double[] in_taus, bool nonUniformTau,
+            bool nonUniformH) // значения S0 после обратного преобразования
         {
             using var writer = new StreamWriter(name!, false);
             writer.WriteLine("TITLE = 'DEM DATA | DEM DATA | DEM DATA | DEM DATA');");
