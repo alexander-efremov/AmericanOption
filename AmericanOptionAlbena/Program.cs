@@ -44,6 +44,8 @@ namespace AmericanOptionAlbena
         private static readonly bool nonuniform_h = false; // the parameter which allows enable/disable condensed meshes
         private static readonly bool nonuniform_tau = false; // the parameter which allows enable/disable condensed meshes
 
+        private static readonly bool enable_finite_element = true; // the parameter which allows enable/disable the finite element at x_N
+
         private static readonly double[] taus = GetTaus();
         private static readonly double[] hs = GetHs();
 
@@ -94,11 +96,12 @@ namespace AmericanOptionAlbena
             }
 
             var s0 = GetS0(s0_dash);
-            S0DashDirectTime($"{GetPrefix(nonuniform_tau, nonuniform_h)}_{nameof(s0_dash)}_K={K}_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}.dat", s0_dash, tau0, taus,
-                nonuniform_tau);
-            var chartName = $"{nameof(s0)}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}";
-            S0ReversedTime($"{GetPrefix(nonuniform_tau, nonuniform_h)}_s0_T-t_K={K}_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}.dat", chartName, s0, T, tau0, taus,
-                nonuniform_tau);
+            S0DashDirectTime(
+                $"{GetPrefix(nonuniform_tau, nonuniform_h)}_{nameof(s0_dash)}_K={K}_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}_finite_elem_{enable_finite_element}.dat",
+                s0_dash, tau0, taus, nonuniform_tau);
+            var chartName = $"{nameof(s0)}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}_finite_elem_{enable_finite_element}";
+            S0ReversedTime($"{GetPrefix(nonuniform_tau, nonuniform_h)}_s0_T-t_K={K}_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}_finite_elem_{enable_finite_element}.dat",
+                chartName, s0, T, tau0, taus, nonuniform_tau);
             CheckS0Dash(s0_dash);
             CheckS0(s0);
         }
@@ -121,22 +124,21 @@ namespace AmericanOptionAlbena
             for (var i = 1; i < N1 - 1; i++)
                 f[i] = u_prev[i] / in_tau;
 
-            // finite element
-            double nu_j;
-            if (j == 1)
+            if (enable_finite_element)
             {
-                nu_j = 0d; // corner case
+                var nu_j = 0d;
+                if (j > 1)
+                {
+                    var tau_j_32 = nonuniform_tau ? taus[j - 2] : tau0;
+                    var tau_j_12 = nonuniform_tau ? taus[j - 1] : tau0;
+                    var val = 2d * ((s0_dash[j - 1] - s0_dash[j - 2]) / tau_j_32 - (rho_j[l] - s0_dash[j - 1]) / tau_j_12);
+                    nu_j = 2d / (lambda[j - 1] + lambda[j] + val / sigma2);
+                }
+
+                f[N1 - 1] = (0.5d + nu_j / (nonuniform_h ? hs[N] : h)) * (u_prev[N1 - 1] / in_tau);
             }
             else
-            {
-                var tau_j_32 = nonuniform_tau ? taus[j - 2] : tau0;
-                var tau_j_12 = nonuniform_tau ? taus[j - 1] : tau0;
-                var val = 2d * ((s0_dash[j - 1] - s0_dash[j - 2]) / tau_j_32 - (rho_j[l] - s0_dash[j - 1]) / tau_j_12);
-                nu_j = 2d / (lambda[j - 1] + lambda[j] + val / sigma2);
-            }
-
-            var h_Nm12 = nonuniform_h ? hs[N] : h;
-            f[N1 - 1] = (0.5d + nu_j / h_Nm12) * (u_prev[N1 - 1] / in_tau);
+                f[N1 - 1] = 0d;
 
             var a0 = new double[N1]; // a - below main diagonal (indexed as [1;n-1])
             var b0 = new double[N1]; // b - main diagonal of matrix (indexed as [0;n-1])
@@ -160,20 +162,25 @@ namespace AmericanOptionAlbena
                 }
             }
 
-            if (nonuniform_h)
+            if (enable_finite_element)
             {
-                if (alpha_j >= 0d)
-                    a0[N1 - 1] = -sigma2 / (2d * hs[N] * hs[N]);
+                if (nonuniform_h)
+                {
+                    if (alpha_j >= 0d)
+                        a0[N1 - 1] = -sigma2 / (2d * hs[N] * hs[N]);
+                    else
+                        a0[N1 - 1] = -sigma2 / (2d * hs[N] * hs[N]) + alpha_j / (2d * hs[N]);
+                }
                 else
-                    a0[N1 - 1] = -sigma2 / (2d * hs[N] * hs[N]) + alpha_j / (2d * hs[N]);
+                {
+                    if (alpha_j >= 0d)
+                        a0[N1 - 1] = -sigma2 / (2d * h * h);
+                    else
+                        a0[N1 - 1] = -sigma2 / (2d * h * h) + alpha_j / (2d * h);
+                }
             }
             else
-            {
-                if (alpha_j >= 0d)
-                    a0[N1 - 1] = -sigma2 / (2d * h * h);
-                else
-                    a0[N1 - 1] = -sigma2 / (2d * h * h) + alpha_j / (2d * h);
-            }
+                a0[N1 - 1] = 0d;
 
             if (nonuniform_h)
             {
@@ -208,40 +215,45 @@ namespace AmericanOptionAlbena
                 }
             }
 
-            if (nonuniform_h)
+            if (enable_finite_element)
             {
-                if (alpha_j >= 0)
+                if (nonuniform_h)
                 {
-                    var val1 = sigma2 / 2d * (1d / (hs[N] * hs[N]) + (a[j] + lambda[j]) / (2d * hs[N]));
-                    var val2 = 0.5d * (1d / in_tau + r) + 1d / (lambda[j] * in_tau * hs[N]);
-                    var val3 = alpha_j / (2d * hs[N]) * (Math.Exp(-(lambda[j] + a[j]) * hs[N] / 2d) - 1d);
-                    b0[N1 - 1] = val1 + val2 - val3;
+                    if (alpha_j >= 0)
+                    {
+                        var val1 = sigma2 / 2d * (1d / (hs[N] * hs[N]) + (a[j] + lambda[j]) / (2d * hs[N]));
+                        var val2 = 0.5d * (1d / in_tau + r) + 1d / (lambda[j] * in_tau * hs[N]);
+                        var val3 = alpha_j / (2d * hs[N]) * (Math.Exp(-(lambda[j] + a[j]) * hs[N] / 2d) - 1d);
+                        b0[N1 - 1] = val1 + val2 - val3;
+                    }
+                    else
+                    {
+                        var val1 = sigma2 / 2d * (1d / (hs[N] * hs[N]) + (a[j] + lambda[j]) / (2d * hs[N]));
+                        var val2 = 0.5d * (1d / in_tau + r) + 1d / (lambda[j] * in_tau * hs[N]);
+                        var val3 = alpha_j / (2d * hs[N]);
+                        b0[N1 - 1] = val1 + val2 - val3;
+                    }
                 }
                 else
                 {
-                    var val1 = sigma2 / 2d * (1d / (hs[N] * hs[N]) + (a[j] + lambda[j]) / (2d * hs[N]));
-                    var val2 = 0.5d * (1d / in_tau + r) + 1d / (lambda[j] * in_tau * hs[N]);
-                    var val3 = alpha_j / (2d * hs[N]);
-                    b0[N1 - 1] = val1 + val2 - val3;
+                    if (alpha_j >= 0)
+                    {
+                        var val1 = sigma2 / 2d * (1d / (h * h) + (a[j] + lambda[j]) / (2d * h));
+                        var val2 = 0.5d * (1d / in_tau + r) + 1d / (lambda[j] * in_tau * h);
+                        var val3 = alpha_j / (2d * h) * (Math.Exp(-(lambda[j] + a[j]) * h / 2d) - 1d);
+                        b0[N1 - 1] = val1 + val2 - val3;
+                    }
+                    else
+                    {
+                        var val1 = sigma2 / 2d * (1d / (h * h) + (a[j] + lambda[j]) / (2d * h));
+                        var val2 = 0.5d * (1d / in_tau + r) + 1d / (lambda[j] * in_tau * h);
+                        var val3 = alpha_j / (2d * h);
+                        b0[N1 - 1] = val1 + val2 - val3;
+                    }
                 }
             }
             else
-            {
-                if (alpha_j >= 0)
-                {
-                    var val1 = sigma2 / 2d * (1d / (h * h) + (a[j] + lambda[j]) / (2d * h));
-                    var val2 = 0.5d * (1d / in_tau + r) + 1d / (lambda[j] * in_tau * h);
-                    var val3 = alpha_j / (2d * h) * (Math.Exp(-(lambda[j] + a[j]) * h / 2d) - 1d);
-                    b0[N1 - 1] = val1 + val2 - val3;
-                }
-                else
-                {
-                    var val1 = sigma2 / 2d * (1d / (h * h) + (a[j] + lambda[j]) / (2d * h));
-                    var val2 = 0.5d * (1d / in_tau + r) + 1d / (lambda[j] * in_tau * h);
-                    var val3 = alpha_j / (2d * h);
-                    b0[N1 - 1] = val1 + val2 - val3;
-                }
-            }
+                b0[N1 - 1] = 1d;
 
             if (nonuniform_h)
             {
@@ -260,19 +272,45 @@ namespace AmericanOptionAlbena
 
             for (var i = 1; i < N1 - 2; ++i)
             {
-                if (nonuniform_h)
+                // equation N - 1 = the [N1 - 3] index
+                if (i == N1 - 3)
                 {
-                    if (alpha_j >= 0d)
-                        c0[i] = -sigma2 / (hs[i + 2] * (hs[i + 1] + hs[i + 2])) - alpha_j / hs[i + 2];
+                    if (enable_finite_element)
+                    {
+                        if (nonuniform_h)
+                        {
+                            if (alpha_j >= 0d)
+                                c0[N1 - 3] = -sigma2 / (hs[N1 - 3 + 2] * (hs[N1 - 3 + 1] + hs[N1 - 3 + 2])) - alpha_j / hs[N1 - 3 + 2];
+                            else
+                                c0[N1 - 3] = -sigma2 / (hs[N1 - 3 + 2] * (hs[N1 - 3 + 1] + hs[N1 - 3 + 2]));
+                        }
+                        else
+                        {
+                            if (alpha_j >= 0d)
+                                c0[N1 - 3] = -sigma2 / (2d * h * h) - alpha_j / h;
+                            else
+                                c0[N1 - 3] = -sigma2 / (2d * h * h);
+                        }
+                    }
                     else
-                        c0[i] = -sigma2 / (hs[i + 2] * (hs[i + 1] + hs[i + 2]));
+                        c0[N1 - 3] = 0d;
                 }
                 else
                 {
-                    if (alpha_j >= 0d)
-                        c0[i] = -sigma2 / (2d * h * h) - alpha_j / h;
+                    if (nonuniform_h)
+                    {
+                        if (alpha_j >= 0d)
+                            c0[i] = -sigma2 / (hs[i + 2] * (hs[i + 1] + hs[i + 2])) - alpha_j / hs[i + 2];
+                        else
+                            c0[i] = -sigma2 / (hs[i + 2] * (hs[i + 1] + hs[i + 2]));
+                    }
                     else
-                        c0[i] = -sigma2 / (2d * h * h);
+                    {
+                        if (alpha_j >= 0d)
+                            c0[i] = -sigma2 / (2d * h * h) - alpha_j / h;
+                        else
+                            c0[i] = -sigma2 / (2d * h * h);
+                    }
                 }
             }
 
