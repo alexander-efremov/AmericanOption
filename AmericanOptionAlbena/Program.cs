@@ -19,7 +19,7 @@ namespace AmericanOptionAlbena
         private const double Tol = 10e-10; // eps to refine eta
         private const double eps = 1e-3; // eps to refine rho
         private const double lb = 0d; // left bound
-        private const double rb = 100d; // right bound
+        private const double rb = 1d; // right bound
         private const double T0 = 0d; // the start time
         private const double Tn = 1d; // the finish time
         private const double T = Tn - T0; // time interval
@@ -39,12 +39,12 @@ namespace AmericanOptionAlbena
         private const double alpha = 2d; // condense parameter for t
         private const double beta = 2d; // condense parameter for h
 
-        private const bool print = true; // the parameter which allows enable/disable printing of the results
+        private const bool print = false; // the parameter which allows enable/disable printing of the results
 
         private static readonly bool nonuniform_h = false; // the parameter which allows enable/disable condensed meshes
         private static readonly bool nonuniform_tau = false; // the parameter which allows enable/disable condensed meshes
 
-        private static readonly bool enable_finite_element = true; // the parameter which allows enable/disable the finite element at x_N
+        private static readonly bool enable_finite_element = false; // the parameter which allows enable/disable the finite element at x_N
 
         private static readonly double[] taus = GetTaus();
         private static readonly double[] hs = GetHs();
@@ -99,9 +99,8 @@ namespace AmericanOptionAlbena
             S0DashDirectTime(
                 $"{GetPrefix(nonuniform_tau, nonuniform_h)}_{nameof(s0_dash)}_K={K}_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}_finite_elem_{enable_finite_element}.dat",
                 s0_dash, tau0, taus, nonuniform_tau);
-            var chartName = $"{nameof(s0)}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}_finite_elem_{enable_finite_element}";
             S0ReversedTime($"{GetPrefix(nonuniform_tau, nonuniform_h)}_s0_T-t_K={K}_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}_finite_elem_{enable_finite_element}.dat",
-                chartName, s0, T, tau0, taus, nonuniform_tau);
+                $"{nameof(s0)}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}_finite_elem_{enable_finite_element}", s0, T, tau0, taus, nonuniform_tau);
             CheckS0Dash(s0_dash);
             CheckS0(s0);
         }
@@ -136,6 +135,9 @@ namespace AmericanOptionAlbena
                 }
 
                 f[N1 - 1] = (0.5d + nu_j / (nonuniform_h ? hs[N] : h)) * (u_prev[N1 - 1] / in_tau);
+                var d = f[N1 - 1];
+                if (d > 0d)
+                    Console.WriteLine(j + " " + d);
             }
             else
                 f[N1 - 1] = 0d;
