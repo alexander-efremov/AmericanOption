@@ -96,11 +96,12 @@ namespace AmericanOptionAlbena
             }
 
             var s0 = GetS0(s0_dash);
+            var chartName = $"{nameof(s0_dash)}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}_finite_elem_{enable_finite_element}_rb_{rb}";
             S0DashDirectTime(
-                $"{GetPrefix(nonuniform_tau, nonuniform_h)}_{nameof(s0_dash)}_K={K}_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}_finite_elem_{enable_finite_element}.dat",
-                s0_dash, tau0, taus, nonuniform_tau);
-            var chartName = $"{nameof(s0)}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}_finite_elem_{enable_finite_element}";
-            S0ReversedTime($"{GetPrefix(nonuniform_tau, nonuniform_h)}_s0_T-t_K={K}_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}_finite_elem_{enable_finite_element}.dat",
+                $"{GetPrefix(nonuniform_tau, nonuniform_h)}_{nameof(s0_dash)}_K={K}_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}_finite_elem_{enable_finite_element}_rb_{rb}.dat",
+                chartName, s0_dash, tau0, taus, nonuniform_tau);
+            chartName = $"{nameof(s0)}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}_finite_elem_{enable_finite_element}_rb_{rb}";
+            S0ReversedTime($"{GetPrefix(nonuniform_tau, nonuniform_h)}_s0_T-t_K={K}_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}_finite_elem_{enable_finite_element}_rb_{rb}.dat",
                 chartName, s0, T, tau0, taus, nonuniform_tau);
             CheckS0Dash(s0_dash);
             CheckS0(s0);
@@ -432,12 +433,12 @@ namespace AmericanOptionAlbena
             Console.WriteLine("==");
         }
 
-        private static void S0DashDirectTime(string name, double[] arr, double in_tau, double[] in_taus, bool nonUniformTau) // значения S0 до обратного преобразования
+        private static void S0DashDirectTime(string name, string chartName, double[] arr, double in_tau, double[] in_taus, bool nonUniformTau) // значения S0 до обратного преобразования
         {
             using var writer = new StreamWriter(name!, false);
             writer.WriteLine("TITLE = 'DEM DATA | DEM DATA | DEM DATA | DEM DATA');");
             writer.WriteLine("VARIABLES = S0_dash t");
-            writer.WriteLine("ZONE T='S0_dash'");
+            writer.WriteLine($"ZONE T='{chartName}'");
             var lines = new List<string>();
             var t = 0d;
             for (var k = 0; k < in_taus.Length; k++)
