@@ -1,5 +1,5 @@
 #!MC 1410
-$!VarSet |LFDSFN1| = '"{NAME}"'
+$!VarSet |LFDSFN1| = '{NAME}'
 $!SetStyleBase Factory
 $!GlobalPaper 
   PaperSizeInfo
@@ -43,14 +43,15 @@ $!ReadDataSet  '|LFDSFN1|'
   VarPositionList =  [1-2]
 $!RemoveVar |LFDSFN1|
 $!FrameLayout 
+  ShowBorder = No
   ShowHeader = No
   HeaderColor = Red
   XYPos
     {
-    X = 1
-    Y = 0.25
+    X = 0.2
+    Y = 0.2
     }
-  Width = 9
+  Width = 8
   Height = 8
 $!ThreeDAxis 
   AspectRatioLimit = 25
@@ -83,7 +84,7 @@ $!LineMap  [1]
     }
   Lines
     {
-    Color = Red
+    Color = Black
     }
   Symbols
     {
@@ -108,9 +109,7 @@ $!XYLineAxis
     }
   ViewportPosition
     {
-    X1 = 13
     Y1 = 10.892
-    X2 = 88
     Y2 = 87.892
     }
   ViewportTopSnapTarget = 87.8918918919
@@ -159,7 +158,7 @@ $!XYLineAxis
     RangeMin = 60
     RangeMax = 100.00239435718721381
     AutoGrid = No
-    GRSpacing = 4
+    GRSpacing = 5
     Ticks
       {
       ShowOnGridBorderMax = Yes

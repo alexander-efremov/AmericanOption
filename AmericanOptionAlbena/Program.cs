@@ -52,8 +52,8 @@ namespace AmericanOptionAlbena
         {
             // Run(false, false);
             var name1 = Run(false, false);
-            var name2 = Run(true, false);
-            var name3 = Run(false, true);
+            var name3 = Run(true, false);
+            var name2 = Run(false, true);
             var name4 = Run(true, true);
         }
 
@@ -119,7 +119,7 @@ namespace AmericanOptionAlbena
             else
                 S0ReversedTime(name + "dat", zone, s0, T, tau0, taus, refined_tau);
 
-            CreateLay("graph.lay", name + "dat", name + "lay");
+            CreateLay("graph.lay", name + "lay", name + "dat");
 
             CheckS0Dash(s0_dash);
             CheckS0(s0);
@@ -631,7 +631,7 @@ namespace AmericanOptionAlbena
             }
         }
 
-        private static void CreateLay(string layTemplate, string datFile, string output)
+        private static void CreateLay(string layTemplate, string output, string datFile)
         {
             var content = File.ReadAllText(layTemplate);
             var replacedContent = content.Replace("{NAME}", datFile);
