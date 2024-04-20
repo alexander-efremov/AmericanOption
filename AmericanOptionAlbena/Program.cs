@@ -37,7 +37,7 @@ namespace AmericanOptionAlbena
         private const int M = 1000; // the number of time intervals
         private const double tau0 = 1d / M; // the time step
         private const double alpha = 2d; // condense parameter for t
-        private const double beta = 2d; // condense parameter for h
+        private const double beta = 2.5d; // condense parameter for h
 
         private const bool print = true; // the parameter which allows to enable/disable printing of the results
         private static readonly bool enable_finite_element = true; // the parameter which allows to enable/disable the finite element at x_N
