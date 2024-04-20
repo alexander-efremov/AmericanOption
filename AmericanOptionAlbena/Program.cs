@@ -43,9 +43,6 @@ namespace AmericanOptionAlbena
         private static readonly bool enable_finite_element = true; // the parameter which allows to enable/disable the finite element at x_N
         private static readonly bool enable_new_eta = true; // the parameter which allows to enable/disable a new formula for eta
 
-        private static readonly bool nonuniform_h = false; // the parameter which allows to enable/disable condensed meshes
-        private static readonly bool nonuniform_tau = true; // the parameter which allows to enable/disable condensed meshes
-
         private static readonly bool s0_economic_style = true; // the parameter which allows to enable/disable graphs in economic style (S is Y-axis)
 
         private static readonly double[] taus = GetTaus();
@@ -53,8 +50,15 @@ namespace AmericanOptionAlbena
 
         public static void Main()
         {
-            if (File.Exists("log.txt"))
-                File.Delete("log.txt");
+            // Run(false, false);
+            Run(false, false);
+            Run(false, true);
+            Run(true, false);
+            Run(true, true);
+        }
+
+        private static void Run(bool refined_tau, bool refined_h)
+        {
             Debug.Assert(q < r);
             var u_curr = new double[N1]; // the current solution
             var u_prev = new double[N1]; // the previous solution
@@ -66,7 +70,7 @@ namespace AmericanOptionAlbena
             lambda[0] = Math.Sqrt(a[0] * a[0] - 4d * b);
             for (var j = 1; j <= M; j++)
             {
-                var tau = nonuniform_tau ? taus[j - 1] : tau0;
+                var tau = refined_tau ? taus[j - 1] : tau0;
                 var eta_j = new double[l_max_iterations];
                 var rho_j = new double[l_max_iterations];
                 rho_j[0] = s0_dash[j - 1];
@@ -75,9 +79,9 @@ namespace AmericanOptionAlbena
                 {
                     CheckNaN(rho_j[l]);
                     var u_0j = K * (1d - Math.Exp(rho_j[l]));
-                    var result = Solve(l, j, u_prev, rho_j, s0_dash, a, lambda, tau, u_0j);
+                    var result = Solve(l, j, u_prev, rho_j, s0_dash, a, lambda, tau, u_0j, refined_tau, refined_h);
                     u_curr = result.u_curr;
-                    var h0 = nonuniform_h ? hs[1] : h;
+                    var h0 = refined_h ? hs[1] : h;
                     if (enable_new_eta)
                         eta_j[l] = K * Math.Exp(rho_j[l]) * (1d + (q * h0 / sigma2) + h0 / 2d) + (u_curr[0] - u_0j) / h0 - (h0 * r * K) / sigma2;
                     else
@@ -102,24 +106,25 @@ namespace AmericanOptionAlbena
 
             var s0 = GetS0(s0_dash);
 
-            var zone = $"{nameof(s0_dash)}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}_finite_elem_{enable_finite_element}_rb_{rb}_new_eta_{enable_new_eta}_beta_{beta}";
+            var zone = $"{nameof(s0_dash)}_h_condensed_{refined_h}_tau_condensed_{refined_tau}_finite_elem_{enable_finite_element}_rb_{rb}_new_eta_{enable_new_eta}_beta_{beta}";
             var name =
-                $"{GetPrefix(nonuniform_tau, nonuniform_h)}_{nameof(s0_dash)}_K={K}_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}_finite_elem_{enable_finite_element}_rb_{rb}_new_eta_{enable_new_eta}_beta_{beta}_is_economic_{s0_economic_style}.dat";
-            S0DashDirectTime(name, zone, s0_dash, tau0, taus, nonuniform_tau);
+                $"{GetPrefix(refined_tau, refined_h)}_{nameof(s0_dash)}_K={K}_N1={N1}_T={T}_h_condensed_{refined_h}_tau_condensed_{refined_tau}_finite_elem_{enable_finite_element}_rb_{rb}_new_eta_{enable_new_eta}_beta_{beta}_is_economic_{s0_economic_style}.dat";
+            S0DashDirectTime(name, zone, s0_dash, tau0, taus, refined_tau);
 
-            zone = $"{nameof(s0)}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}_finite_elem_{enable_finite_element}_rb_{rb}_new_eta_{enable_new_eta}_beta_{beta}";
+            zone = $"{nameof(s0)}_h_condensed_{refined_h}_tau_condensed_{refined_tau}_finite_elem_{enable_finite_element}_rb_{rb}_new_eta_{enable_new_eta}_beta_{beta}";
             name =
-                $"{GetPrefix(nonuniform_tau, nonuniform_h)}_s0_T-t_K={K}_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}_finite_elem_{enable_finite_element}_rb_{rb}_new_eta_{enable_new_eta}_beta_{beta}_is_economic_{s0_economic_style}.dat";
+                $"{GetPrefix(refined_tau, refined_h)}_s0_T-t_K={K}_N1={N1}_T={T}_h_condensed_{refined_h}_tau_condensed_{refined_tau}_finite_elem_{enable_finite_element}_rb_{rb}_new_eta_{enable_new_eta}_beta_{beta}_is_economic_{s0_economic_style}.dat";
             if (s0_economic_style)
-                S0ReversedTimeE(name, zone, s0, T, tau0, taus, nonuniform_tau);
-            else 
-                S0ReversedTime(name, zone, s0, T, tau0, taus, nonuniform_tau);
+                S0ReversedTimeE(name, zone, s0, T, tau0, taus, refined_tau);
+            else
+                S0ReversedTime(name, zone, s0, T, tau0, taus, refined_tau);
 
             CheckS0Dash(s0_dash);
             CheckS0(s0);
         }
 
-        private static (double[] u_curr, double alpha_j) Solve(int l, int j, double[] u_prev, double[] rho_j, double[] s0_dash, double[] a, double[] lambda, double in_tau, double u_0j)
+        private static (double[] u_curr, double alpha_j) Solve(int l, int j, double[] u_prev, double[] rho_j, double[] s0_dash, double[] a, double[] lambda, double in_tau, double u_0j,
+            bool refined_tau, bool refined_h)
         {
             // alpha, a, lambda, nu
             var s_approx = (rho_j[l] - s0_dash[j - 1]) / in_tau;
@@ -128,8 +133,8 @@ namespace AmericanOptionAlbena
 
             var alpha_j = r - q - sigma2 / 2d + s_approx;
             var f = new double[N1];
-            var h_12 = nonuniform_h ? hs[1] : h;
-            var h_32 = nonuniform_h ? hs[2] : h;
+            var h_12 = refined_h ? hs[1] : h;
+            var h_32 = refined_h ? hs[2] : h;
             if (alpha_j >= 0d)
                 f[0] = u_prev[0] / in_tau + (u_0j * sigma2) / (h_12 * (h_12 + h_32));
             else
@@ -142,13 +147,13 @@ namespace AmericanOptionAlbena
                 var nu_j = 0d;
                 if (j > 1)
                 {
-                    var tau_j_32 = nonuniform_tau ? taus[j - 2] : tau0;
-                    var tau_j_12 = nonuniform_tau ? taus[j - 1] : tau0;
+                    var tau_j_32 = refined_tau ? taus[j - 2] : tau0;
+                    var tau_j_12 = refined_tau ? taus[j - 1] : tau0;
                     var val = 2d * ((s0_dash[j - 1] - s0_dash[j - 2]) / tau_j_32 - (rho_j[l] - s0_dash[j - 1]) / tau_j_12);
                     nu_j = 2d / (lambda[j - 1] + lambda[j] + val / sigma2);
                 }
 
-                f[N1 - 1] = (0.5d + nu_j / (nonuniform_h ? hs[N] : h)) * (u_prev[N1 - 1] / in_tau);
+                f[N1 - 1] = (0.5d + nu_j / (refined_h ? hs[N] : h)) * (u_prev[N1 - 1] / in_tau);
             }
             else
                 f[N1 - 1] = 0d;
@@ -159,7 +164,7 @@ namespace AmericanOptionAlbena
             a0[0] = 0d;
             for (var i = 1; i < N1 - 1; ++i)
             {
-                if (nonuniform_h)
+                if (refined_h)
                 {
                     if (alpha_j >= 0d)
                         a0[i] = -sigma2 / (hs[i + 1] * (hs[i + 1] + hs[i + 2]));
@@ -177,7 +182,7 @@ namespace AmericanOptionAlbena
 
             if (enable_finite_element)
             {
-                if (nonuniform_h)
+                if (refined_h)
                 {
                     if (alpha_j >= 0d)
                         a0[N1 - 1] = -sigma2 / (2d * hs[N] * hs[N]);
@@ -195,7 +200,7 @@ namespace AmericanOptionAlbena
             else
                 a0[N1 - 1] = 0d;
 
-            if (nonuniform_h)
+            if (refined_h)
             {
                 if (alpha_j >= 0d)
                     b0[0] = sigma2 / (hs[1] + hs[2]) * (1d / hs[1] + 1d / hs[2]) + (r + 1d / in_tau) + alpha_j / hs[2];
@@ -212,7 +217,7 @@ namespace AmericanOptionAlbena
 
             for (var i = 1; i < N1 - 1; ++i)
             {
-                if (nonuniform_h)
+                if (refined_h)
                 {
                     if (alpha_j >= 0d)
                         b0[i] = sigma2 / (hs[i + 1] + hs[i + 2]) * (1d / hs[i + 1] + 1d / hs[i + 2]) + (r + 1d / in_tau) + alpha_j / hs[i + 2];
@@ -230,7 +235,7 @@ namespace AmericanOptionAlbena
 
             if (enable_finite_element)
             {
-                if (nonuniform_h)
+                if (refined_h)
                 {
                     if (alpha_j >= 0)
                     {
@@ -268,7 +273,7 @@ namespace AmericanOptionAlbena
             else
                 b0[N1 - 1] = 1d;
 
-            if (nonuniform_h)
+            if (refined_h)
             {
                 if (alpha_j >= 0d)
                     c0[0] = -sigma2 / (hs[2] * (hs[1] + hs[2])) - alpha_j / hs[2];
@@ -290,7 +295,7 @@ namespace AmericanOptionAlbena
                 {
                     if (enable_finite_element)
                     {
-                        if (nonuniform_h)
+                        if (refined_h)
                         {
                             if (alpha_j >= 0d)
                                 c0[N1 - 3] = -sigma2 / (hs[N1 - 3 + 2] * (hs[N1 - 3 + 1] + hs[N1 - 3 + 2])) - alpha_j / hs[N1 - 3 + 2];
@@ -310,7 +315,7 @@ namespace AmericanOptionAlbena
                 }
                 else
                 {
-                    if (nonuniform_h)
+                    if (refined_h)
                     {
                         if (alpha_j >= 0d)
                             c0[i] = -sigma2 / (hs[i + 2] * (hs[i + 1] + hs[i + 2])) - alpha_j / hs[i + 2];
