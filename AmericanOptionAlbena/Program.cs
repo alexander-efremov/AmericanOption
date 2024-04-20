@@ -51,13 +51,13 @@ namespace AmericanOptionAlbena
         public static void Main()
         {
             // Run(false, false);
-            Run(false, false);
-            Run(false, true);
-            Run(true, false);
-            Run(true, true);
+            var name1 = Run(false, false);
+            var name2 = Run(true, false);
+            var name3 = Run(false, true);
+            var name4 = Run(true, true);
         }
 
-        private static void Run(bool refined_tau, bool refined_h)
+        private static string Run(bool refined_tau, bool refined_h)
         {
             Debug.Assert(q < r);
             var u_curr = new double[N1]; // the current solution
@@ -123,6 +123,7 @@ namespace AmericanOptionAlbena
 
             CheckS0Dash(s0_dash);
             CheckS0(s0);
+            return name;
         }
 
         private static (double[] u_curr, double alpha_j) Solve(int l, int j, double[] u_prev, double[] rho_j, double[] s0_dash, double[] a, double[] lambda, double in_tau, double u_0j,
