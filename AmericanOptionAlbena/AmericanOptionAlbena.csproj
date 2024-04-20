@@ -14,4 +14,10 @@
     <PackageReference Include="NUnit" Version="4.1.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="graph.lay">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

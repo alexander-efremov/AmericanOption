@@ -108,16 +108,18 @@ namespace AmericanOptionAlbena
 
             var zone = $"{nameof(s0_dash)}_h_condensed_{refined_h}_tau_condensed_{refined_tau}_finite_elem_{enable_finite_element}_rb_{rb}_new_eta_{enable_new_eta}_beta_{beta}";
             var name =
-                $"{GetPrefix(refined_tau, refined_h)}_{nameof(s0_dash)}_K={K}_N1={N1}_T={T}_h_condensed_{refined_h}_tau_condensed_{refined_tau}_finite_elem_{enable_finite_element}_rb_{rb}_new_eta_{enable_new_eta}_beta_{beta}_is_economic_{s0_economic_style}.dat";
+                $"{GetPrefix(refined_tau, refined_h)}_{nameof(s0_dash)}_K={K}_N1={N1}_T={T}_h_condensed_{refined_h}_tau_condensed_{refined_tau}_finite_elem_{enable_finite_element}_rb_{rb}_new_eta_{enable_new_eta}_beta_{beta}_is_economic_{s0_economic_style}.";
             S0DashDirectTime(name, zone, s0_dash, tau0, taus, refined_tau);
 
             zone = $"{nameof(s0)}_h_condensed_{refined_h}_tau_condensed_{refined_tau}_finite_elem_{enable_finite_element}_rb_{rb}_new_eta_{enable_new_eta}_beta_{beta}";
             name =
-                $"{GetPrefix(refined_tau, refined_h)}_s0_T-t_K={K}_N1={N1}_T={T}_h_condensed_{refined_h}_tau_condensed_{refined_tau}_finite_elem_{enable_finite_element}_rb_{rb}_new_eta_{enable_new_eta}_beta_{beta}_is_economic_{s0_economic_style}.dat";
+                $"{GetPrefix(refined_tau, refined_h)}_s0_T-t_K={K}_N1={N1}_T={T}_h_condensed_{refined_h}_tau_condensed_{refined_tau}_finite_elem_{enable_finite_element}_rb_{rb}_new_eta_{enable_new_eta}_beta_{beta}_is_economic_{s0_economic_style}.";
             if (s0_economic_style)
-                S0ReversedTimeE(name, zone, s0, T, tau0, taus, refined_tau);
+                S0ReversedTimeE(name + "dat", zone, s0, T, tau0, taus, refined_tau);
             else
-                S0ReversedTime(name, zone, s0, T, tau0, taus, refined_tau);
+                S0ReversedTime(name + "dat", zone, s0, T, tau0, taus, refined_tau);
+
+            CreateLay("graph.lay", name + "dat", name + "lay");
 
             CheckS0Dash(s0_dash);
             CheckS0(s0);
@@ -626,6 +628,13 @@ namespace AmericanOptionAlbena
                 Console.Write("i: " + i + " " + x1.ToString("F8") + " " + x2.ToString("F8") + " " + x.ToString("F8") + (x1.Equals(x2) ? '=' : '\0'));
                 Console.WriteLine();
             }
+        }
+
+        private static void CreateLay(string layTemplate, string datFile, string output)
+        {
+            var content = File.ReadAllText(layTemplate);
+            var replacedContent = content.Replace("{NAME}", datFile);
+            File.WriteAllText(output, replacedContent);
         }
     }
 }

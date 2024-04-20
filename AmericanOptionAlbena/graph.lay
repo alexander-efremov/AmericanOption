@@ -1,0 +1,195 @@
+#!MC 1410
+$!VarSet |LFDSFN1| = '"{NAME}"'
+$!SetStyleBase Factory
+$!GlobalPaper 
+  PaperSizeInfo
+    {
+    Letter
+      {
+      Width = 8.5
+      Height = 11
+      LeftHardClipOffset = 0.125
+      RightHardClipOffset = 0.125
+      TopHardClipOffset = 0.125
+      BottomHardClipOffset = 0.125
+      }
+    }
+$!Page 
+  Name = 'Untitled'
+  PaperAttributes
+    {
+    BackgroundColor = White
+    IsTransparent = Yes
+    OrientPortrait = No
+    ShowGrid = Yes
+    ShowRuler = No
+    ShowPaper = No
+    PaperSize = Letter
+    RulerSpacing = OneInch
+    PaperGridSpacing = HalfInch
+    RegionInWorkArea
+      {
+      X1 = 1
+      Y1 = 0.25
+      X2 = 10
+      Y2 = 8.25
+      }
+    }
+### Frame Number 1 ###
+$!ReadDataSet  '|LFDSFN1|'
+  InitialPlotType = XYLine
+  IncludeText = No
+  IncludeGeom = No
+  VarPositionList =  [1-2]
+$!RemoveVar |LFDSFN1|
+$!FrameLayout 
+  ShowHeader = No
+  HeaderColor = Red
+  XYPos
+    {
+    X = 1
+    Y = 0.25
+    }
+  Width = 9
+  Height = 8
+$!ThreeDAxis 
+  AspectRatioLimit = 25
+  BoxAspectRatioLimit = 25
+$!PlotType  = XYLine
+$!FrameName  = 'Frame 001'
+$!GlobalTime 
+  SolutionTime = 0
+$!DeleteLineMaps 
+$!ActiveLineMaps  =  [1]
+$!GlobalLinePlot 
+  DataLabels
+    {
+    DistanceSkip = 5
+    }
+  Legend
+    {
+    XYPos
+      {
+      X = 95
+      }
+    }
+$!LineMap  [1]
+  Name = '&ZN&'
+  Assign
+    {
+    Zone = 1
+    XAxisVar = 1
+    YAxisVar = 2
+    }
+  Lines
+    {
+    Color = Red
+    }
+  Symbols
+    {
+    Color = Red
+    FillColor = Red
+    }
+  BarCharts
+    {
+    Color = Red
+    FillColor = Red
+    }
+  ErrorBars
+    {
+    Color = Red
+    }
+$!XYLineAxis 
+  DepXToYRatio = 1
+  GridArea
+    {
+    DrawBorder = Yes
+    LineThickness = 0.1
+    }
+  ViewportPosition
+    {
+    X1 = 13
+    Y1 = 10.892
+    X2 = 88
+    Y2 = 87.892
+    }
+  ViewportTopSnapTarget = 87.8918918919
+$!XYLineAxis 
+  XDetail 1
+    {
+    RangeMin = 0
+    RangeMax = 1.000099999999999989
+    AutoGrid = No
+    GRSpacing = 0.2
+    Ticks
+      {
+      ShowOnGridBorderMin = Yes
+      ShowOnGridBorderMax = Yes
+      Length = 1.2
+      LineThickness = 0.1
+      NumMinOrTicks = 0
+      MinorLineThickness = 0.4
+      }
+    TickLabel
+      {
+      TextShape
+        {
+        Height = 2.5
+        }
+      }
+    Title
+      {
+      TitleMode = UseText
+      Text = 'Time to expiration'
+      TextShape
+        {
+        FontFamily = 'Arial'
+        IsBold = No
+        Height = 2.5
+        }
+      }
+    AxisLine
+      {
+      LineThickness = 0.1
+      }
+    }
+$!XYLineAxis 
+  YDetail 1
+    {
+    RangeMin = 60
+    RangeMax = 100.00239435718721381
+    AutoGrid = No
+    GRSpacing = 4
+    Ticks
+      {
+      ShowOnGridBorderMax = Yes
+      Length = 1.2
+      LineThickness = 0.1
+      NumMinOrTicks = 0
+      }
+    TickLabel
+      {
+      TextShape
+        {
+        Height = 2.5
+        }
+      }
+    Title
+      {
+      TitleMode = UseText
+      Text = 'Optimal exercise path ($)'
+      TextShape
+        {
+        FontFamily = 'Arial'
+        IsBold = No
+        Height = 2.5
+        }
+      }
+    AxisLine
+      {
+      LineThickness = 0.1
+      }
+    }
+$!FrameControl ActivateByNumber
+  Frame = 1
+$!SetStyleBase Config
