@@ -21,12 +21,12 @@ namespace AmericanOptionAlbena
         private const double lb = 0d; // left bound
         private const double rb = 100d; // right bound
         private const double T0 = 0d; // the start time
-        private const double Tn = 1d; // the finish time
+        private const double Tn = 3d; // the finish time
         private const double T = Tn - T0; // time interval
-        private const double sigma = 0.3d; // the sigma = volatility
+        private const double sigma = 0.2d; // the sigma = volatility
         private const double sigma2 = sigma * sigma; // the squared sigma
         private const double r = 0.1d; // the risk-free rate
-        private const double K = 100d; // the strike price
+        private const double K = 1d; // the strike price
         private const double q = 0d; // the dividend rate
         private const int N = 10000; // the number of space intervals
         private const int N1 = N + 1; // the number of points
@@ -35,16 +35,16 @@ namespace AmericanOptionAlbena
         private const double h = (rb - lb) / N; // the space step
 
         private const int M = 1000; // the number of time intervals
-        private const double tau0 = T / M; // the time step
+        private const double tau0 = 1d / M; // the time step
         private const double alpha = 2d; // condense parameter for t
         private const double beta = 2d; // condense parameter for h
 
         private const bool print = true; // the parameter which allows enable/disable printing of the results
-
-        private static readonly bool nonuniform_h = false; // the parameter which allows enable/disable condensed meshes
-        private static readonly bool nonuniform_tau = false; // the parameter which allows enable/disable condensed meshes
-
         private static readonly bool enable_finite_element = true; // the parameter which allows enable/disable the finite element at x_N
+        private static readonly bool enable_new_eta = true; // the parameter which allows enable/disable a new formula for eta
+
+        private static readonly bool nonuniform_h = true; // the parameter which allows enable/disable condensed meshes
+        private static readonly bool nonuniform_tau = true; // the parameter which allows enable/disable condensed meshes
 
         private static readonly double[] taus = GetTaus();
         private static readonly double[] hs = GetHs();
@@ -76,7 +76,10 @@ namespace AmericanOptionAlbena
                     var result = Solve(l, j, u_prev, rho_j, s0_dash, a, lambda, tau, u_0j);
                     u_curr = result.u_curr;
                     var h0 = nonuniform_h ? hs[1] : h;
-                    eta_j[l] = K * Math.Exp(rho_j[l]) + (u_curr[0] - u_0j) / h0;
+                    if (enable_new_eta)
+                        eta_j[l] = K * Math.Exp(rho_j[l]) * (1d + (q * h0 / sigma2) + h0 / 2d) + (u_curr[0] - u_0j) / h0 - (h0 * r * K) / sigma2;
+                    else
+                        eta_j[l] = K * Math.Exp(rho_j[l]) + (u_curr[0] - u_0j) / h0;
                     if (print)
                         Console.WriteLine(
                             $"l = {l:G10} j = {j:G10} tau {tau} rho_j_l {rho_j[l]:N10} alpha_j {result.alpha_j:N5} u[1] {u_curr[1]:G10} u[0] {u_curr[0]:G10} eta_j_l = {eta_j[l]:G10} u[N] = {u_curr[N]:G10}");
@@ -96,12 +99,12 @@ namespace AmericanOptionAlbena
             }
 
             var s0 = GetS0(s0_dash);
-            var chartName = $"{nameof(s0_dash)}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}_finite_elem_{enable_finite_element}_rb_{rb}";
+            var chartName = $"{nameof(s0_dash)}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}_finite_elem_{enable_finite_element}_rb_{rb}_new_eta_{enable_new_eta}_beta_{beta}";
             S0DashDirectTime(
-                $"{GetPrefix(nonuniform_tau, nonuniform_h)}_{nameof(s0_dash)}_K={K}_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}_finite_elem_{enable_finite_element}_rb_{rb}.dat",
+                $"{GetPrefix(nonuniform_tau, nonuniform_h)}_{nameof(s0_dash)}_K={K}_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}_finite_elem_{enable_finite_element}_rb_{rb}_new_eta_{enable_new_eta}_beta_{beta}.dat",
                 chartName, s0_dash, tau0, taus, nonuniform_tau);
-            chartName = $"{nameof(s0)}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}_finite_elem_{enable_finite_element}_rb_{rb}";
-            S0ReversedTime($"{GetPrefix(nonuniform_tau, nonuniform_h)}_s0_T-t_K={K}_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}_finite_elem_{enable_finite_element}_rb_{rb}.dat",
+            chartName = $"{nameof(s0)}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}_finite_elem_{enable_finite_element}_rb_{rb}_new_eta_{enable_new_eta}_beta_{beta}";
+            S0ReversedTime($"{GetPrefix(nonuniform_tau, nonuniform_h)}_s0_T-t_K={K}_N1={N1}_T={T}_h_condensed_{nonuniform_h}_tau_condensed_{nonuniform_tau}_finite_elem_{enable_finite_element}_rb_{rb}_new_eta_{enable_new_eta}_beta_{beta}.dat",
                 chartName, s0, T, tau0, taus, nonuniform_tau);
             CheckS0Dash(s0_dash);
             CheckS0(s0);
