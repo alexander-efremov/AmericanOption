@@ -23,11 +23,11 @@ namespace AmericanOptionAlbena
         private const double T0 = 0d; // the start time
         private const double Tn = 3d; // the finish time
         private const double T = Tn - T0; // time interval
-        private const double sigma = 0.2d; // the sigma = volatility
+        private const double sigma = 0.3d; // the sigma = volatility
         private const double sigma2 = sigma * sigma; // the squared sigma
-        private const double r = 0.08d; // the risk-free rate
+        private const double r = 0.1d; // the risk-free rate
         private const double K = 100d; // the strike price
-        private const double q = 0d; // the dividend rate
+        private const double q = 0.05d; // the dividend rate
         private const int N = 10000; // the number of space intervals
         private const int N1 = N + 1; // the number of points
         private const double b = -2d * r / sigma2;
@@ -51,10 +51,10 @@ namespace AmericanOptionAlbena
         public static void Main()
         {
             // Run(false, false);
-            // var name1 = Run(false, false, new[] {90d, 100d, 110d, 120d});
-            // var name3 = Run(true, false, Array.Empty<double>());
-            // var name2 = Run(false, true, Array.Empty<double>());
-            var name4 = Run(true, true, new[] {90d, 100d, 110d, 120d});
+            // var name1 = Run(false, false, new[] {80d, 90d, 100d, 110d, 120d});
+            // var name3 = Run(true, false, new[] {80d, 90d, 100d, 110d, 120d});
+            // var name2 = Run(false, true, new[] {80d, 90d, 100d, 110d, 120d});
+            var name4 = Run(true, true, new[] {80d, 90d, 100d, 110d, 120d});
         }
 
         private static string Run(bool refined_tau, bool refined_h, double[] S_vals)
@@ -88,7 +88,8 @@ namespace AmericanOptionAlbena
                         eta_j[l] = K * Math.Exp(rho_j[l]) + (u_curr[0] - u_0j) / h0;
 
                     if (print)
-                        Console.WriteLine($"l = {l:G10} j = {j:G10} tau {tau} rho_j_l {rho_j[l]:N10} alpha_j {result.alpha_j:N5} u[1] {u_curr[1]:G10} u[0] {u_curr[0]:G10} eta_j_l = {eta_j[l]:G10} u[N] = {u_curr[N]:G10}");
+                        Console.WriteLine(
+                            $"l = {l:G10} j = {j:G10} tau {tau} rho_j_l {rho_j[l]:N10} alpha_j {result.alpha_j:N5} u[1] {u_curr[1]:G10} u[0] {u_curr[0]:G10} eta_j_l = {eta_j[l]:G10} u[N] = {u_curr[N]:G10}");
 
                     if (Math.Abs(eta_j[l]) <= Tol)
                     {
@@ -137,33 +138,17 @@ namespace AmericanOptionAlbena
         private static (double S, double x, double u) get_x_u(double S, double[] u, double[] s0, bool refined_h)
         {
             var x = Math.Log(S / s0[s0.Length - 1]);
-            if (!refined_h)
-            {
-                var cx1 = 0d;
-                var j = 0;
-                while (true)
-                {
-                    cx1 += h;
-                    if (cx1 >= x)
-                        break;
-                    j++;
-                }
-
-                Console.WriteLine($"calculated x = {x} found x = {cx1} diff = {cx1 - x} h = {h}");
-                return (S, x, u[j]);
-            }
-
             var cx = 0d;
             var i = 0;
             while (true)
             {
-                cx += hs[i + 1];
+                cx += refined_h ? h : hs[i + 1];
                 if (cx >= x)
                     break;
                 i++;
             }
 
-            Console.WriteLine($"calculated x = {x} found x = {cx} diff = {cx - x}");
+            Console.WriteLine($"s0 = {s0[s0.Length - 1]} calculated x = {x} found x = {cx} diff = {cx - x}" + (refined_h ? string.Empty : $"h = {h}"));
             return (S, x, u[i]);
         }
 

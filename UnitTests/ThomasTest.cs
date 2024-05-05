@@ -37,12 +37,7 @@ namespace UnitTests
             Assert.AreEqual(u[2], -0.67d, 0.01d);
         }
 
-        private static double[] SolveByTridiagonalMatrixAlgorithm(
-            int n,
-            IReadOnlyList<double> a,
-            IReadOnlyList<double> b,
-            IReadOnlyList<double> c,
-            IReadOnlyList<double> d)
+        private static double[] SolveByTridiagonalMatrixAlgorithm(int n, IReadOnlyList<double> a, IReadOnlyList<double> b, IReadOnlyList<double> c, IReadOnlyList<double> d)
         {
             // for (var i = 0; i < c.Length; i++)
             //     if (Math.Abs(c[i]) < Math.Abs(b[i]) + Math.Abs(d[i]))
