@@ -21,11 +21,11 @@ namespace AmericanOptionAlbena
         private const double lb = 0d; // left bound
         private const double rb = 100d; // right bound
         private const double T0 = 0d; // the start time
-        private const double Tn = 1d; // the finish time
+        private const double Tn = 3d; // the finish time
         private const double T = Tn - T0; // time interval
-        private const double sigma = 0.3d; // the sigma = volatility
+        private const double sigma = 0.2d; // the sigma = volatility
         private const double sigma2 = sigma * sigma; // the squared sigma
-        private const double r = 0.1d; // the risk-free rate
+        private const double r = 0.08d; // the risk-free rate
         private const double K = 100d; // the strike price
         private const double q = 0d; // the dividend rate
         private const int N = 10000; // the number of space intervals
@@ -51,13 +51,13 @@ namespace AmericanOptionAlbena
         public static void Main()
         {
             // Run(false, false);
-            var name1 = Run(false, false);
-            var name3 = Run(true, false);
-            var name2 = Run(false, true);
-            var name4 = Run(true, true);
+            // var name1 = Run(false, false, new[] {90d, 100d, 110d, 120d});
+            // var name3 = Run(true, false, Array.Empty<double>());
+            // var name2 = Run(false, true, Array.Empty<double>());
+            var name4 = Run(true, true, new[] {90d, 100d, 110d, 120d});
         }
 
-        private static string Run(bool refined_tau, bool refined_h)
+        private static string Run(bool refined_tau, bool refined_h, double[] S_vals)
         {
             Debug.Assert(q < r);
             var u_curr = new double[N1]; // the current solution
@@ -86,9 +86,9 @@ namespace AmericanOptionAlbena
                         eta_j[l] = K * Math.Exp(rho_j[l]) * (1d + (q * h0 / sigma2) + h0 / 2d) + (u_curr[0] - u_0j) / h0 - (h0 * r * K) / sigma2;
                     else
                         eta_j[l] = K * Math.Exp(rho_j[l]) + (u_curr[0] - u_0j) / h0;
+
                     if (print)
-                        Console.WriteLine(
-                            $"l = {l:G10} j = {j:G10} tau {tau} rho_j_l {rho_j[l]:N10} alpha_j {result.alpha_j:N5} u[1] {u_curr[1]:G10} u[0] {u_curr[0]:G10} eta_j_l = {eta_j[l]:G10} u[N] = {u_curr[N]:G10}");
+                        Console.WriteLine($"l = {l:G10} j = {j:G10} tau {tau} rho_j_l {rho_j[l]:N10} alpha_j {result.alpha_j:N5} u[1] {u_curr[1]:G10} u[0] {u_curr[0]:G10} eta_j_l = {eta_j[l]:G10} u[N] = {u_curr[N]:G10}");
 
                     if (Math.Abs(eta_j[l]) <= Tol)
                     {
@@ -105,11 +105,10 @@ namespace AmericanOptionAlbena
             }
 
             var s0 = GetS0(s0_dash);
-
             var zone = $"{nameof(s0_dash)}_h_condensed_{refined_h}_tau_condensed_{refined_tau}_finite_elem_{enable_finite_element}_rb_{rb}_new_eta_{enable_new_eta}_beta_{beta}";
             var name =
                 $"{GetPrefix(refined_tau, refined_h)}_{nameof(s0_dash)}_K={K}_N1={N1}_T={T}_h_condensed_{refined_h}_tau_condensed_{refined_tau}_finite_elem_{enable_finite_element}_rb_{rb}_new_eta_{enable_new_eta}_beta_{beta}_is_economic_{s0_economic_style}.";
-            S0DashDirectTime(name, zone, s0_dash, tau0, taus, refined_tau);
+            // S0DashDirectTime(name + ".dat", zone, s0_dash, tau0, taus, refined_tau);
 
             zone = $"{nameof(s0)}_h_condensed_{refined_h}_tau_condensed_{refined_tau}_finite_elem_{enable_finite_element}_rb_{rb}_new_eta_{enable_new_eta}_beta_{beta}";
             name =
@@ -119,11 +118,53 @@ namespace AmericanOptionAlbena
             else
                 S0ReversedTime(name + "dat", zone, s0, T, tau0, taus, refined_tau);
 
-            CreateLay("graph.lay", name + "lay", name + "dat");
+            // CreateLay("graph.lay", name + "lay", name + "dat");
+
+            // S (90,100,110,120)
+            // Для заданных значений S вычислим значения x=ln(S/s0(tau)). При t=T у нас tau=0, т.е. s0(0)=84..., подставляем в эту формулу S=90, 100,...,
+            // находим соответствующие им значения x и в этих точках выводим значения решения u.
+            foreach (var val in S_vals)
+            {
+                var v = get_x_u(val, u_curr, s0, refined_h);
+                Console.WriteLine($"S = {v.S}, x = {v.x} u = {v.u}");
+            }
 
             CheckS0Dash(s0_dash);
             CheckS0(s0);
             return name;
+        }
+
+        private static (double S, double x, double u) get_x_u(double S, double[] u, double[] s0, bool refined_h)
+        {
+            var x = Math.Log(S / s0[s0.Length - 1]);
+            if (!refined_h)
+            {
+                var cx1 = 0d;
+                var j = 0;
+                while (true)
+                {
+                    cx1 += h;
+                    if (cx1 >= x)
+                        break;
+                    j++;
+                }
+
+                Console.WriteLine($"calculated x = {x} found x = {cx1} diff = {cx1 - x} h = {h}");
+                return (S, x, u[j]);
+            }
+
+            var cx = 0d;
+            var i = 0;
+            while (true)
+            {
+                cx += hs[i + 1];
+                if (cx >= x)
+                    break;
+                i++;
+            }
+
+            Console.WriteLine($"calculated x = {x} found x = {cx} diff = {cx - x}");
+            return (S, x, u[i]);
         }
 
         private static (double[] u_curr, double alpha_j) Solve(int l, int j, double[] u_prev, double[] rho_j, double[] s0_dash, double[] a, double[] lambda, double in_tau, double u_0j,
