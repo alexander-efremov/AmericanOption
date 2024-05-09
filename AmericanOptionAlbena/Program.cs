@@ -23,19 +23,20 @@ namespace AmericanOptionAlbena
         private const double T0 = 0d; // the start time
         private const double Tn = 3d; // the finish time
         private const double T = Tn - T0; // time interval
-        private const double sigma = 0.3d; // the sigma = volatility
+        private const double sigma = 0.2d; // the sigma = volatility
         private const double sigma2 = sigma * sigma; // the squared sigma
-        private const double r = 0.1d; // the risk-free rate
+        private const double r = 0.08d; // the risk-free rate
         private const double K = 100d; // the strike price
-        private const double q = 0.05d; // the dividend rate
+        private const double q = 0d; // the dividend rate
         private const int N = 10000; // the number of space intervals
         private const int N1 = N + 1; // the number of points
         private const double b = -2d * r / sigma2;
 
         private const double h = (rb - lb) / N; // the space step
 
-        private const int M = 1000; // the number of time intervals
-        private const double tau0 = 1d / M; // the time step
+        private const int TauTuner = 1000; // the value to change the static time step
+        private const int M = (int) (T * TauTuner); // the number of time intervals
+        private const double tau0 = T / M; // the time step
         private const double alpha = 2d; // condense parameter for t
         private const double beta = 2.5d; // condense parameter for h
 
@@ -54,11 +55,14 @@ namespace AmericanOptionAlbena
             // var name1 = Run(false, false, new[] {80d, 90d, 100d, 110d, 120d});
             // var name3 = Run(true, false, new[] {80d, 90d, 100d, 110d, 120d});
             // var name2 = Run(false, true, new[] {80d, 90d, 100d, 110d, 120d});
-            var name4 = Run(true, true, new[] {80d, 90d, 100d, 110d, 120d});
+            var name4 = Run(true, true, new[] {/*80d, */ 90d, 100d, 110d, 120d});
         }
 
         private static string Run(bool refined_tau, bool refined_h, double[] S_vals)
         {
+            if (print)
+                Console.WriteLine($"Tn = {Tn} M = {M} N = {N} sigma = {sigma} r = {r} K = {K} q = {q} h = {h} tau = {tau0} refined h = {refined_h} refined tau = {refined_tau} alpha = {alpha} beta = {beta}");
+
             Debug.Assert(q < r);
             var u_curr = new double[N1]; // the current solution
             var u_prev = new double[N1]; // the previous solution
@@ -87,9 +91,9 @@ namespace AmericanOptionAlbena
                     else
                         eta_j[l] = K * Math.Exp(rho_j[l]) + (u_curr[0] - u_0j) / h0;
 
-                    if (print)
-                        Console.WriteLine(
-                            $"l = {l:G10} j = {j:G10} tau {tau} rho_j_l {rho_j[l]:N10} alpha_j {result.alpha_j:N5} u[1] {u_curr[1]:G10} u[0] {u_curr[0]:G10} eta_j_l = {eta_j[l]:G10} u[N] = {u_curr[N]:G10}");
+                    // if (print)
+                    //     Console.WriteLine(
+                    //         $"l = {l:G10} j = {j:G10} tau {tau} rho_j_l {rho_j[l]:N10} alpha_j {result.alpha_j:N5} u[1] {u_curr[1]:G10} u[0] {u_curr[0]:G10} eta_j_l = {eta_j[l]:G10} u[N] = {u_curr[N]:G10}");
 
                     if (Math.Abs(eta_j[l]) <= Tol)
                     {
@@ -124,6 +128,7 @@ namespace AmericanOptionAlbena
             // S (90,100,110,120)
             // Для заданных значений S вычислим значения x=ln(S/s0(tau)). При t=T у нас tau=0, т.е. s0(0)=84..., подставляем в эту формулу S=90, 100,...,
             // находим соответствующие им значения x и в этих точках выводим значения решения u.
+            Console.WriteLine("s0(0) = " + s0[s0.Length - 1]);
             foreach (var val in S_vals)
             {
                 var v = get_x_u(val, u_curr, s0, refined_h);
@@ -148,7 +153,7 @@ namespace AmericanOptionAlbena
                 i++;
             }
 
-            Console.WriteLine($"s0 = {s0[s0.Length - 1]} calculated x = {x} found x = {cx} diff = {cx - x}" + (refined_h ? string.Empty : $"h = {h}"));
+            Console.WriteLine($"calculated x = {x} found x = {cx} diff = {cx - x}" + (refined_h ? string.Empty : $"h = {h}"));
             return (S, x, u[i]);
         }
 
