@@ -44,7 +44,9 @@ namespace AmericanOptionAlbena
         private const double beta = 2.5d; // condense parameter for h
 
         private const bool print = true; // the parameter which allows to enable/disable printing of the results
-        private static readonly bool enable_finite_element = true; // the parameter which allows to enable/disable the finite element at x_N
+#pragma warning disable CS0414 // Field is assigned but its value is never used
+        private static readonly bool finite_element_enabled = false; // the parameter which allows to enable/disable the finite element at x_N
+#pragma warning restore CS0414 // Field is assigned but its value is never used
         private static readonly bool enable_new_eta = true; // the parameter which allows to enable/disable a new formula for eta
 
         private static readonly bool s0_economic_style = true; // the parameter which allows to enable/disable graphs in economic style (S is Y-axis)
@@ -84,38 +86,44 @@ namespace AmericanOptionAlbena
             // _ = Run(false, false, new[]
             // {
             //     90d, 100d, 110d, 120d
-            // });
+            // }, finite_element_enabled);
             // flush_log();
             // clear_log();
             // _ = Run(true, false, new[]
             // {
             //     90d, 100d, 110d, 120d
-            // });
+            // }, finite_element_enabled);
             // flush_log();
             // clear_log();
             _ = Run(false, true, new[]
             {
                 90d, 100d, 110d, 120d
-            });
+            }, true);
             flush_log();
             clear_log();
+            // _ = Run(false, true, new[]
+            // {
+            //     90d, 100d, 110d, 120d
+            // }, false);
+            // flush_log();
+            // clear_log();
             // _ = Run(true, true, new[]
             // {
             //     90d, 100d, 110d, 120d
-            // });
+            // }, finite_element_enabled);
             // flush_log();
             // clear_log();
             // var name4 = Run(true, true, new[]
             // {
-            // 80d, 90d, 100d, 110d, 120d
-            // });
+            //     80d, 90d, 100d, 110d, 120d
+            // }, finite_element_enabled);
         }
 
-        private static string? Run(bool refined_tau, bool refined_h, double[] S_vals)
+        private static string? Run(bool refined_tau, bool refined_h, double[] S_vals, bool finite_element)
         {
             if (print)
                 print_to_log(
-                    $"Tn = {Tn} M = {M} N = {N} rb = {rb} sigma = {sigma} r = {r} K = {K} q = {q} h = {h} tau = {tau0} refined h = {refined_h} refined tau = {refined_tau} alpha = {alpha} beta = {beta} tau intervals = {(refined_tau ? taus.Length.ToString() : "-")}");
+                    $"Tn = {Tn} M = {M} N = {N} rb = {rb} sigma = {sigma} r = {r} K = {K} q = {q} h = {h} tau = {tau0} refined h = {refined_h} refined tau = {refined_tau} alpha = {alpha} beta = {beta} tau intervals = {(refined_tau ? taus.Length.ToString() : "-")} finite element enabled = {finite_element}");
 
             Debug.Assert(q < r);
             var u_curr = new double[N1];
@@ -161,7 +169,7 @@ namespace AmericanOptionAlbena
                     }
 
                     var u_0j = K * (1d - Math.Exp(rho_j[l]));
-                    var result = Solve(l, j, u_prev, rho_j, s0_dash, a, lambda, tau, u_0j, refined_tau, refined_h);
+                    var result = Solve(l, j, u_prev, rho_j, s0_dash, a, lambda, tau, u_0j, refined_tau, refined_h, finite_element);
                     u_curr = result.u_curr;
                     var h0 = refined_h ? hs[1] : h;
                     if (enable_new_eta)
@@ -190,14 +198,14 @@ namespace AmericanOptionAlbena
                 return null;
 
             var s0 = GetS0(s0_dash);
-            var zone = $"{nameof(s0_dash)}_h_condensed_{refined_h}_tau_condensed_{refined_tau}_finite_elem_{enable_finite_element}_rb_{rb}_new_eta_{enable_new_eta}_beta_{beta}";
+            var zone = $"{nameof(s0_dash)}_h_condensed_{refined_h}_tau_condensed_{refined_tau}_finite_elem_{finite_element}_rb_{rb}_new_eta_{enable_new_eta}_beta_{beta}";
             var name =
-                $"{GetPrefix(refined_tau, refined_h)}_{nameof(s0_dash)}_K={K}_N1={N1}_T={T}_h_condensed_{refined_h}_tau_condensed_{refined_tau}_finite_elem_{enable_finite_element}_rb_{rb}_new_eta_{enable_new_eta}_beta_{beta}_is_economic_{s0_economic_style}.";
+                $"{GetPrefix(refined_tau, refined_h)}_{nameof(s0_dash)}_K={K}_N1={N1}_T={T}_h_condensed_{refined_h}_tau_condensed_{refined_tau}_finite_elem_{finite_element}_rb_{rb}_new_eta_{enable_new_eta}_beta_{beta}_is_economic_{s0_economic_style}.";
             // S0DashDirectTime(name + ".dat", zone, s0_dash, tau0, taus, refined_tau);
 
-            zone = $"{nameof(s0)}_h_condensed_{refined_h}_tau_condensed_{refined_tau}_finite_elem_{enable_finite_element}_rb_{rb}_new_eta_{enable_new_eta}_beta_{beta}";
+            zone = $"{nameof(s0)}_h_condensed_{refined_h}_tau_condensed_{refined_tau}_finite_elem_{finite_element}_rb_{rb}_new_eta_{enable_new_eta}_beta_{beta}";
             name =
-                $"{GetPrefix(refined_tau, refined_h)}_s0_T-t_K={K}_N1={N1}_T={T}_h_condensed_{refined_h}_tau_condensed_{refined_tau}_finite_elem_{enable_finite_element}_rb_{rb}_new_eta_{enable_new_eta}_beta_{beta}_is_economic_{s0_economic_style}.";
+                $"{GetPrefix(refined_tau, refined_h)}_s0_T-t_K={K}_N1={N1}_T={T}_h_condensed_{refined_h}_tau_condensed_{refined_tau}_finite_elem_{finite_element}_rb_{rb}_new_eta_{enable_new_eta}_beta_{beta}_is_economic_{s0_economic_style}.";
             if (s0_economic_style)
             {
                 S0ReversedTimeE(name + "dat", zone, s0, T, tau0, taus, refined_tau);
@@ -236,33 +244,14 @@ namespace AmericanOptionAlbena
         private static void print_results(double S, double[] u, double s0, bool refined_h)
         {
             var x = Math.Log(S / s0);
-            double x_im1;
-            var x_i = 0d;
-            var i = 0;
-            while (true)
-            {
-                x_im1 = x_i;
-                if (refined_h)
-                {
-                    if (i < hs.Length)
-                        x_i += hs[i + 1];
-                    else
-                        x_i += h;
-                }
-                else
-                    x_i += h;
-
-                if (x_i >= x)
-                    break;
-                i++;
-            }
-
+            get_x_i(x, refined_h, out var x_i, out var x_im1, out var i);
+            get_x_rb(rb, refined_h, out var x_rb, out var i_rb);
             // print_to_log($"calculated x = {x} found x_i = {x_i} {(refined_h ? string.Empty : $"h = {h}")}");
             string format;
             if (i < u.Length && i - 1 >= 0)
             {
                 var u_x = ((u[i] - u[i - 1]) / (x_i - x_im1)) * x + (u[i - 1] * x_i - u[i] * x_im1) / (x_i - x_im1);
-                format = $"S = {S,3}, x_i-1 = {x_im1,4:F17} x = {x,4:F17} x_i = {x_i,4:F17} u(x_(i-1)) = {(i - 1 >= 0 ? u[i - 1] : -1d),4:F17} u(x) = {u_x,4:F17} u(x_i) = {u[i],4:F17}";
+                format = $"S = {S,3}, rb = {rb} x_rb = {x_rb} i_rb = {i_rb} u(x_rb) = {u[i_rb]}, x_i-1 = {x_im1,4:F17} x = {x,4:F17} x_i = {x_i,4:F17} u(x_(i-1)) = {(i - 1 >= 0 ? u[i - 1] : -1d),4:F17} u(x) = {u_x,4:F17} u(x_i) = {u[i],4:F17}";
             }
             else
             {
@@ -270,10 +259,56 @@ namespace AmericanOptionAlbena
             }
 
             print_to_log(format);
+            return;
+
+            static void get_x_i(double val, bool refined, out double x_j, out double x_jm1, out int j)
+            {
+                x_j = 0d;
+                j = 0;
+                while (true)
+                {
+                    x_jm1 = x_j;
+                    if (refined)
+                    {
+                        if (j < hs.Length)
+                            x_j += hs[j + 1];
+                        else
+                            x_j += h;
+                    }
+                    else
+                        x_j += h;
+
+                    if (x_j >= val)
+                        break;
+                    j++;
+                }
+            }
+            
+            static void get_x_rb(double boundary, bool refined, out double x_j, out int j)
+            {
+                x_j = 0d;
+                j = 0;
+                while (true)
+                {
+                    if (refined)
+                    {
+                        if (j < hs.Length)
+                            x_j += hs[j + 1];
+                        else
+                            x_j += h;
+                    }
+                    else
+                        x_j += h;
+
+                    if (x_j >= boundary)
+                        break;
+                    j++;
+                }
+            }
         }
 
         private static (double[] u_curr, double alpha_j) Solve(int l, int j, double[] u_prev, double[] rho_j, double[] s0_dash, double[] a, double[] lambda, double in_tau, double u_0j,
-            bool refined_tau, bool refined_h)
+            bool refined_tau, bool refined_h, bool finite_element)
         {
             // alpha, a, lambda, nu
             var s_approx = (rho_j[l] - s0_dash[j - 1]) / in_tau;
@@ -291,7 +326,7 @@ namespace AmericanOptionAlbena
             for (var i = 1; i < N1 - 1; i++)
                 f[i] = u_prev[i] / in_tau;
 
-            if (enable_finite_element)
+            if (finite_element)
             {
                 var nu_j = 0d;
                 if (j > 1)
@@ -329,7 +364,7 @@ namespace AmericanOptionAlbena
                 }
             }
 
-            if (enable_finite_element)
+            if (finite_element)
             {
                 if (refined_h)
                 {
@@ -382,7 +417,7 @@ namespace AmericanOptionAlbena
                 }
             }
 
-            if (enable_finite_element)
+            if (finite_element)
             {
                 if (refined_h)
                 {
@@ -442,7 +477,7 @@ namespace AmericanOptionAlbena
                 // equation N - 1 = the [N1 - 3] index
                 if (i == N1 - 3)
                 {
-                    if (enable_finite_element)
+                    if (finite_element)
                     {
                         if (refined_h)
                         {
